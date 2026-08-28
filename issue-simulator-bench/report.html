@@ -1,4 +1,7 @@
-<title>Issue 13 Model Bake-off</title>
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dependency purge as AI model benchmark</title>
 
 <style>
     :root {
@@ -325,8 +328,8 @@
             'Liberation Mono', monospace;
         font-weight: 600;
         font-size: 14px;
-        width: 42px;
-        text-align: right;
+        width: 3ch;
+        text-align: left;
     }
     .bar {
         flex: 1;
@@ -666,7 +669,7 @@
 <div class="page">
     <header class="masthead">
         <div class="eyebrow">Controlled bake-off · irae/mendel · issue #13</div>
-        <h1>Six models, one dependency purge</h1>
+        <h1>Dependency purge as AI model benchmark</h1>
         <p class="standfirst">
             The same prompt, the same commit, the same eight npm packages to
             replace with Node built-ins. Every branch reviewed against the real
@@ -696,41 +699,23 @@
                     <tr>
                         <th>#</th>
                         <th>Model</th>
-                        <th>Provider</th>
+                        <th>Score</th>
+                        <th>Cost</th>
                         <th class="num">Wall</th>
                         <th class="num">Tokens</th>
                         <th class="num">Peak ctx</th>
                         <th class="num">Window</th>
                         <th class="num">Compact</th>
-                        <th class="num">Cost</th>
                         <th class="num">Commits</th>
                         <th class="num">Bugs</th>
-                        <th>Score</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td class="rank rank-1">1</td>
                         <th scope="row" class="model best">
-                            grok-4.6<small>pi · xai · grok-4.6</small>
+                            grok-4.6<small>pi · xai</small>
                         </th>
-                        <td>xAI direct</td>
-                        <td class="num best">20 min</td>
-                        <td class="num best">11.6 M</td>
-                        <td class="num">260 k</td>
-                        <td class="num">52 %</td>
-                        <td class="num best">0</td>
-                        <td class="num">
-                            <span class="pill p-bad">$7.76</span
-                            ><small
-                                style="display: block; color: var(--ink-faint)"
-                                >paid ≈$0.14</small
-                            >
-                        </td>
-                        <td class="num">17</td>
-                        <td class="num best">
-                            <span class="pill p-good">0</span>
-                        </td>
                         <td>
                             <div class="scorewrap">
                                 <span class="scoreval">88</span>
@@ -738,6 +723,30 @@
                                     <span style="width: 88%"></span>
                                 </div>
                             </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >xAI</small
+                            >
+                        </td>
+                        <td class="num">
+                            $7.76<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid ≈$0.14</small
+                            >
+                        </td>
+                        <td class="num best">20 min</td>
+                        <td class="num">11.6 M</td>
+                        <td class="num">260 k</td>
+                        <td class="num">52 %</td>
+                        <td class="num best">0</td>
+                        <td class="num">17</td>
+                        <td class="num best">
+                            <span class="pill p-good">0</span>
                         </td>
                     </tr>
                     <tr>
@@ -745,23 +754,6 @@
                         <th scope="row" class="model">
                             claude-opus-5<small>claude-code · anthropic</small>
                         </th>
-                        <td>Claude plan</td>
-                        <td class="num">44 min</td>
-                        <td class="num">12.1 M</td>
-                        <td class="num">131 k</td>
-                        <td class="num">65 %</td>
-                        <td class="num best">0</td>
-                        <td class="num">
-                            <span class="pill p-bad">$8.45</span
-                            ><small
-                                style="display: block; color: var(--ink-faint)"
-                                >plan-billed</small
-                            >
-                        </td>
-                        <td class="num">18</td>
-                        <td class="num best">
-                            <span class="pill p-good">0</span>
-                        </td>
                         <td>
                             <div class="scorewrap">
                                 <span class="scoreval">87</span>
@@ -769,30 +761,37 @@
                                     <span style="width: 87%"></span>
                                 </div>
                             </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >Claude plan</small
+                            >
+                        </td>
+                        <td class="num">
+                            $8.45<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid ≈$0.56</small
+                            >
+                        </td>
+                        <td class="num">44 min</td>
+                        <td class="num">12.1 M</td>
+                        <td class="num">131 k</td>
+                        <td class="num">65 %</td>
+                        <td class="num best">0</td>
+                        <td class="num">18</td>
+                        <td class="num best">
+                            <span class="pill p-good">0</span>
                         </td>
                     </tr>
                     <tr>
                         <td class="rank">3</td>
                         <th scope="row" class="model">
-                            gpt-5.6-luna<small>pi · openai-codex · max</small>
+                            gpt-5.6-luna<small>pi · openai-codex</small>
                         </th>
-                        <td>ChatGPT plan</td>
-                        <td class="num">39 min</td>
-                        <td class="num">28.0 M</td>
-                        <td class="num">354 k</td>
-                        <td class="num">
-                            <span class="pill p-bad">130 %</span>
-                        </td>
-                        <td class="num">1</td>
-                        <td class="num">
-                            <span class="pill p-mid">$0.84</span
-                            ><small
-                                style="display: block; color: var(--ink-faint)"
-                                >paid ≈$0.05</small
-                            >
-                        </td>
-                        <td class="num">20</td>
-                        <td class="num"><span class="pill p-mid">2</span></td>
                         <td>
                             <div class="scorewrap">
                                 <span class="scoreval">85</span>
@@ -800,28 +799,37 @@
                                     <span style="width: 85%"></span>
                                 </div>
                             </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >ChatGPT plan</small
+                            >
                         </td>
+                        <td class="num">
+                            $0.42<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid ≈$0.05</small
+                            >
+                        </td>
+                        <td class="num">39 min</td>
+                        <td class="num">28.0 M</td>
+                        <td class="num">354 k</td>
+                        <td class="num">
+                            <span class="pill p-bad">130 %</span>
+                        </td>
+                        <td class="num">1</td>
+                        <td class="num">20</td>
+                        <td class="num"><span class="pill p-mid">2</span></td>
                     </tr>
                     <tr>
                         <td class="rank">4</td>
                         <th scope="row" class="model">
                             kimi-k3<small>pi · fireworks</small>
                         </th>
-                        <td>Fireworks</td>
-                        <td class="num">22 min</td>
-                        <td class="num best">4.8 M</td>
-                        <td class="num best">63 k</td>
-                        <td class="num best">6 %</td>
-                        <td class="num best">0</td>
-                        <td class="num">
-                            <span class="pill p-mid">$2.08</span
-                            ><small
-                                style="display: block; color: var(--ink-faint)"
-                                >$1.77 cheapest route</small
-                            >
-                        </td>
-                        <td class="num">17</td>
-                        <td class="num"><span class="pill p-mid">2</span></td>
                         <td>
                             <div class="scorewrap">
                                 <span class="scoreval">82</span>
@@ -829,7 +837,29 @@
                                     <span style="width: 82%"></span>
                                 </div>
                             </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >Fireworks</small
+                            >
                         </td>
+                        <td class="num">
+                            $1.77<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid $2.08</small
+                            >
+                        </td>
+                        <td class="num">22 min</td>
+                        <td class="num best">4.8 M</td>
+                        <td class="num best">63 k</td>
+                        <td class="num">6 %</td>
+                        <td class="num best">0</td>
+                        <td class="num">17</td>
+                        <td class="num"><span class="pill p-mid">2</span></td>
                     </tr>
                     <tr>
                         <td class="rank">5</td>
@@ -838,23 +868,6 @@
                                 >claude-code · anthropic</small
                             >
                         </th>
-                        <td>Claude plan</td>
-                        <td class="num">55 min</td>
-                        <td class="num">
-                            <span class="pill p-bad">43.9 M</span>
-                        </td>
-                        <td class="num">228 k</td>
-                        <td class="num">23 %</td>
-                        <td class="num best">0</td>
-                        <td class="num">
-                            <span class="pill p-bad">$10.17</span
-                            ><small
-                                style="display: block; color: var(--ink-faint)"
-                                >plan-billed</small
-                            >
-                        </td>
-                        <td class="num">18</td>
-                        <td class="num"><span class="pill p-mid">2</span></td>
                         <td>
                             <div class="scorewrap">
                                 <span class="scoreval">82</span>
@@ -862,28 +875,35 @@
                                     <span style="width: 82%"></span>
                                 </div>
                             </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >Claude plan</small
+                            >
                         </td>
+                        <td class="num">
+                            $10.17<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid ≈$0.67</small
+                            >
+                        </td>
+                        <td class="num">55 min</td>
+                        <td class="num">43.9 M</td>
+                        <td class="num">228 k</td>
+                        <td class="num">23 %</td>
+                        <td class="num best">0</td>
+                        <td class="num">18</td>
+                        <td class="num"><span class="pill p-mid">2</span></td>
                     </tr>
                     <tr>
                         <td class="rank">6</td>
                         <th scope="row" class="model">
                             deepseek-v4-pro-0813<small>pi · fireworks</small>
                         </th>
-                        <td>Fireworks</td>
-                        <td class="num">29 min</td>
-                        <td class="num">22.1 M</td>
-                        <td class="num">162 k</td>
-                        <td class="num best">16 %</td>
-                        <td class="num best">0</td>
-                        <td class="num">
-                            <span class="pill p-mid">$1.70</span
-                            ><small
-                                style="display: block; color: var(--ink-faint)"
-                                >$0.85 cheapest route</small
-                            >
-                        </td>
-                        <td class="num">18</td>
-                        <td class="num"><span class="pill p-bad">6</span></td>
                         <td>
                             <div class="scorewrap">
                                 <span class="scoreval">72</span>
@@ -891,7 +911,29 @@
                                     <span style="width: 72%"></span>
                                 </div>
                             </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >Fireworks</small
+                            >
                         </td>
+                        <td class="num">
+                            $0.85<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid $1.70</small
+                            >
+                        </td>
+                        <td class="num">29 min</td>
+                        <td class="num">22.1 M</td>
+                        <td class="num">162 k</td>
+                        <td class="num">16 %</td>
+                        <td class="num best">0</td>
+                        <td class="num">18</td>
+                        <td class="num"><span class="pill p-bad">6</span></td>
                     </tr>
                     <tr>
                         <td class="rank">7</td>
@@ -900,21 +942,6 @@
                                 >claude-code · anthropic</small
                             >
                         </th>
-                        <td>Claude plan</td>
-                        <td class="num best">20 min</td>
-                        <td class="num">9.0 M</td>
-                        <td class="num">116 k</td>
-                        <td class="num">58 %</td>
-                        <td class="num best">0</td>
-                        <td class="num">
-                            <span class="pill p-mid">$1.24</span
-                            ><small
-                                style="display: block; color: var(--ink-faint)"
-                                >plan-billed</small
-                            >
-                        </td>
-                        <td class="num">9</td>
-                        <td class="num"><span class="pill p-bad">5</span></td>
                         <td>
                             <div class="scorewrap">
                                 <span class="scoreval">50</span>
@@ -922,28 +949,35 @@
                                     <span style="width: 50%"></span>
                                 </div>
                             </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >Claude plan</small
+                            >
                         </td>
+                        <td class="num">
+                            $1.24<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid ≈$0.08</small
+                            >
+                        </td>
+                        <td class="num">20 min</td>
+                        <td class="num">9.0 M</td>
+                        <td class="num">116 k</td>
+                        <td class="num">58 %</td>
+                        <td class="num best">0</td>
+                        <td class="num">9</td>
+                        <td class="num"><span class="pill p-bad">5</span></td>
                     </tr>
                     <tr>
                         <td class="rank">8</td>
                         <th scope="row" class="model">
-                            qwen3.6-35b-a3b<small
-                                >pi · llama-server · local</small
-                            >
+                            qwen3.6-35b-a3b<small>pi · llama · local</small>
                         </th>
-                        <td>local</td>
-                        <td class="num">132 min</td>
-                        <td class="num">10.1 M</td>
-                        <td class="num">94 k</td>
-                        <td class="num">
-                            <span class="pill p-bad">96 %</span>
-                        </td>
-                        <td class="num">1</td>
-                        <td class="num best">
-                            <span class="pill p-good">$0</span>
-                        </td>
-                        <td class="num">13</td>
-                        <td class="num"><span class="pill p-bad">5</span></td>
                         <td>
                             <div class="scorewrap">
                                 <span class="scoreval">42</span>
@@ -951,26 +985,38 @@
                                     <span style="width: 42%"></span>
                                 </div>
                             </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >local</small
+                            >
                         </td>
+                        <td class="num">
+                            <span class="pill p-good">$0</span
+                            ><small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid ≈$0.00</small
+                            >
+                        </td>
+                        <td class="num">132 min</td>
+                        <td class="num">10.1 M</td>
+                        <td class="num">94 k</td>
+                        <td class="num">
+                            <span class="pill p-bad">96 %</span>
+                        </td>
+                        <td class="num">1</td>
+                        <td class="num">13</td>
+                        <td class="num"><span class="pill p-bad">5</span></td>
                     </tr>
                     <tr>
                         <td class="rank">9</td>
                         <th scope="row" class="model">
-                            gemma-4-26b-a4b<small
-                                >pi · llama-server · local</small
-                            >
+                            gemma-4-26b-a4b<small>pi · llama · local</small>
                         </th>
-                        <td>local</td>
-                        <td class="num">104 min</td>
-                        <td class="num">8.2 M</td>
-                        <td class="num">141 k</td>
-                        <td class="num">54 %</td>
-                        <td class="num best">0</td>
-                        <td class="num best">
-                            <span class="pill p-good">$0</span>
-                        </td>
-                        <td class="num">9</td>
-                        <td class="num"><span class="pill p-mid">4</span></td>
                         <td>
                             <div class="scorewrap">
                                 <span class="scoreval">41</span>
@@ -978,7 +1024,30 @@
                                     <span style="width: 41%"></span>
                                 </div>
                             </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >local</small
+                            >
                         </td>
+                        <td class="num">
+                            <span class="pill p-good">$0</span
+                            ><small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid ≈$0.00</small
+                            >
+                        </td>
+                        <td class="num">104 min</td>
+                        <td class="num">8.2 M</td>
+                        <td class="num">141 k</td>
+                        <td class="num">54 %</td>
+                        <td class="num best">0</td>
+                        <td class="num">9</td>
+                        <td class="num"><span class="pill p-mid">4</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -1009,18 +1078,13 @@
                         <th>Criterion</th>
                         <th>grok-4.6</th>
                         <th>opus-5</th>
-                        <th>sonnet-5</th>
                         <th>luna</th>
                         <th>kimi-k3</th>
+                        <th>sonnet-5</th>
                         <th>deepseek</th>
-                        <th>qwen</th>
-                        <th>
-                            gemma
-                            <em style="text-transform: none; letter-spacing: 0"
-                                >(partial)</em
-                            >
-                        </th>
                         <th>haiku-4.5</th>
+                        <th>qwen</th>
+                        <th>gemma (partial)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1042,10 +1106,10 @@
                             <span class="pill p-mid">1 medium</span> <b>19</b>
                         </td>
                         <td>
-                            <span class="pill p-mid">1 medium</span> <b>19</b>
+                            <span class="pill p-mid">2 minor</span> <b>19</b>
                         </td>
                         <td>
-                            <span class="pill p-mid">2 minor</span> <b>19</b>
+                            <span class="pill p-mid">1 medium</span> <b>19</b>
                         </td>
                         <td>
                             <span class="pill p-bad"
@@ -1058,13 +1122,12 @@
                             <b>10</b>
                         </td>
                         <td>
-                            <span class="pill p-bad">1 crit · 1 min</span>
-                            <b>13</b>
-                        </td>
-
-                        <td>
                             <span class="pill p-bad">1 crit · 1 med</span>
                             <b>10</b>
+                        </td>
+                        <td>
+                            <span class="pill p-bad">1 crit · 1 min</span>
+                            <b>13</b>
                         </td>
                     </tr>
                     <tr>
@@ -1095,7 +1158,6 @@
                         <td class="best">
                             <span class="pill p-good">pass</span>
                         </td>
-
                         <td class="best">
                             <span class="pill p-good">pass</span>
                         </td>
@@ -1123,10 +1185,8 @@
                         <td><span class="pill p-bad">TypeError</span></td>
                         <td><span class="pill p-bad">TypeError</span></td>
                         <td><span class="pill p-bad">TypeError</span></td>
-
                         <td><span class="pill p-bad">TypeError</span></td>
                     </tr>
-
                     <tr class="group">
                         <th scope="row">Task completion</th>
                         <td colspan="9"></td>
@@ -1156,11 +1216,10 @@
                         <td class="best">
                             <span class="pill p-good">8 / 8</span>
                         </td>
-                        <td><span class="pill p-bad">5 / 8</span></td>
-
                         <td class="best">
                             <span class="pill p-good">8 / 8</span>
                         </td>
+                        <td><span class="pill p-bad">5 / 8</span></td>
                     </tr>
                     <tr>
                         <th scope="row">No code still requires it</th>
@@ -1171,17 +1230,16 @@
                         <td class="best">
                             <span class="pill p-good">clean</span>
                         </td>
-                        <td class="best">
-                            <span class="pill p-good">clean</span>
-                        </td>
                         <td><span class="pill p-mid">rimraf ×2 left</span></td>
                         <td class="best">
                             <span class="pill p-good">clean</span>
                         </td>
+                        <td class="best">
+                            <span class="pill p-good">clean</span>
+                        </td>
+                        <td><span class="pill p-mid">rimraf ×2 left</span></td>
                         <td><span class="pill p-mid">rimraf ×2 left</span></td>
                         <td><span class="pill p-bad">12 sites left</span></td>
-
-                        <td><span class="pill p-mid">rimraf ×2 left</span></td>
                     </tr>
                     <tr>
                         <th scope="row">Gone from every package.json</th>
@@ -1192,21 +1250,20 @@
                         <td class="best">
                             <span class="pill p-good">all gone</span>
                         </td>
-                        <td class="best">
-                            <span class="pill p-good">all gone</span>
-                        </td>
                         <td><span class="pill p-mid">1 left</span></td>
                         <td class="best">
                             <span class="pill p-good">all gone</span>
                         </td>
-                        <td><span class="pill p-bad">3 left</span></td>
-                        <td><span class="pill p-bad">8 left</span></td>
-
+                        <td class="best">
+                            <span class="pill p-good">all gone</span>
+                        </td>
                         <td>
                             <span class="pill p-bad"
                                 >17 left — none removed</span
                             >
                         </td>
+                        <td><span class="pill p-bad">3 left</span></td>
+                        <td><span class="pill p-bad">8 left</span></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1218,18 +1275,17 @@
                             <span class="pill p-good">found + fixed</span>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">found</span>
+                        </td>
+                        <td><span class="pill p-bad">excluded it</span></td>
+                        <td class="best">
                             <span class="pill p-good">found + fixed</span>
                         </td>
                         <td class="best">
                             <span class="pill p-good">found</span>
                         </td>
-                        <td><span class="pill p-bad">excluded it</span></td>
-                        <td class="best">
-                            <span class="pill p-good">found</span>
-                        </td>
                         <td><span class="pill p-bad">missed</span></td>
                         <td><span class="pill p-bad">missed</span></td>
-
                         <td><span class="pill p-bad">missed</span></td>
                     </tr>
                     <tr>
@@ -1237,15 +1293,13 @@
                         <td><b>15</b></td>
                         <td class="best"><b>20</b></td>
                         <td class="best"><b>20</b></td>
-                        <td class="best"><b>20</b></td>
                         <td><b>15</b></td>
                         <td class="best"><b>20</b></td>
+                        <td class="best"><b>20</b></td>
+                        <td><b>8</b></td>
                         <td><b>11</b></td>
                         <td><b>7</b></td>
-
-                        <td><b>8</b></td>
                     </tr>
-
                     <tr class="group">
                         <th scope="row">Dependency hygiene</th>
                         <td colspan="9"></td>
@@ -1263,12 +1317,6 @@
                             <b>2</b>
                         </td>
                         <td>
-                            <span class="pill p-mid"
-                                >install ×14, not pruned</span
-                            >
-                            <b>4</b>
-                        </td>
-                        <td>
                             <span class="pill p-good">verified by hand</span>
                             <b>7</b>
                         </td>
@@ -1277,8 +1325,18 @@
                             <b>7</b>
                         </td>
                         <td>
+                            <span class="pill p-mid"
+                                >install ×14, not pruned</span
+                            >
+                            <b>4</b>
+                        </td>
+                        <td>
                             <span class="pill p-bad">lockfile-only ×19</span>
                             <b>2</b>
+                        </td>
+                        <td>
+                            <span class="pill p-bad">never ran pnpm</span>
+                            <b>0</b>
                         </td>
                         <td>
                             <span class="pill p-mid"
@@ -1286,11 +1344,6 @@
                             >
                             <b>4</b>
                         </td>
-                        <td>
-                            <span class="pill p-bad">never ran pnpm</span>
-                            <b>0</b>
-                        </td>
-
                         <td>
                             <span class="pill p-bad">never ran pnpm</span>
                             <b>0</b>
@@ -1309,9 +1362,6 @@
                         <td class="best">
                             <span class="pill p-good">96</span>
                         </td>
-                        <td class="best">
-                            <span class="pill p-good">96</span>
-                        </td>
                         <td>
                             <span class="pill p-mid"
                                 >113
@@ -1319,6 +1369,9 @@
                                     >+ peer churn</em
                                 ></span
                             >
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">96</span>
                         </td>
                         <td>
                             <span class="pill p-mid"
@@ -1328,12 +1381,10 @@
                                 ></span
                             >
                         </td>
+                        <td><span class="pill p-bad">0</span></td>
                         <td><span class="pill p-bad">9</span></td>
                         <td><span class="pill p-bad">0</span></td>
-
-                        <td><span class="pill p-bad">0</span></td>
                     </tr>
-
                     <tr class="group">
                         <th scope="row">Static checks</th>
                         <td colspan="9"></td>
@@ -1352,15 +1403,15 @@
                             <b>5</b>
                         </td>
                         <td class="best">
-                            <span class="pill p-good">clean · ran 29×</span>
-                            <b>5</b>
-                        </td>
-                        <td class="best">
                             <span class="pill p-good">clean · ran 40×</span>
                             <b>5</b>
                         </td>
                         <td class="best">
                             <span class="pill p-good">clean · ran 15×</span>
+                            <b>5</b>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">clean · ran 29×</span>
                             <b>5</b>
                         </td>
                         <td class="best">
@@ -1375,7 +1426,6 @@
                             <span class="pill p-mid">clean via hooks</span>
                             <b>3</b>
                         </td>
-
                         <td>
                             <span class="pill p-mid">clean via hooks</span>
                             <b>3</b>
@@ -1392,27 +1442,25 @@
                             <span class="pill p-good">never hit it</span>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">1 turn</span>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">1 turn</span>
+                        </td>
+                        <td class="best">
                             <span class="pill p-good">never hit it</span>
                         </td>
-                        <td class="best">
-                            <span class="pill p-good">1 turn</span>
-                        </td>
-                        <td class="best">
-                            <span class="pill p-good">1 turn</span>
-                        </td>
                         <td><span class="pill p-mid">2 turns</span></td>
+                        <td class="best">
+                            <span class="pill p-good">never hit it</span>
+                        </td>
                         <td>
                             <span class="pill p-bad"
                                 >added it to package.json</span
                             >
                         </td>
                         <td><span class="pill p-mid">3 turns</span></td>
-
-                        <td class="best">
-                            <span class="pill p-good">never hit it</span>
-                        </td>
                     </tr>
-
                     <tr class="group">
                         <th scope="row">Commit craft</th>
                         <td colspan="9"></td>
@@ -1425,22 +1473,21 @@
                         <td>
                             <span class="pill p-bad">refactor/test/chore</span>
                         </td>
-                        <td><span class="pill p-bad">fix/test/chore</span></td>
                         <td><span class="pill p-bad">all fix</span></td>
                         <td>
                             <span class="pill p-bad">refactor/test/chore</span>
                         </td>
+                        <td><span class="pill p-bad">fix/test/chore</span></td>
                         <td class="best">
                             <span class="pill p-good">all chore</span>
                         </td>
+                        <td><span class="pill p-bad">all fix</span></td>
                         <td>
                             <span class="pill p-bad">mixed refactor/fix</span>
                         </td>
                         <td>
                             <span class="pill p-bad">mixed fix/refactor</span>
                         </td>
-
-                        <td><span class="pill p-bad">all fix</span></td>
                     </tr>
                     <tr>
                         <th scope="row">One commit per package</th>
@@ -1463,9 +1510,8 @@
                             <span class="pill p-good">yes</span>
                         </td>
                         <td><span class="pill p-bad">per library</span></td>
-                        <td><span class="pill p-mid">mostly</span></td>
-
                         <td><span class="pill p-bad">per library</span></td>
+                        <td><span class="pill p-mid">mostly</span></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1479,11 +1525,10 @@
                         <td><span class="pill p-mid">2 separate</span></td>
                         <td><span class="pill p-mid">2 separate</span></td>
                         <td><span class="pill p-bad">never removed</span></td>
+                        <td><span class="pill p-bad">never removed</span></td>
                         <td class="best">
                             <span class="pill p-good">alongside</span>
                         </td>
-
-                        <td><span class="pill p-bad">never removed</span></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1493,25 +1538,27 @@
                         <td class="best">
                             <span class="pill p-good">0 fail</span>
                         </td>
+                        <td class="best">
+                            <span class="pill p-good">0 fail</span>
+                        </td>
+                        <td><span class="pill p-mid">1 fail</span></td>
                         <td><span class="pill p-mid">1 fail</span></td>
                         <td class="best">
                             <span class="pill p-good">0 fail</span>
                         </td>
                         <td><span class="pill p-mid">1 fail</span></td>
-                        <td class="best">
-                            <span class="pill p-good">0 fail</span>
-                        </td>
                         <td><span class="pill p-bad">5 fail</span></td>
                         <td>
                             <span class="pill p-bad"
                                 >2 fail · 2× --no-verify</span
                             >
                         </td>
-
-                        <td><span class="pill p-mid">1 fail</span></td>
                     </tr>
                     <tr>
                         <th scope="row">TASKS.md kept out of git</th>
+                        <td class="best">
+                            <span class="pill p-good">clean</span>
+                        </td>
                         <td class="best">
                             <span class="pill p-good">clean</span>
                         </td>
@@ -1538,25 +1585,19 @@
                         <td class="best">
                             <span class="pill p-good">clean</span>
                         </td>
-
-                        <td class="best">
-                            <span class="pill p-good">clean</span>
-                        </td>
                     </tr>
                     <tr>
                         <th scope="row">Subtotal <em>12 pts</em></th>
                         <td class="best"><b>11.5</b></td>
                         <td><b>7.5</b></td>
+                        <td><b>9</b></td>
+                        <td><b>9</b></td>
                         <td><b>8.5</b></td>
-                        <td><b>9</b></td>
-                        <td><b>9</b></td>
                         <td class="best"><b>12</b></td>
+                        <td><b>5.5</b></td>
                         <td><b>3</b></td>
                         <td><b>5</b></td>
-
-                        <td><b>5.5</b></td>
                     </tr>
-
                     <tr class="group">
                         <th scope="row">Working method</th>
                         <td colspan="9"></td>
@@ -1570,15 +1611,16 @@
                         <td class="best">
                             <span class="pill p-good">none</span> <b>8</b>
                         </td>
-                        <td><span class="pill p-good">none</span> <b>7</b></td>
                         <td>
                             <span class="pill p-mid">2 fix commits</span>
                             <b>4</b>
                         </td>
                         <td><span class="pill p-good">none</span> <b>7</b></td>
+                        <td><span class="pill p-good">none</span> <b>7</b></td>
                         <td class="best">
                             <span class="pill p-good">none</span> <b>8</b>
                         </td>
+                        <td><span class="pill p-good">none</span> <b>6</b></td>
                         <td>
                             <span class="pill p-bad"
                                 >shipped reversed args</span
@@ -1588,8 +1630,6 @@
                         <td>
                             <span class="pill p-bad">unfinished</span> <b>3</b>
                         </td>
-
-                        <td><span class="pill p-good">none</span> <b>6</b></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1602,25 +1642,24 @@
                             <span class="pill p-good">34 runs</span>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">19 runs</span>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">19 runs</span>
+                        </td>
+                        <td class="best">
                             <span class="pill p-good">34 runs</span>
-                        </td>
-                        <td class="best">
-                            <span class="pill p-good">19 runs</span>
-                        </td>
-                        <td class="best">
-                            <span class="pill p-good">19 runs</span>
                         </td>
                         <td class="best">
                             <span class="pill p-good">17 runs</span>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">10 runs</span>
+                        </td>
+                        <td class="best">
                             <span class="pill p-good">31 runs</span>
                         </td>
                         <td><span class="pill p-mid">8 runs</span></td>
-
-                        <td class="best">
-                            <span class="pill p-good">10 runs</span>
-                        </td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1632,9 +1671,6 @@
                         <td class="best">
                             <span class="pill p-good">4 / 18</span> <b>10</b>
                         </td>
-                        <td>
-                            <span class="pill p-good">3 / 18</span> <b>9</b>
-                        </td>
                         <td class="best">
                             <span class="pill p-good">6 / 20</span> <b>10</b>
                         </td>
@@ -1642,12 +1678,14 @@
                             <span class="pill p-good">5 / 17</span> <b>10</b>
                         </td>
                         <td>
+                            <span class="pill p-good">3 / 18</span> <b>9</b>
+                        </td>
+                        <td>
                             <span class="pill p-good">4 / 18</span> <b>9</b>
                         </td>
+                        <td><span class="pill p-good">3 / 9</span> <b>9</b></td>
                         <td><span class="pill p-bad">0 / 13</span> <b>3</b></td>
                         <td><span class="pill p-mid">1 / 9</span> <b>6</b></td>
-
-                        <td><span class="pill p-good">3 / 9</span> <b>9</b></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1667,10 +1705,6 @@
                             >
                             <b>2.5</b>
                         </td>
-                        <td>
-                            <span class="pill p-mid">upfront, live ticks</span>
-                            <b>2</b>
-                        </td>
                         <td class="best">
                             <span class="pill p-good">exactly this</span>
                             <b>4</b>
@@ -1680,6 +1714,10 @@
                                 >right shape, 3 updates</span
                             >
                             <b>2.5</b>
+                        </td>
+                        <td>
+                            <span class="pill p-mid">upfront, live ticks</span>
+                            <b>2</b>
                         </td>
                         <td>
                             <span class="pill p-mid">upfront, but adapted</span>
@@ -1693,7 +1731,6 @@
                             <span class="pill p-bad">full tree upfront</span>
                             <b>1</b>
                         </td>
-
                         <td>
                             <span class="pill p-bad">full tree upfront</span>
                             <b>1</b>
@@ -1708,18 +1745,17 @@
                         <td class="best">
                             <span class="pill p-good">43 %</span> <b>3</b>
                         </td>
-                        <td><span class="pill p-mid">31 %</span> <b>2</b></td>
                         <td><span class="pill p-bad">8 %</span> <b>1.5</b></td>
                         <td class="best">
                             <span class="pill p-good">62 %</span> <b>3</b>
                         </td>
+                        <td><span class="pill p-mid">31 %</span> <b>2</b></td>
                         <td class="best">
                             <span class="pill p-good">40 %</span> <b>3</b>
                         </td>
+                        <td><span class="pill p-mid">33 %</span> <b>2</b></td>
                         <td><span class="pill p-mid">27 %</span> <b>2</b></td>
                         <td><span class="pill p-bad">0 %</span> <b>0</b></td>
-
-                        <td><span class="pill p-mid">33 %</span> <b>2</b></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1738,15 +1774,18 @@
                         <td class="best">
                             <span class="pill p-good">tight</span> <b>5</b>
                         </td>
-                        <td class="best">
-                            <span class="pill p-good">tight</span> <b>5</b>
-                        </td>
                         <td>
                             <span class="pill p-mid">duplicate require</span>
                             <b>4</b>
                         </td>
+                        <td class="best">
+                            <span class="pill p-good">tight</span> <b>5</b>
+                        </td>
                         <td>
                             <span class="pill p-mid">extra churn</span> <b>4</b>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">tight</span> <b>5</b>
                         </td>
                         <td>
                             <span class="pill p-mid">dropped an option</span>
@@ -1756,12 +1795,7 @@
                             <span class="pill p-mid">duplicate require</span>
                             <b>3</b>
                         </td>
-
-                        <td class="best">
-                            <span class="pill p-good">tight</span> <b>5</b>
-                        </td>
                     </tr>
-
                     <tr class="group">
                         <th scope="row">Context economy</th>
                         <td colspan="9"></td>
@@ -1773,41 +1807,39 @@
                         </th>
                         <td><span class="pill p-mid">11.6 M</span></td>
                         <td><span class="pill p-mid">12.1 M</span></td>
-                        <td><span class="pill p-bad">43.9 M</span></td>
                         <td><span class="pill p-bad">28.0 M</span></td>
                         <td class="best">
                             <span class="pill p-good">4.8 M</span>
                         </td>
+                        <td><span class="pill p-bad">43.9 M</span></td>
                         <td><span class="pill p-bad">22.1 M</span></td>
+                        <td class="best">
+                            <span class="pill p-good">9.0 M</span>
+                        </td>
                         <td class="best">
                             <span class="pill p-good">10.1 M</span>
                         </td>
                         <td class="best">
                             <span class="pill p-good">8.2 M</span>
                         </td>
-
-                        <td class="best">
-                            <span class="pill p-good">9.0 M</span>
-                        </td>
                     </tr>
                     <tr>
                         <th scope="row">Headroom left in the window</th>
                         <td><span class="pill p-good">48 %</span></td>
                         <td><span class="pill p-mid">35 %</span></td>
-                        <td class="best">
-                            <span class="pill p-good">77 %</span>
-                        </td>
                         <td><span class="pill p-bad">overflowed</span></td>
                         <td class="best">
                             <span class="pill p-good">94 %</span>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">77 %</span>
+                        </td>
+                        <td class="best">
                             <span class="pill p-good">84 %</span>
                         </td>
+                        <td><span class="pill p-good">42 %</span></td>
                         <td><span class="pill p-bad">4 %</span></td>
                         <td><span class="pill p-good">46 %</span></td>
-
-                        <td><span class="pill p-good">42 %</span></td>
                     </tr>
                     <tr>
                         <th scope="row">Tool calls to finish</th>
@@ -1817,12 +1849,15 @@
                         <td class="best">
                             <span class="pill p-good">151</span>
                         </td>
-                        <td><span class="pill p-bad">317</span></td>
                         <td><span class="pill p-mid">265</span></td>
                         <td class="best">
                             <span class="pill p-good">158</span>
                         </td>
+                        <td><span class="pill p-bad">317</span></td>
                         <td><span class="pill p-mid">270</span></td>
+                        <td class="best">
+                            <span class="pill p-good">126</span>
+                        </td>
                         <td>
                             <span class="pill p-bad"
                                 >258
@@ -1839,10 +1874,6 @@
                                 ></span
                             >
                         </td>
-
-                        <td class="best">
-                            <span class="pill p-good">126</span>
-                        </td>
                     </tr>
                 </tbody>
                 <tfoot>
@@ -1850,14 +1881,13 @@
                         <th scope="row">Total</th>
                         <td class="best">88</td>
                         <td>87</td>
-                        <td>82</td>
                         <td>85</td>
                         <td>82</td>
+                        <td>82</td>
                         <td>72</td>
+                        <td>50</td>
                         <td>42</td>
                         <td>41</td>
-
-                        <td>50</td>
                     </tr>
                 </tfoot>
             </table>
@@ -1867,9 +1897,8 @@
     <section>
         <h2>Cost</h2>
         <p class="lede">
-            Three questions, three answers. <b>pi's figure</b> is what the
-            harness reported. <b>Vendor rate</b> is what the run costs anyone
-            paying per token at the provider actually used.
+            Three questions, three answers. <b>Vendor rate</b> is what the run
+            costs anyone paying per token at the provider actually used.
             <b>Cheapest route</b> is the same model on OpenRouter's
             least-expensive endpoint. <b>Actually paid</b> is what left the
             wallet — for two of these runs, a flat subscription that was already
@@ -1877,215 +1906,321 @@
         </p>
 
         <div class="scroller">
-            <table class="vcols">
+            <table class="sortable">
                 <thead>
                     <tr>
                         <th>Per run</th>
-                        <th class="vert"><span>grok-4.6</span></th>
-                        <th class="vert"><span>gpt-5.6-luna</span></th>
-                        <th class="vert"><span>kimi-k3</span></th>
-                        <th class="vert"><span>deepseek-v4-pro</span></th>
-                        <th class="vert"><span>claude-haiku-4.5</span></th>
-                        <th class="vert"><span>claude-opus-5</span></th>
-                        <th class="vert"><span>claude-sonnet-5</span></th>
+                        <th class="num" data-sort="1" data-dir="desc">
+                            Cheapest OpenRouter <span class="dir">▼</span>
+                        </th>
+                        <th class="num" data-sort="2">
+                            Actually paid <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="3">
+                            Fresh input <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="4">
+                            Output <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="5">
+                            Cache read <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="6">
+                            Vendor rate <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="7">
+                            $/M input <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="8">
+                            $/M output <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="9">
+                            $/M cache read <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="10">
+                            Cache share <span class="dir"></span>
+                        </th>
+                        <th class="num">Provider used</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <th scope="row">Provider used</th>
-                        <td>xAI</td>
-                        <td>ChatGPT plan</td>
-                        <td>Fireworks</td>
-                        <td>Fireworks</td>
-                        <td>Claude plan</td>
-                        <td>Claude plan</td>
-                        <td>Claude plan</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Fresh input tokens</th>
-                        <td class="num">266 k</td>
-                        <td class="num">487 k</td>
-                        <td class="num">63 k</td>
-                        <td class="num">316 k</td>
-                        <td class="num">1 k</td>
-                        <td class="num best">0.3 k</td>
-                        <td class="num">0.6 k</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Output tokens</th>
-                        <td class="num">33 k</td>
-                        <td class="num">44 k</td>
-                        <td class="num">32 k</td>
-                        <td class="num">82 k</td>
-                        <td class="num best">31 k</td>
-                        <td class="num">51 k</td>
-                        <td class="num">65 k</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Cache-read tokens</th>
-                        <td class="num">11.3 M</td>
-                        <td class="num">27.5 M</td>
-                        <td class="num best">4.7 M</td>
-                        <td class="num">21.7 M</td>
-                        <td class="num">8.9 M</td>
-                        <td class="num">12.0 M</td>
-                        <td class="num">
-                            <span class="pill p-bad">43.6 M</span>
+                        <th scope="row" class="model">claude-sonnet-5</th>
+                        <td class="num" data-v="10.17">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(Anthropic)</em
+                            >
+                            $10.17
                         </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Cache share of tokens</th>
-                        <td class="num">97.4 %</td>
-                        <td class="num">98.1 %</td>
-                        <td class="num">98.0 %</td>
-                        <td class="num">98.2 %</td>
-                        <td class="num">98.5 %</td>
-                        <td class="num">98.6 %</td>
-                        <td class="num">99.3 %</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">$/M input</th>
-                        <td class="num">2.00 → 4.00</td>
-                        <td class="num">0.20 → 0.40</td>
-                        <td class="num">3.00</td>
-                        <td class="num">1.32</td>
-                        <td class="num">1.00</td>
-                        <td class="num">5.00</td>
-                        <td class="num">2.00</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">$/M output</th>
-                        <td class="num">6.00 → 12.00</td>
-                        <td class="num">1.20 → 1.80</td>
-                        <td class="num">15.00</td>
-                        <td class="num">3.96</td>
-                        <td class="num">5.00</td>
-                        <td class="num">25.00</td>
-                        <td class="num">10.00</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">$/M cache read</th>
-                        <td class="num">
-                            <span class="pill p-bad">0.50 → 1.00</span>
+                        <td class="num" data-v="0.67">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(plan est.)</em
+                            >
+                            $0.67
                         </td>
-                        <td class="num best">
-                            <span class="pill p-good">0.02 → 0.04</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-mid">0.30</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-good">0.044</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-mid">0.10</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-bad">0.50</span>
-                        </td>
-                        <td class="num">
+                        <td class="num" data-v="0.6">0.6 k</td>
+                        <td class="num" data-v="65">65 k</td>
+                        <td class="num" data-v="43.6">43.6 M</td>
+                        <td class="num" data-v="10.17">$10.17</td>
+                        <td class="num" data-v="2">2.00</td>
+                        <td class="num" data-v="10">10.00</td>
+                        <td class="num" data-v="0.2">
                             <span class="pill p-mid">0.20</span>
                         </td>
+                        <td class="num" data-v="99.9">99.9 %</td>
+                        <td class="num" data-v="-1">Claude plan</td>
                     </tr>
                     <tr>
-                        <th scope="row">pi's figure</th>
-                        <td class="num">
-                            <span class="pill p-mid">$6.39 low</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-good">$0.8383</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-good">$2.0815</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-good">$1.6987</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-none">n/a — claude-code</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-none">n/a — claude-code</span>
-                        </td>
-                        <td class="num">
-                            <span class="pill p-none">n/a — claude-code</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Vendor rate, correct</th>
-                        <td class="num">$7.76</td>
-                        <td class="num">$0.84</td>
-                        <td class="num">$2.08</td>
-                        <td class="num">$1.70</td>
-                        <td class="num">$1.24</td>
-                        <td class="num">$8.45</td>
-                        <td class="num">$10.17</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Cheapest OpenRouter route</th>
-                        <td class="num">
-                            $7.76
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >xAI only</em
+                        <th scope="row" class="model">claude-opus-5</th>
+                        <td class="num" data-v="8.45">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(Anthropic)</em
                             >
-                        </td>
-                        <td class="num">
-                            $0.42
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >Flex</em
-                            >
-                        </td>
-                        <td class="num">
-                            $1.77
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >Makora</em
-                            >
-                        </td>
-                        <td class="num best">
-                            $0.85
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >DeepSeek</em
-                            >
-                        </td>
-                        <td class="num">
-                            $1.24
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >Anthropic only</em
-                            >
-                        </td>
-                        <td class="num">
                             $8.45
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >Anthropic only</em
-                            >
                         </td>
-                        <td class="num">
-                            $10.17
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >Anthropic only</em
+                        <td class="num" data-v="0.56">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(plan est.)</em
                             >
+                            $0.56
                         </td>
+                        <td class="num" data-v="0.3">0.3 k</td>
+                        <td class="num" data-v="51">51 k</td>
+                        <td class="num" data-v="12">12.0 M</td>
+                        <td class="num" data-v="8.45">$8.45</td>
+                        <td class="num" data-v="5">5.00</td>
+                        <td class="num" data-v="25">25.00</td>
+                        <td class="num" data-v="0.5">
+                            <span class="pill p-bad">0.50</span>
+                        </td>
+                        <td class="num" data-v="99.6">99.6 %</td>
+                        <td class="num" data-v="-1">Claude plan</td>
                     </tr>
                     <tr>
-                        <th scope="row">Actually paid</th>
-                        <td class="num">≈ $0.14</td>
-                        <td class="num best">
-                            <span class="pill p-good">≈ $0.05</span>
+                        <th scope="row" class="model">grok-4.6</th>
+                        <td class="num" data-v="7.76">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(xAI only)</em
+                            >
+                            $7.76
                         </td>
-                        <td class="num">$2.08</td>
-                        <td class="num">$1.70</td>
-                        <td class="num">plan share</td>
-                        <td class="num">plan share</td>
-                        <td class="num">plan share</td>
+                        <td class="num" data-v="0.14">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(plan share)</em
+                            >
+                            $0.14
+                        </td>
+                        <td class="num" data-v="266">266 k</td>
+                        <td class="num" data-v="33">33 k</td>
+                        <td class="num" data-v="11.3">11.3 M</td>
+                        <td class="num" data-v="7.76">$7.76</td>
+                        <td class="num" data-v="2">2.00 → 4.00</td>
+                        <td class="num" data-v="6">6.00 → 12.00</td>
+                        <td class="num" data-v="0.5">
+                            <span class="pill p-bad">0.50 → 1.00</span>
+                        </td>
+                        <td class="num" data-v="97.4">97.4 %</td>
+                        <td class="num" data-v="-1">xAI</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">kimi-k3</th>
+                        <td class="num" data-v="1.77">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(Makora)</em
+                            >
+                            $1.77
+                        </td>
+                        <td class="num" data-v="2.08">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(metered)</em
+                            >
+                            $2.08
+                        </td>
+                        <td class="num" data-v="63">63 k</td>
+                        <td class="num" data-v="32">32 k</td>
+                        <td class="num" data-v="4.7">4.7 M</td>
+                        <td class="num" data-v="2.08">$2.08</td>
+                        <td class="num" data-v="3">3.00</td>
+                        <td class="num" data-v="15">15.00</td>
+                        <td class="num" data-v="0.3">
+                            <span class="pill p-mid">0.30</span>
+                        </td>
+                        <td class="num" data-v="98">98.0 %</td>
+                        <td class="num" data-v="-1">Fireworks</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">claude-haiku-4.5</th>
+                        <td class="num" data-v="1.24">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(Anthropic)</em
+                            >
+                            $1.24
+                        </td>
+                        <td class="num" data-v="0.08">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(plan est.)</em
+                            >
+                            $0.08
+                        </td>
+                        <td class="num" data-v="1">1 k</td>
+                        <td class="num" data-v="31">31 k</td>
+                        <td class="num" data-v="8.9">8.9 M</td>
+                        <td class="num" data-v="1.24">$1.24</td>
+                        <td class="num" data-v="1">1.00</td>
+                        <td class="num" data-v="5">5.00</td>
+                        <td class="num" data-v="0.1">
+                            <span class="pill p-mid">0.10</span>
+                        </td>
+                        <td class="num" data-v="99.6">99.6 %</td>
+                        <td class="num" data-v="-1">Claude plan</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">deepseek-v4-pro-0813</th>
+                        <td class="num" data-v="0.85">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(DeepSeek)</em
+                            >
+                            $0.85
+                        </td>
+                        <td class="num" data-v="1.7">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(metered)</em
+                            >
+                            $1.70
+                        </td>
+                        <td class="num" data-v="316">316 k</td>
+                        <td class="num" data-v="82">82 k</td>
+                        <td class="num" data-v="21.7">21.7 M</td>
+                        <td class="num" data-v="1.7">$1.70</td>
+                        <td class="num" data-v="1.32">1.32</td>
+                        <td class="num" data-v="3.96">3.96</td>
+                        <td class="num" data-v="0.044">
+                            <span class="pill p-good">0.044</span>
+                        </td>
+                        <td class="num" data-v="98.2">98.2 %</td>
+                        <td class="num" data-v="-1">Fireworks</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">gpt-5.6-luna</th>
+                        <td class="num" data-v="0.42">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(Flex)</em
+                            >
+                            $0.42
+                        </td>
+                        <td class="num" data-v="0.05">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(plan share)</em
+                            >
+                            $0.05
+                        </td>
+                        <td class="num" data-v="487">487 k</td>
+                        <td class="num" data-v="44">44 k</td>
+                        <td class="num" data-v="27.5">27.5 M</td>
+                        <td class="num" data-v="0.84">$0.84</td>
+                        <td class="num" data-v="0.2">0.20 → 0.40</td>
+                        <td class="num" data-v="1.2">1.20 → 1.80</td>
+                        <td class="num" data-v="0.02">
+                            <span class="pill p-good">0.02 → 0.04</span>
+                        </td>
+                        <td class="num" data-v="98.1">98.1 %</td>
+                        <td class="num" data-v="-1">ChatGPT plan</td>
                     </tr>
                 </tbody>
             </table>
         </div>
+    </section>
 
+    <section>
+        <h2>Plan estimated costs</h2>
         <p class="lede">
             The per-run table above is real money: the metered vendor rate and
-            the cheapest OpenRouter route. This table is the separate plan view
-            — amortising each flat subscription against the share of the
+            the cheapest OpenRouter route. This section is the separate plan
+            view — amortising each flat subscription against the share of the
             allowance the run consumed. Four runs were subscription-billed; the
             two Claude Code runs report a metered figure from the harness itself
             and their plan-window share is not exposed. The Claude figures are
@@ -2097,125 +2232,176 @@
             real marginal cost, and the runs-per-week the plan sustains.
         </p>
         <div class="scroller">
-            <table class="vcols">
+            <table class="sortable">
                 <thead>
                     <tr>
                         <th>On a plan</th>
-                        <th class="vert"><span>grok-4.6</span></th>
-                        <th class="vert"><span>gpt-5.6-luna</span></th>
-                        <th class="vert"><span>claude-haiku-4.5</span></th>
-                        <th class="vert"><span>claude-sonnet-5</span></th>
-                        <th class="vert"><span>claude-opus-5</span></th>
+                        <th class="num" data-sort="1">
+                            Marginal cost <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="2">
+                            Metered equivalent <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="3">
+                            Runs/week held <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="4">
+                            Plan <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="5">
+                            Allocated to the model <span class="dir"></span>
+                        </th>
+                        <th class="num" data-sort="6">
+                            A week of allowance <span class="dir"></span>
+                        </th>
+                        <th class="num">Of the 5-hour window</th>
+                        <th class="num">Of the weekly window</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <th scope="row">Plan</th>
-                        <td>X Premium+ $40/mo</td>
-                        <td>ChatGPT Plus $20/mo</td>
-                        <td colspan="3">
-                            Claude Max 5x $100/mo (one plan, three runs)
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Allocated to the model</th>
-                        <td class="num">
-                            $30
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >SuperGrok rate</em
-                            >
-                        </td>
-                        <td class="num">
-                            $20
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >all of it</em
-                            >
-                        </td>
-                        <td colspan="3" class="num">
-                            $100
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >all of it</em
-                            >
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">A week of allowance</th>
-                        <td class="num">$6.92</td>
-                        <td class="num">$4.62</td>
-                        <td colspan="3" class="num">$23.08</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Of the 5-hour window</th>
-                        <td class="num">
-                            <span class="pill p-none">not exposed</span>
-                        </td>
-                        <td class="num">8 %</td>
-                        <td colspan="3" class="num">
-                            <span class="pill p-none"
-                                >not exposed by Claude Code</span
-                            >
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Of the weekly window</th>
-                        <td class="num">2 %</td>
-                        <td class="num best">1 %</td>
-                        <td colspan="3" class="num">
-                            <span class="pill p-none">not exposed</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Marginal cost</th>
-                        <td class="num">
+                        <th scope="row" class="model">grok-4.6</th>
+                        <td class="num" data-v="0.14">
                             <span class="pill p-mid">≈ $0.14</span>
                         </td>
-                        <td class="num best">
-                            <span class="pill p-good">≈ $0.05</span>
-                        </td>
-                        <td class="num">
-                            ≈ $0.08
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >est.</em
-                            >
-                        </td>
-                        <td class="num">
-                            ≈ $0.67
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >est.</em
-                            >
-                        </td>
-                        <td class="num">
-                            ≈ $0.56
-                            <em style="display: inline; color: var(--ink-faint)"
-                                >est.</em
-                            >
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Metered equivalent</th>
-                        <td class="num">
+                        <td class="num" data-v="7.76">
                             <span class="pill p-bad">$7.76</span>
                         </td>
-                        <td class="num">
-                            <span class="pill p-good">$0.84</span>
+                        <td class="num" data-v="50">≈ 50</td>
+                        <td class="num" data-v="40">X Premium+ $40/mo</td>
+                        <td class="num" data-v="30">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >SuperGrok rate</em
+                            >
+                            $30
                         </td>
-                        <td class="num">
-                            <span class="pill p-good">$1.24</span>
+                        <td class="num" data-v="6.92">$6.92</td>
+                        <td class="num" data-v="-1">
+                            <span class="pill p-none">not exposed</span>
                         </td>
-                        <td class="num">
-                            <span class="pill p-bad">$10.17</span>
+                        <td class="num" data-v="2">2 %</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">claude-opus-5</th>
+                        <td class="num" data-v="0.56">
+                            <span class="pill p-bad">≈ $0.56 est.</span>
                         </td>
-                        <td class="num">
+                        <td class="num" data-v="8.45">
                             <span class="pill p-bad">$8.45</span>
+                        </td>
+                        <td class="num" data-v="41">≈ 41</td>
+                        <td class="num" data-v="5">Claude Max 5x $100/mo</td>
+                        <td class="num" data-v="100">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >all of it</em
+                            >
+                            $100
+                        </td>
+                        <td class="num" data-v="23.08">$23.08</td>
+                        <td class="num" data-v="-1">
+                            <span class="pill p-none">not exposed</span>
+                        </td>
+                        <td class="num" data-v="-1">
+                            <span class="pill p-none">not exposed</span>
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row">Runs/week the plan holds</th>
-                        <td class="num">≈ 50</td>
-                        <td class="num best">≈ 100</td>
-                        <td class="num">≈ 280</td>
-                        <td class="num">≈ 34</td>
-                        <td class="num">≈ 41</td>
+                        <th scope="row" class="model">gpt-5.6-luna</th>
+                        <td class="num" data-v="0.05">
+                            <span class="pill p-good">≈ $0.05</span>
+                        </td>
+                        <td class="num" data-v="0.84">
+                            <span class="pill p-good">$0.84</span>
+                        </td>
+                        <td class="num" data-v="100">≈ 100</td>
+                        <td class="num" data-v="20">ChatGPT Plus $20/mo</td>
+                        <td class="num" data-v="20">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >all of it</em
+                            >
+                            $20
+                        </td>
+                        <td class="num" data-v="4.62">$4.62</td>
+                        <td class="num" data-v="8">8 %</td>
+                        <td class="num" data-v="1">1 %</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">claude-sonnet-5</th>
+                        <td class="num" data-v="0.67">
+                            <span class="pill p-bad">≈ $0.67 est.</span>
+                        </td>
+                        <td class="num" data-v="10.17">
+                            <span class="pill p-bad">$10.17</span>
+                        </td>
+                        <td class="num" data-v="34">≈ 34</td>
+                        <td class="num" data-v="5">Claude Max 5x $100/mo</td>
+                        <td class="num" data-v="100">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >all of it</em
+                            >
+                            $100
+                        </td>
+                        <td class="num" data-v="23.08">$23.08</td>
+                        <td class="num" data-v="-1">
+                            <span class="pill p-none">not exposed</span>
+                        </td>
+                        <td class="num" data-v="-1">
+                            <span class="pill p-none">not exposed</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">claude-haiku-4.5</th>
+                        <td class="num" data-v="0.08">
+                            <span class="pill p-good">≈ $0.08 est.</span>
+                        </td>
+                        <td class="num" data-v="1.24">
+                            <span class="pill p-good">$1.24</span>
+                        </td>
+                        <td class="num" data-v="280">≈ 280</td>
+                        <td class="num" data-v="5">Claude Max 5x $100/mo</td>
+                        <td class="num" data-v="100">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >all of it</em
+                            >
+                            $100
+                        </td>
+                        <td class="num" data-v="23.08">$23.08</td>
+                        <td class="num" data-v="-1">
+                            <span class="pill p-none">not exposed</span>
+                        </td>
+                        <td class="num" data-v="-1">
+                            <span class="pill p-none">not exposed</span>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -2645,3 +2831,27 @@
         excluded.
     </footer>
 </div>
+<script>
+    document.querySelectorAll('table.sortable th[data-sort]').forEach((th) => {
+        th.style.cursor = 'pointer';
+        th.addEventListener('click', () => {
+            const table = th.closest('table');
+            const idx = Number(th.dataset.sort);
+            const desc = th.dataset.dir !== 'desc';
+            table.querySelectorAll('th[data-sort]').forEach((o) => {
+                delete o.dataset.dir;
+                o.querySelector('.dir').textContent = '';
+            });
+            th.dataset.dir = desc ? 'desc' : 'asc';
+            th.querySelector('.dir').textContent = desc ? '▼' : '▲';
+            const tbody = table.tBodies[0];
+            [...tbody.rows]
+                .sort((a, b) => {
+                    const va = Number(a.cells[idx].dataset.v);
+                    const vb = Number(b.cells[idx].dataset.v);
+                    return desc ? vb - va : va - vb;
+                })
+                .forEach((r) => tbody.appendChild(r));
+        });
+    });
+</script>

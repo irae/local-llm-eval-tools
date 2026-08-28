@@ -58,9 +58,22 @@ After scoring, update and commit on this branch:
 - `results.json` — full structured results: per model, the harness, provider, scores
   per criterion, defects, telemetry.
 - `results.csv` — flat one-row-per-model summary for spreadsheet use.
-- `report.html` — the self-contained HTML report. Zero external requests: no `<link>`,
+- `report.html` — the self-contained HTML report. **Do not edit its tables by hand.**
+  The report is data driven: `generate-report.mjs` reads `results.json` and
+  `report-template.html` (prose + `{{SCOREBOARD}}`/`{{MATRIX}}`/`{{COST}}`/`{{PLAN}}`
+  placeholders) and writes the output paths given as arguments. Fix data in
+  `results.json`, prose in the template, then regenerate:
+  `node benchmark/generate-report.mjs benchmark/report.html docs/superpowers/issue13-model-bakeoff.html`.
+  The headline cost everywhere is the **cheapest OpenRouter route**; what was
+  actually paid (metered, plan share, or plan estimate) sits under it. Zero external requests: no `<link>`,
   no `<script src>`, no `@import`, no web fonts. Light and dark theme via CSS custom
   properties.
+
+Cost sources: for pi runs, use the cost that pi reports (recompute the tier math when
+its price table is wrong). For Claude Code runs, read the token counts from the
+session log and compute the cost from the published rates; the report shows that
+computed figure, never an "n/a". The OpenRouter column is the cheapest route quote
+for the same tokens; Anthropic models have no other route.
 
 The report keeps two separate cost tables. The **per-run cost table** holds real
 money only: the metered vendor rate and the cheapest OpenRouter quote. The **plan

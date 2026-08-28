@@ -1,0 +1,1174 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dependency purge as AI model benchmark</title>
+
+<style>
+    :root {
+        --ground: #f4f6f8;
+        --surface: #ffffff;
+        --surface-alt: #eceff3;
+        --ink: #161b22;
+        --ink-soft: #4a5563;
+        --ink-faint: #78838f;
+        --rule: #d7dde4;
+        --rule-strong: #b9c3ce;
+        --brand: #20304f;
+        --brand-soft: #5b6f96;
+        --gold: #8a6110;
+        --gold-wash: #f6eddb;
+        --gold-edge: #ddc48a;
+        --good: #276b52;
+        --good-wash: #e2efe9;
+        --mid: #8d6414;
+        --mid-wash: #f4ecdd;
+        --bad: #9c3f38;
+        --bad-wash: #f4e3e1;
+        --bar-track: #dde2e9;
+        --shadow:
+            0 1px 2px rgba(22, 27, 34, 0.06),
+            0 8px 24px -12px rgba(22, 27, 34, 0.18);
+    }
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+            --ground: #12161c;
+            --surface: #191f27;
+            --surface-alt: #212933;
+            --ink: #e4e9ef;
+            --ink-soft: #a6b1bf;
+            --ink-faint: #7b8695;
+            --rule: #2c3541;
+            --rule-strong: #3d4856;
+            --brand: #9db3d8;
+            --brand-soft: #7f93b6;
+            --gold: #d7ab55;
+            --gold-wash: #2e2818;
+            --gold-edge: #59492a;
+            --good: #6fc39c;
+            --good-wash: #172a23;
+            --mid: #d3a75c;
+            --mid-wash: #2b2517;
+            --bad: #e08a82;
+            --bad-wash: #2e1d1c;
+            --bar-track: #2a323d;
+            --shadow:
+                0 1px 2px rgba(0, 0, 0, 0.4),
+                0 8px 24px -12px rgba(0, 0, 0, 0.6);
+        }
+    }
+    :root[data-theme='dark'] {
+        --ground: #12161c;
+        --surface: #191f27;
+        --surface-alt: #212933;
+        --ink: #e4e9ef;
+        --ink-soft: #a6b1bf;
+        --ink-faint: #7b8695;
+        --rule: #2c3541;
+        --rule-strong: #3d4856;
+        --brand: #9db3d8;
+        --brand-soft: #7f93b6;
+        --gold: #d7ab55;
+        --gold-wash: #2e2818;
+        --gold-edge: #59492a;
+        --good: #6fc39c;
+        --good-wash: #172a23;
+        --mid: #d3a75c;
+        --mid-wash: #2b2517;
+        --bad: #e08a82;
+        --bad-wash: #2e1d1c;
+        --bar-track: #2a323d;
+        --shadow:
+            0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font-family:
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            'Segoe UI',
+            Roboto,
+            'Helvetica Neue',
+            sans-serif;
+        font-size: 15px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 56px 28px 96px;
+        display: flex;
+        flex-direction: column;
+        gap: 52px;
+    }
+
+    /* ---------- masthead ---------- */
+
+    .masthead {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .eyebrow {
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 11.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--brand-soft);
+        font-weight: 500;
+    }
+
+    h1 {
+        font-family:
+            ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia,
+            serif;
+        font-weight: 600;
+        font-size: clamp(34px, 5vw, 52px);
+        line-height: 1.08;
+        letter-spacing: -0.015em;
+        margin: 0;
+        text-wrap: balance;
+        color: var(--ink);
+    }
+
+    .standfirst {
+        font-family:
+            ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia,
+            serif;
+        font-size: 19px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        max-width: 62ch;
+        margin: 0;
+    }
+
+    .runmeta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0 26px;
+        padding-top: 16px;
+        border-top: 2px solid var(--brand);
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 12px;
+        color: var(--ink-faint);
+    }
+    .runmeta b {
+        color: var(--ink-soft);
+        font-weight: 500;
+    }
+
+    /* ---------- sections ---------- */
+
+    section {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    h2 {
+        font-family:
+            ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia,
+            serif;
+        font-weight: 600;
+        font-size: 27px;
+        letter-spacing: -0.01em;
+        margin: 0;
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+    }
+    h2::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--rule);
+    }
+
+    .lede {
+        margin: 0;
+        color: var(--ink-soft);
+        max-width: 72ch;
+        font-size: 14.5px;
+    }
+
+    /* ---------- tables ---------- */
+
+    .scroller {
+        overflow-x: auto;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        box-shadow: var(--shadow);
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 13.5px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background: var(--surface-alt);
+        color: var(--ink-soft);
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-weight: 500;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-align: left;
+        padding: 11px 13px;
+        border-bottom: 1px solid var(--rule-strong);
+        white-space: nowrap;
+        z-index: 2;
+    }
+
+    tbody td,
+    tbody th {
+        padding: 11px 13px;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: middle;
+        text-align: left;
+    }
+    tbody tr:last-child td,
+    tbody tr:last-child th {
+        border-bottom: 0;
+    }
+
+    .num {
+        text-align: right;
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        white-space: nowrap;
+    }
+
+    .model {
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--ink);
+        white-space: nowrap;
+    }
+    .model small {
+        display: block;
+        font-weight: 400;
+        font-size: 11px;
+        color: var(--ink-faint);
+        letter-spacing: 0.02em;
+    }
+
+    .rank {
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--brand-soft);
+        width: 1%;
+        white-space: nowrap;
+    }
+    .rank-1 {
+        color: var(--gold);
+    }
+
+    /* winner column / row emphasis */
+    .best {
+        background: var(--gold-wash);
+        box-shadow: inset 2px 0 0 var(--gold-edge);
+    }
+    td.best,
+    th.best {
+        color: var(--ink);
+    }
+    .best .num,
+    td.best.num {
+        font-weight: 600;
+    }
+
+    tbody tr:hover td,
+    tbody tr:hover th {
+        background: var(--surface-alt);
+    }
+    tbody tr:hover td.best,
+    tbody tr:hover th.best {
+        background: var(--gold-wash);
+    }
+
+    /* score bar */
+    .scorewrap {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-width: 132px;
+    }
+    .scoreval {
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-weight: 600;
+        font-size: 14px;
+        width: 3ch;
+        text-align: left;
+    }
+    .bar {
+        flex: 1;
+        height: 6px;
+        background: var(--bar-track);
+        border-radius: 3px;
+        overflow: hidden;
+        min-width: 60px;
+    }
+    .bar span {
+        display: block;
+        height: 100%;
+        background: var(--brand-soft);
+        border-radius: 3px;
+    }
+    .bar.gold span {
+        background: var(--gold);
+    }
+
+    /* pills */
+    .pill {
+        display: inline-block;
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        padding: 2px 7px;
+        border-radius: 2px;
+        white-space: nowrap;
+    }
+    .p-good {
+        background: var(--good-wash);
+        color: var(--good);
+    }
+    .p-mid {
+        background: var(--mid-wash);
+        color: var(--mid);
+    }
+    .p-bad {
+        background: var(--bad-wash);
+        color: var(--bad);
+    }
+    .p-none {
+        color: var(--ink-faint);
+    }
+
+    /* transposed cost tables: models as vertical column heads */
+    .vcols thead th.vert {
+        vertical-align: bottom;
+        padding: 13px 10px 11px;
+        text-transform: none;
+        letter-spacing: 0.04em;
+        font-size: 12px;
+        color: var(--ink);
+        font-weight: 600;
+        width: 1%;
+    }
+    .vcols thead th.vert span {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        display: inline-block;
+        white-space: nowrap;
+        line-height: 1;
+    }
+    .vcols th[scope='row'] {
+        position: sticky;
+        left: 0;
+        background: var(--surface);
+        font-weight: 500;
+        color: var(--ink);
+        font-size: 13px;
+        min-width: 196px;
+        border-right: 1px solid var(--rule);
+        z-index: 1;
+    }
+    .vcols tbody tr:hover th[scope='row'] {
+        background: var(--surface-alt);
+    }
+    .vcols td {
+        min-width: 104px;
+    }
+    .vcols em {
+        font-style: normal;
+        font-size: 11px;
+    }
+
+    /* criteria matrix */
+    .matrix th[scope='row'] {
+        position: sticky;
+        left: 0;
+        background: var(--surface);
+        font-weight: 500;
+        color: var(--ink);
+        font-size: 13px;
+        min-width: 232px;
+        border-right: 1px solid var(--rule);
+        z-index: 1;
+    }
+    .matrix th[scope='row'] em {
+        display: block;
+        font-style: normal;
+        font-size: 11px;
+        color: var(--ink-faint);
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+    }
+    .matrix tbody tr:hover th[scope='row'] {
+        background: var(--surface-alt);
+    }
+    .matrix td {
+        font-size: 12.5px;
+        min-width: 138px;
+    }
+    .matrix td b {
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-weight: 600;
+    }
+    .matrix .group td {
+        background: var(--surface-alt);
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--brand-soft);
+        padding: 7px 13px;
+    }
+    .matrix .group th[scope='row'] {
+        background: var(--surface-alt);
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--brand-soft);
+        padding: 7px 13px;
+        font-weight: 600;
+    }
+    .matrix tfoot th[scope='row'] {
+        position: sticky;
+        left: 0;
+        background: var(--surface-alt);
+        border-top: 2px solid var(--rule-strong);
+        border-right: 1px solid var(--rule);
+        font-family:
+            ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia,
+            serif;
+        font-size: 16px;
+    }
+    .matrix tfoot td {
+        background: var(--surface-alt);
+        border-top: 2px solid var(--rule-strong);
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-weight: 600;
+        font-size: 16px;
+    }
+    .matrix tfoot td.best {
+        background: var(--gold-wash);
+        color: var(--gold);
+    }
+
+    /* ---------- notes ---------- */
+
+    .notes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+        gap: 1px;
+        background: var(--rule);
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    .note {
+        background: var(--surface);
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+    .note h3 {
+        margin: 0;
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--brand-soft);
+        font-weight: 600;
+    }
+    .note p {
+        margin: 0;
+        font-size: 13.5px;
+        color: var(--ink-soft);
+        line-height: 1.5;
+    }
+    .note code,
+    td code,
+    th code,
+    .lede code {
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 0.89em;
+        background: var(--surface-alt);
+        padding: 1px 4px;
+        border-radius: 2px;
+        color: var(--ink);
+    }
+
+    details {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        padding: 0;
+        box-shadow: var(--shadow);
+    }
+    summary {
+        cursor: pointer;
+        padding: 15px 20px;
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--brand-soft);
+        font-weight: 600;
+        list-style: none;
+    }
+    summary::-webkit-details-marker {
+        display: none;
+    }
+    summary::before {
+        content: '▸  ';
+    }
+    details[open] summary::before {
+        content: '▾  ';
+    }
+    summary:focus-visible {
+        outline: 2px solid var(--brand-soft);
+        outline-offset: -2px;
+    }
+    .ledger {
+        padding: 0 20px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .ledger h4 {
+        margin: 0 0 6px;
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 12.5px;
+        color: var(--ink);
+        border-top: 1px solid var(--rule);
+        padding-top: 16px;
+    }
+    .ledger ul {
+        margin: 0;
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+    .ledger li {
+        font-size: 13.5px;
+        color: var(--ink-soft);
+        line-height: 1.5;
+    }
+    .ledger li b {
+        color: var(--ink);
+        font-weight: 600;
+    }
+    .sev {
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 1px 6px;
+        border-radius: 2px;
+        margin-right: 7px;
+    }
+    .sev-3 {
+        background: var(--bad-wash);
+        color: var(--bad);
+    }
+    .sev-2 {
+        background: var(--mid-wash);
+        color: var(--mid);
+    }
+    .sev-1 {
+        background: var(--surface-alt);
+        color: var(--ink-faint);
+    }
+
+    footer {
+        border-top: 1px solid var(--rule);
+        padding-top: 20px;
+        font-family:
+            ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+            'Liberation Mono', monospace;
+        font-size: 11.5px;
+        color: var(--ink-faint);
+        line-height: 1.7;
+    }
+
+    @media (max-width: 640px) {
+        .page {
+            padding: 36px 16px 64px;
+            gap: 40px;
+        }
+        .matrix th[scope='row'] {
+            min-width: 176px;
+        }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+</style>
+
+<div class="page">
+    <header class="masthead">
+        <div class="eyebrow">Controlled bake-off · irae/mendel · issue #13</div>
+        <h1>Dependency purge as AI model benchmark</h1>
+        <p class="standfirst">
+            The same prompt, the same commit, the same eight npm packages to
+            replace with Node built-ins. Every branch reviewed against the real
+            code, every process claim checked against the session log.
+        </p>
+        <div class="runmeta">
+            <span><b>Base</b> 182b07f master</span>
+            <span><b>Branches</b> <code>&lt;model&gt;-issue-13</code></span>
+            <span><b>Libraries</b> 8</span>
+            <span><b>Runs</b> 25–26 Aug 2026</span>
+            <span><b>Models</b> 6</span>
+            <span><b>Harness</b> pi agent</span>
+        </div>
+    </header>
+
+    <section>
+        <h2>Scoreboard</h2>
+        <p class="lede">
+            Ranked by the weighted criteria in the second table. Cost is the
+            metered vendor rate with what was really paid beneath it; local
+            models are free. Peak context is the largest single request, against
+            each model's own window.
+        </p>
+        <div class="scroller">{{SCOREBOARD}}</div>
+        <p class="lede">
+            <b>Bugs</b> are weighted: critical 3, medium 2, minor 1.
+            <b>gemma stopped early</b> — the run was cut for hardware, not by
+            the model, so its score covers roughly five of the eight libraries;
+            see the partial-run note. <b>Cost is the metered vendor rate</b>,
+            which is what compares models — only the deepseek run was actually
+            billed per token. grok came free with X Premium+ (≈14¢ a run at
+            standalone SuperGrok value) and luna ran on $20/month ChatGPT Plus
+            (≈5¢). See the cost section.
+        </p>
+    </section>
+
+    <section>
+        <h2>Criteria</h2>
+        <p class="lede">
+            Every row was checked against the branch or the session log, not
+            against what the model said it did. Weights in the left column; the
+            best cell in each row is highlighted.
+        </p>
+        <div class="scroller">{{MATRIX}}</div>
+    </section>
+
+    <section>
+        <h2>Cost</h2>
+        <p class="lede">
+            Three questions, three answers. <b>Vendor rate</b> is what the run
+            costs anyone paying per token at the provider actually used.
+            <b>Cheapest route</b> is the same model on OpenRouter's
+            least-expensive endpoint. <b>Actually paid</b> is what left the
+            wallet — for two of these runs, a flat subscription that was already
+            sunk.
+        </p>
+
+        <div class="scroller">{{COST}}</div>
+    </section>
+
+    <section>
+        <h2>Plan estimated costs</h2>
+        <p class="lede">
+            The per-run table above is real money: the metered vendor rate and
+            the cheapest OpenRouter route. This section is the separate plan
+            view — amortising each flat subscription against the share of the
+            allowance the run consumed. Four runs were subscription-billed; the
+            two Claude Code runs report a metered figure from the harness itself
+            and their plan-window share is not exposed. The Claude figures are
+            estimates: Claude Code does not log window usage, so the marginal
+            cost assumes a Max 5x week sustains roughly $350 of
+            metered-equivalent work — marginal ≈ metered ÷ 350 × $23.08. Recheck
+            against claude.ai usage when precision matters. Amortising each plan
+            against the share of the weekly allowance the run consumed gives the
+            real marginal cost, and the runs-per-week the plan sustains.
+        </p>
+        <div class="scroller">{{PLAN}}</div>
+
+        <div class="notes">
+            <div class="note">
+                <h3>How pi prices a run</h3>
+                <p>
+                    A local static table, not a live lookup and not OpenRouter.
+                    <code>calculateCost()</code> multiplies the token counts the
+                    provider returns by the per-model rates in
+                    <code>~/.pi/agent/models-store.json</code>, picking the
+                    highest matching entry in an optional
+                    <code>cost.tiers</code> array. It matched Fireworks to the
+                    cent on both deepseek and kimi, and matched OpenAI on luna.
+                </p>
+            </div>
+            <div class="note">
+                <h3>Where pi is wrong about grok</h3>
+                <p>
+                    xAI doubles every rate once a prompt passes 200 k tokens,
+                    and 11 of grok's 113 requests did. pi's
+                    <code>grok-4.6</code> entry carries no
+                    <code>tiers</code> array, so it billed all 113 at the low
+                    rate. The true figure is <b>$7.76</b> — pi understates it by
+                    21.5 %. Its <code>gpt-5.6-luna</code> entry does have tiers
+                    and priced correctly, so this is a data gap, not a logic
+                    bug.
+                </p>
+            </div>
+            <div class="note">
+                <h3>Cache reads decide everything</h3>
+                <p>
+                    Between 97 and 98 % of every run's tokens are cache reads,
+                    so the cache-read rate alone sets the ranking. grok sent the
+                    fewest tokens of the metered three and still cost the most,
+                    because xAI charges 25 % of input for a cache hit where
+                    Fireworks charges 3.3 % and OpenAI 10 %.
+                </p>
+            </div>
+            <div class="note">
+                <h3>OpenRouter is worth it for two of the four</h3>
+                <p>
+                    It resells <code>deepseek-v4-pro-0813</code> from 14
+                    providers and <code>kimi-k3</code> from 16, and Fireworks
+                    sits mid-pack in both. DeepSeek's own endpoint halves the
+                    deepseek run to <b>$0.85</b>; Makora cuts kimi 15 % to
+                    <b>$1.77</b>. Pin the provider — default routing balances on
+                    uptime and throughput, and bouncing between providers also
+                    breaks the prompt cache. Rates are pass-through, but card
+                    top-ups carry a 5.5 % fee. For grok it changes nothing: xAI
+                    passes straight through and the only other route is Bedrock
+                    at $2.20/$6.60/$0.55.
+                </p>
+            </div>
+            <div class="note">
+                <h3>Splitting a bundled plan</h3>
+                <p>
+                    Grok came in free with X Premium+ at $40/month, so its price
+                    has to be allocated. The defensible split is the standalone
+                    rate: SuperGrok sells the same access for <b>$30</b>,
+                    leaving ~$10 for the X features. That puts a run at
+                    <b>14¢</b>. An even split would say 9¢ and charging the
+                    whole bundle would say 18¢ — the range is narrow and none of
+                    it changes a conclusion, but 14¢ is the honest figure, and
+                    it is three times what the same run costs on ChatGPT Plus.
+                </p>
+            </div>
+            <div class="note">
+                <h3>Reading your own plan usage</h3>
+                <p>
+                    OpenAI exposes it:
+                    <code>GET https://chatgpt.com/backend-api/wham/usage</code>
+                    with the Codex OAuth bearer token returns
+                    <code>plan_type</code> plus <code>primary_window</code> (5
+                    h) and <code>secondary_window</code> (7 d), each with
+                    <code>used_percent</code> and <code>reset_at</code>. The
+                    Codex CLI records the same block in every rollout log. xAI
+                    publishes no equivalent route — <code>/v1/usage</code> and
+                    <code>/v1/subscription</code> both 404; the weekly pool is
+                    only visible in grok.com's Usage tab.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>What decided it</h2>
+        <div class="notes">
+            <div class="note">
+                <h3>The trap that split the field</h3>
+                <p>
+                    <code>fs.promises.glob()</code> returns an async iterator,
+                    not a promise. Three models kept the old
+                    <code>.then(files =&gt; …)</code> chain and shipped code
+                    that throws on the first bundle using an
+                    <code>ignore</code>, <code>exclude</code> or
+                    <code>external</code> glob. Two wrapped it in
+                    <code>Array.fromAsync</code>. No test in the repo covers
+                    that file, so all five suites stayed green.
+                </p>
+            </div>
+            <div class="note">
+                <h3>The reference the issue missed</h3>
+                <p>
+                    <code>legacy-packages/mendel-requirify</code> still required
+                    <code>rimraf</code> in two test files. Only deepseek and
+                    luna grepped widely enough to find it; both handled the
+                    callback form correctly. grok, qwen and gemma trusted the
+                    issue's list. kimi is the awkward case — it ran a repo-wide
+                    sweep but passed <code>-g '!legacy-packages/**'</code>, so
+                    it looked straight past it.
+                </p>
+            </div>
+            <div class="note">
+                <h3>Where the issue was wrong</h3>
+                <p>
+                    It claims <code>tmp</code> auto-removes its directories on
+                    exit. It does not — <code>tmp</code> 0.2 needs
+                    <code>setGracefulCleanup()</code>. deepseek and luna
+                    dutifully added an exit hook to
+                    <code>validate-manifest.js</code>, which now deletes the
+                    debug manifest one line after printing its path. grok, qwen
+                    and kimi left it alone and matched the old behaviour exactly
+                    — kimi is the only one that wrote down why.
+                </p>
+            </div>
+            <div class="note">
+                <h3>gemma's partial run</h3>
+                <p>
+                    Stopped at five of eight libraries when the GPU was needed
+                    elsewhere — not the model's failure. But its delivered
+                    portion still carried the critical glob bug, never ran
+                    <code>pnpm</code> once, and reached for
+                    <code>--no-verify</code> twice, so the score is not
+                    depressed only by the missing scope.
+                </p>
+            </div>
+            <div class="note">
+                <h3>kimi's context discipline</h3>
+                <p>
+                    4.8 M tokens for the whole job — less than half the
+                    next-lowest run, and a third of deepseek's — with a peak
+                    request of 63 k against a 1 M window. It finished in 22
+                    minutes on 158 tool calls, and piped 62 % of its shell
+                    commands through <code>tail</code> or <code>head</code>, the
+                    highest rate in the field. Same eight libraries, a quarter
+                    of the context.
+                </p>
+            </div>
+            <div class="note">
+                <h3>grok's quiet advantage</h3>
+                <p>
+                    <code
+                        >pnpm install &amp;&amp; git add &lt;explicit files&gt;
+                        &amp;&amp; git commit</code
+                    >, every single time. It is the only run where node_modules
+                    on disk actually matched the branch, and the only one that
+                    finished with nothing to fix.
+                </p>
+            </div>
+            <div class="note">
+                <h3>luna's task-list discipline</h3>
+                <p>
+                    The only model that wrote the eight top-level items and
+                    nothing else, then added each library's sub-items just
+                    before starting it. Everyone else planned the whole tree
+                    upfront from the issue text — which is also why they
+                    inherited its mistakes.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <details>
+            <summary>
+                Defect ledger — 16 findings, open when you want them
+            </summary>
+            <div class="ledger">
+                <div>
+                    <h4>grok-4.6 — 0 points</h4>
+                    <ul>
+                        <li>
+                            Nothing found. Every swap is behaviour-preserving;
+                            the <code>glob</code> shim, the
+                            <code>styleText</code> colour switch and the
+                            temp-dir scoping are all correct.
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>gpt-5.6-luna — 2 points</h4>
+                    <ul>
+                        <li>
+                            <span class="sev sev-2">medium</span
+                            ><b
+                                ><code>validate-manifest.js</code> deletes its
+                                own debug artifact.</b
+                            >
+                            The added <code>process.once('exit')</code> removes
+                            the temp dir immediately after printing
+                            <code>&lt;path&gt; written</code>, so the file the
+                            message points at is always gone. It also registers
+                            a new exit listener per call.
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>kimi-k3 — 2 points</h4>
+                    <ul>
+                        <li>
+                            <span class="sev sev-1">minor</span
+                            ><b>Duplicate import.</b>
+                            <code>mendel-mocha-runner/index.js</code> gained
+                            <code>const { globSync } = require('fs')</code> next
+                            to the <code>const fs = require('fs')</code> already
+                            on the line above.
+                        </li>
+                        <li>
+                            <span class="sev sev-1">minor</span
+                            ><b>Unrelated lockfile churn.</b> 21 of its inserted
+                            lines are <code>supports-color</code> peer
+                            re-resolution across eslint, debug and axios, folded
+                            into the dependency commits.
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>deepseek-v4-pro-0813 — 6 points</h4>
+                    <ul>
+                        <li>
+                            <span class="sev sev-3">critical</span
+                            ><b
+                                ><code
+                                    >fs.promises.glob(...).then is not a
+                                    function</code
+                                ></b
+                            >
+                            at three call sites in
+                            <code>apply-extra-options.js</code>. Any bundle
+                            config using an <code>ignore</code>,
+                            <code>exclude</code> or <code>external</code> glob
+                            throws. Reproduced directly.
+                        </li>
+                        <li>
+                            <span class="sev sev-2">medium</span
+                            ><b
+                                >Same
+                                <code>validate-manifest.js</code> debug-artifact
+                                deletion as luna.</b
+                            >
+                        </li>
+                        <li>
+                            <span class="sev sev-1">minor</span
+                            ><b>Unrelated lockfile churn.</b> Dropped
+                            <code>babel-plugin-polyfill-corejs2</code> and
+                            re-resolved a babel version, folded into the
+                            dependency commits — 98 of its 195 changed lines
+                            have nothing to do with the issue.
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>qwen3.6-35b-a3b — 5 points</h4>
+                    <ul>
+                        <li>
+                            <span class="sev sev-3">critical</span
+                            ><b>Same <code>fs.promises.glob</code> bug</b> at
+                            three call sites.
+                        </li>
+                        <li>
+                            <span class="sev sev-2">medium</span
+                            ><b>CLI analytics lost its colours.</b>
+                            <code
+                                >chalk.level = options.enableColor !== false ? 3
+                                : 0</code
+                            >
+                            was deleted outright, so <code>enableColor</code> is
+                            now dead config, and without
+                            <code>validateStream: false</code> the printer emits
+                            no colour at all whenever stdout is not a TTY.
+                            Verified: the other three still force colour, qwen
+                            does not.
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>
+                        gemma-4-26b-a4b — 4 points, over five of eight libraries
+                    </h4>
+                    <ul>
+                        <li>
+                            <span class="sev sev-3">critical</span
+                            ><b>Same <code>fs.promises.glob</code> bug</b> at
+                            three call sites.
+                        </li>
+                        <li>
+                            <span class="sev sev-1">minor</span
+                            ><b>Duplicate import.</b>
+                            <code>mendel-mocha-runner/index.js</code> gained
+                            <code>const { globSync } = require('fs')</code> next
+                            to the <code>const fs = require('fs')</code> already
+                            on the line above.
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>claude-opus-5 — 0 points</h4>
+                    <p style="margin: 6px 0 0; color: var(--ink-soft)">
+                        Nothing found. <code>Array.fromAsync</code> glob shim,
+                        correct <code>styleText</code> colour switch with
+                        <code>validateStream: false</code>,
+                        <code>validate-manifest.js</code> left alone, and it is
+                        the only model that both found <b>and fixed</b> the
+                        <code>mendel-requirify</code> references the issue
+                        missed. Process dings live in the matrix:
+                        <code>git add -A</code> on all eighteen commits,
+                        <code>--lockfile-only</code> installs only,
+                        refactor/test commit types.
+                    </p>
+                </div>
+
+                <div>
+                    <h4>claude-sonnet-5 — 2 points</h4>
+                    <ul>
+                        <li>
+                            <span class="sev sev-2">medium</span
+                            ><b>Forced colour lost.</b> The
+                            <code>styleText</code> wrapper honours
+                            <code>enableColor: false</code>, but leaves stream
+                            validation on, so the analytics printer emits no
+                            colour when stdout is not a TTY — master forced
+                            level 3 regardless. Same class of regression as qwen
+                            and haiku, milder shape.
+                        </li>
+                    </ul>
+                    <p style="margin: 6px 0 0; color: var(--ink-soft)">
+                        Otherwise clean: trap A passed via
+                        <code>fs.promises.glob</code> handled correctly,
+                        <code>validate-manifest.js</code> left alone, and it
+                        found <b>and fixed</b> the
+                        <code>mendel-requirify</code> references. Ran fourteen
+                        real <code>pnpm install</code>s yet the dropped packages
+                        still resolve from the worktree root — pruning never
+                        verified.
+                    </p>
+                </div>
+
+                <div>
+                    <h4>claude-haiku-4.5 — 5 points</h4>
+                    <ul>
+                        <li>
+                            <span class="sev sev-3">critical</span
+                            ><b>Same <code>fs.promises.glob</code> bug</b> at
+                            three call sites in
+                            <code>apply-extra-options.js</code>. Reproduced:
+                            <code
+                                >TypeError: fs.glob(...).then is not a
+                                function</code
+                            >.
+                        </li>
+                        <li>
+                            <span class="sev sev-2">medium</span
+                            ><b>CLI analytics lost its colours</b> the same way
+                            qwen did — the forced level is gone and
+                            <code>styleText</code> runs with stream validation
+                            on, so <code>enableColor</code> no longer forces
+                            colour off a TTY.
+                        </li>
+                    </ul>
+                    <p style="margin: 6px 0 0; color: var(--ink-soft)">
+                        Not a bug but the completion gap of the field: haiku
+                        replaced every <code>require()</code> site, then never
+                        touched a single <code>package.json</code>, never ran
+                        pnpm, and left the lockfile untouched. All seventeen
+                        dependency declarations are still there.
+                    </p>
+                </div>
+
+                <div>
+                    <h4>Shared, not charged to anyone</h4>
+                    <ul>
+                        <li>
+                            All six replaced <code>shasum(x)</code> with
+                            <code>createHash('sha1').update(x)</code> without
+                            guarding non-string input.
+                            <code>shasum</code> stable-stringifies;
+                            <code>createHash</code> throws. Both call sites
+                            always pass strings today, so it is latent, not
+                            live.
+                        </li>
+                        <li>
+                            All six correctly used bare
+                            <code>require('crypto')</code> in the end, and all
+                            six hit the
+                            <code>implicit-dependencies</code> ESLint rule on
+                            <code>node:crypto</code> first.
+                        </li>
+                        <li>
+                            All five that reached the <code>chalk</code> item
+                            found the two call sites the issue did not list —
+                            <code>cache/client.js</code> and
+                            <code>pipeline.js</code>.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <footer>
+        Reviewed against branch tips on 26 Aug 2026 · prettier and eslint re-run
+        per branch in isolated worktrees · package suites re-run per branch ·
+        <code>apply-extra-options</code> exercised with a stub browserify ·
+        session metrics read from <code>~/.pi/agent/sessions</code> via the
+        analyze-sessions skill.<br />
+        Known-good baseline: <code>full-example</code> and
+        <code>legacy-packages</code> suites already failed on master and were
+        excluded.
+    </footer>
+</div>
