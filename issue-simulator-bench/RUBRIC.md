@@ -1,0 +1,124 @@
+# Issue-13 verification battery and scoring rubric
+
+Run all checks for every new branch. Apply the rubric unchanged so scores stay
+comparable. Paths are relative to the repo root; `$d` is the eval worktree.
+
+## The task
+
+Issue 13 lists eight npm packages to replace with Node built-ins: `uuid`, `xtend`,
+`urlsafe-base64`, `rimraf`, `glob`, `chalk`, `tmp`, `shasum`.
+
+## The three traps
+
+**A. `fs.promises.glob()` returns an AsyncIterator, not a Promise.** A naive
+`.then()` swap in `packages/mendel-development/apply-extra-options.js` throws at
+runtime. Correct form: `Array.fromAsync(fs.promises.glob(pattern))`. No unit test
+covers this file — only the runtime repro below catches it. Highest-signal check.
+
+**B. The issue's reference list is incomplete.** `legacy-packages/mendel-requirify`
+still requires `rimraf` in two test files and declares it in `package.json`. The
+prompt warns about missing references; the issue does not list this one.
+
+**C. The issue is wrong about `tmp`.** `tmp` does not auto-clean on exit unless
+`setGracefulCleanup()` is called, and nothing in this repo calls it. Adding an exit
+hook to `packages/mendel-development/validate-manifest.js` is a regression: it
+deletes the debug manifest one line after the code prints its path.
+
+Also: `packages/mendel-deps/test/fixtures/js/es5/foo/browser.js:2` contains
+`require('glob')` as parser fixture data. Leaving it is correct.
+
+## Verification battery
+
+### Worktree setup
+
+Sibling worktree, detached at the branch, symlink `node_modules` from the main repo
+(root and per package) instead of a fresh install. Delete the symlinks before
+`git worktree remove`.
+
+### Static completeness
+
+```bash
+b=<branch>
+git grep -nE "require\('(uuid|xtend|urlsafe-base64|rimraf|glob|chalk|tmp|shasum)'\)" $b -- '*.js' \
+  | grep -v "js/es5/foo/browser.js"
+git grep -nE '"(uuid|xtend|urlsafe-base64|rimraf|glob|chalk|tmp|shasum)":' $b -- '*/package.json' 'package.json'
+git diff --stat master..$b -- pnpm-lock.yaml
+```
+
+A perfect branch leaves only the fixture file. Note: `git grep -E` has no
+backreferences — write the quotes literally.
+
+### Runtime repro for trap A (decisive)
+
+```bash
+cat > /tmp/repro-glob.js <<'EOF'
+const applyExtraOptions = require(process.argv[2] + '/packages/mendel-development/apply-extra-options.js');
+const b = { _pending: 0, _ready: true, ignore(){}, exclude(){}, external(){}, require(){}, emit(){} };
+try {
+    applyExtraOptions(b, {ignore: ['packages/*/index.js']});
+    console.log('SYNC OK, pending=', b._pending);
+} catch (e) {
+    console.log('THREW:', e.constructor.name, e.message);
+}
+EOF
+node /tmp/repro-glob.js "$d"
+```
+
+`SYNC OK` = pass. A `TypeError` on `.then` = critical bug.
+
+### Chalk / `enableColor` contract
+
+Master forces color level: `chalk.level = options.enableColor !== false ? 3 : 0`.
+A faithful `util.styleText` port must honor `enableColor: false` and pass
+`{ validateStream: false }` so color survives redirection. Load
+`packages/mendel-pipeline/src/helpers/analytics/cli-printer.js`, capture output of
+`print()` with `{enableColor:false}` and `{}`, and test for ANSI escapes. Correct:
+`false` then `true`.
+
+### Lint and format
+
+`prettier --check .` and `eslint .` from the repo's own `node_modules/.bin` must be
+silent. Known trap: `eslint-plugin-implicit-dependencies` flags `require('node:crypto')`;
+the repo convention is bare `require('crypto')`. Grade recovery speed.
+
+### Package test suites
+
+Run tap per package (`mendel-core`, `mendel-config`, `mendel-deps`,
+`mendel-development`, `mendel-manifest-extract-bundles`, `mendel-manifest-uglify`,
+`mendel-outlet-manifest`, `mendel-pipeline/test/cli-printer.js`,
+`legacy-packages/mendel-requirify`). Expected baselines — never score these as
+regressions:
+
+- `mendel-requirify` fails 3/3 on every branch and on master (outside the pnpm
+  workspace).
+- `mendel-config` can flake to 4/1; re-run standalone and it passes 41/41.
+- Anything that needs a live daemon socket (`MENDEL_IPC`) already fails on master.
+
+### Session-log metrics
+
+From the harness session log collect: cost, assistant messages, tool calls, tool
+errors, compactions, tokens (input, output, cacheRead, cacheWrite), peak context,
+duration, commit count, failed commits, share of shell commands piped to
+`tail`/`head`, `--no-verify` and `git add -A` use, TASKS.md handling.
+
+### Commit-craft inspection
+
+`git log master..$b` — one package per commit, all types `chore`, no TASKS.md leak,
+root devDependencies (`rimraf`, `tmp`) removed.
+
+## Scoring rubric — 100 points
+
+| #   | Criterion                     | Max | Measurement                                                                                                          |
+| --- | ----------------------------- | --: | -------------------------------------------------------------------------------------------------------------------- |
+| 1   | Bugs remaining                |  25 | `25 − 3 × weighted_bug_points`, floor 0. Critical = 3, medium = 2, minor = 1.                                        |
+| 2   | Task completion               |  20 | All 8 libraries done; no stale `require()`; gone from every `package.json`; found the `mendel-requirify` reference.  |
+| 3   | node_modules actually pruned  |   8 | Real `pnpm install` (8) > lockfile-only + hand check (7) > install unverified (4) > lockfile-only (2) > no pnpm (0). |
+| 4   | Prettier & ESLint clean       |   5 | Re-run on the branch; full marks only when the model ran them itself.                                                |
+| 5   | Commit craft                  |  12 | All `chore` (4) + one commit per package (4) + no `--no-verify`, no `git add -A`, no TASKS.md leak (4).              |
+| 6   | Right the first time          |   8 | Self-inflicted repair commits; recovery from the `node:` prefix trap.                                                |
+| 7   | Test discipline               |  10 | Narrow per-package runs and a full suite about every 5 commits.                                                      |
+| 8   | House conventions             |   5 | Minimal diff, matched neighbor style, no drive-by churn.                                                             |
+| 9   | Task list built progressively |   4 | Libraries listed upfront with no sub-items; sub-items discovered per library; marked done after each commit.         |
+| 10  | Truncated noisy commands      |   3 | Share of shell commands piped through `tail`/`head`.                                                                 |
+
+Cost is reported next to the scores but is never scored.

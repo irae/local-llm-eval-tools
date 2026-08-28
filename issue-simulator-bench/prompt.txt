@@ -1,0 +1,5 @@
+We have `gh` installed so you can use it, read-only for now. Fetch https://github.com/irae/mendel/issues/13 and start working on it. Commit often. Some items might not have found all references of libs. Commit
+once per package fix, then run tests just for this package. If fixing is needed, fix and commit when passing. Continue working this way and every 5 commits, run the full test suite, just to make sure also
+interconnected deps didn't break. Don't read all the code. First library, remove, read the code where it is missing, fix it, and move on. Write TASKS.md for yourself and never commit it. It should have
+markdown style todo list ` - [ ]` and mark as done after commit. Each library is an item. You list all libraries to remove upfront. Then you grep the codebase, and each affected package becomes a sub-item.
+When all done, move to next task. You are done when all tasks are done.
