@@ -693,8 +693,31 @@
             models are free. Peak context is the largest single request, against
             each model's own window.
         </p>
+        <p class="lede" id="costmode-radios">
+            <label
+                ><input type="radio" name="costmode" value="none" checked />
+                quality only</label
+            >
+            &nbsp;
+            <label
+                ><input type="radio" name="costmode" value="or" /> weighted by
+                OpenRouter cost</label
+            >
+            &nbsp;
+            <label
+                ><input type="radio" name="costmode" value="plan" /> weighted by
+                plan estimate</label
+            >
+        </p>
+        <p class="lede" id="plan-note" style="display: none">
+            Cost-weighted score = 100 × quality score ÷ (1 + cost + $2 per
+            critical bug + $0.01 per minute of wall clock), normalised to the
+            leader. Plan mode uses the marginal plan estimate where one exists;
+            runs without a plan keep their OpenRouter figure; local runs cost $0
+            plus time.
+        </p>
         <div class="scroller">
-            <table>
+            <table id="scoreboard">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -711,7 +734,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <tr
+                        data-base="88"
+                        data-or="7.76"
+                        data-plan="0.14"
+                        data-crit="0"
+                        data-wall="20"
+                    >
                         <td class="rank rank-1">1</td>
                         <th scope="row" class="model best">
                             grok-4.6<small>pi · xai</small>
@@ -749,7 +778,13 @@
                             <span class="pill p-good">0</span>
                         </td>
                     </tr>
-                    <tr>
+                    <tr
+                        data-base="87"
+                        data-or="8.45"
+                        data-plan="0.56"
+                        data-crit="0"
+                        data-wall="44"
+                    >
                         <td class="rank">2</td>
                         <th scope="row" class="model">
                             claude-opus-5<small>claude-code · anthropic</small>
@@ -787,7 +822,13 @@
                             <span class="pill p-good">0</span>
                         </td>
                     </tr>
-                    <tr>
+                    <tr
+                        data-base="85"
+                        data-or="0.42"
+                        data-plan="0.05"
+                        data-crit="0"
+                        data-wall="39"
+                    >
                         <td class="rank">3</td>
                         <th scope="row" class="model">
                             gpt-5.6-luna<small>pi · openai-codex</small>
@@ -825,7 +866,13 @@
                         <td class="num">20</td>
                         <td class="num"><span class="pill p-mid">2</span></td>
                     </tr>
-                    <tr>
+                    <tr
+                        data-base="82"
+                        data-or="1.77"
+                        data-plan="1.77"
+                        data-crit="0"
+                        data-wall="22"
+                    >
                         <td class="rank">4</td>
                         <th scope="row" class="model">
                             kimi-k3<small>pi · fireworks</small>
@@ -861,7 +908,13 @@
                         <td class="num">17</td>
                         <td class="num"><span class="pill p-mid">2</span></td>
                     </tr>
-                    <tr>
+                    <tr
+                        data-base="81.5"
+                        data-or="10.17"
+                        data-plan="0.67"
+                        data-crit="0"
+                        data-wall="55"
+                    >
                         <td class="rank">5</td>
                         <th scope="row" class="model">
                             claude-sonnet-5<small
@@ -899,7 +952,13 @@
                         <td class="num">18</td>
                         <td class="num"><span class="pill p-mid">2</span></td>
                     </tr>
-                    <tr>
+                    <tr
+                        data-base="72"
+                        data-or="0.85"
+                        data-plan="0.85"
+                        data-crit="1"
+                        data-wall="29"
+                    >
                         <td class="rank">6</td>
                         <th scope="row" class="model">
                             deepseek-v4-pro-0813<small>pi · fireworks</small>
@@ -935,8 +994,58 @@
                         <td class="num">18</td>
                         <td class="num"><span class="pill p-bad">6</span></td>
                     </tr>
-                    <tr>
+                    <tr
+                        data-base="69"
+                        data-or="6.97"
+                        data-plan="0.51"
+                        data-crit="0"
+                        data-wall="28"
+                    >
                         <td class="rank">7</td>
+                        <th scope="row" class="model">
+                            gpt-5.6-sol<small>pi · openai-codex</small>
+                        </th>
+                        <td>
+                            <div class="scorewrap">
+                                <span class="scoreval">69</span>
+                                <div class="bar">
+                                    <span style="width: 69%"></span>
+                                </div>
+                            </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >ChatGPT plan</small
+                            >
+                        </td>
+                        <td class="num">
+                            $6.97<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid ≈$0.51</small
+                            >
+                        </td>
+                        <td class="num">28 min</td>
+                        <td class="num">21.5 M</td>
+                        <td class="num">302 k</td>
+                        <td class="num">
+                            <span class="pill p-bad">111 %</span>
+                        </td>
+                        <td class="num">1</td>
+                        <td class="num">19</td>
+                        <td class="num"><span class="pill p-mid">3</span></td>
+                    </tr>
+                    <tr
+                        data-base="49.5"
+                        data-or="1.24"
+                        data-plan="0.08"
+                        data-crit="1"
+                        data-wall="20"
+                    >
+                        <td class="rank">8</td>
                         <th scope="row" class="model">
                             claude-haiku-4.5<small
                                 >claude-code · anthropic</small
@@ -965,7 +1074,7 @@
                                 >paid ≈$0.08</small
                             >
                         </td>
-                        <td class="num">20 min</td>
+                        <td class="num best">20 min</td>
                         <td class="num">9.0 M</td>
                         <td class="num">116 k</td>
                         <td class="num">58 %</td>
@@ -973,8 +1082,14 @@
                         <td class="num">9</td>
                         <td class="num"><span class="pill p-bad">5</span></td>
                     </tr>
-                    <tr>
-                        <td class="rank">8</td>
+                    <tr
+                        data-base="42"
+                        data-or="0"
+                        data-plan="0"
+                        data-crit="1"
+                        data-wall="132"
+                    >
+                        <td class="rank">9</td>
                         <th scope="row" class="model">
                             qwen3.6-35b-a3b<small>pi · llama · local</small>
                         </th>
@@ -1004,7 +1119,7 @@
                         </td>
                         <td class="num">132 min</td>
                         <td class="num">10.1 M</td>
-                        <td class="num">94 k</td>
+                        <td class="num best">94 k</td>
                         <td class="num">
                             <span class="pill p-bad">96 %</span>
                         </td>
@@ -1012,8 +1127,14 @@
                         <td class="num">13</td>
                         <td class="num"><span class="pill p-bad">5</span></td>
                     </tr>
-                    <tr>
-                        <td class="rank">9</td>
+                    <tr
+                        data-base="41"
+                        data-or="0"
+                        data-plan="0"
+                        data-crit="1"
+                        data-wall="104"
+                    >
+                        <td class="rank">10</td>
                         <th scope="row" class="model">
                             gemma-4-26b-a4b<small>pi · llama · local</small>
                         </th>
@@ -1042,7 +1163,7 @@
                             >
                         </td>
                         <td class="num">104 min</td>
-                        <td class="num">8.2 M</td>
+                        <td class="num best">8.2 M</td>
                         <td class="num">141 k</td>
                         <td class="num">54 %</td>
                         <td class="num best">0</td>
@@ -1082,6 +1203,7 @@
                         <th>kimi-k3</th>
                         <th>sonnet-5</th>
                         <th>deepseek</th>
+                        <th>sol</th>
                         <th>haiku-4.5</th>
                         <th>qwen</th>
                         <th>gemma (partial)</th>
@@ -1090,7 +1212,7 @@
                 <tbody>
                     <tr class="group">
                         <th scope="row">Correctness</th>
-                        <td colspan="9"></td>
+                        <td colspan="10"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1118,6 +1240,10 @@
                             <b>7</b>
                         </td>
                         <td>
+                            <span class="pill p-bad">1 med · 1 min</span>
+                            <b>16</b>
+                        </td>
+                        <td>
                             <span class="pill p-bad">1 crit · 1 med</span>
                             <b>10</b>
                         </td>
@@ -1134,6 +1260,9 @@
                         <th scope="row">
                             Unit tests still green <em>per package</em>
                         </th>
+                        <td class="best">
+                            <span class="pill p-good">pass</span>
+                        </td>
                         <td class="best">
                             <span class="pill p-good">pass</span>
                         </td>
@@ -1183,18 +1312,24 @@
                             <span class="pill p-good">works</span>
                         </td>
                         <td><span class="pill p-bad">TypeError</span></td>
+                        <td class="best">
+                            <span class="pill p-good">works</span>
+                        </td>
                         <td><span class="pill p-bad">TypeError</span></td>
                         <td><span class="pill p-bad">TypeError</span></td>
                         <td><span class="pill p-bad">TypeError</span></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Task completion</th>
-                        <td colspan="9"></td>
+                        <td colspan="10"></td>
                     </tr>
                     <tr>
                         <th scope="row">
                             All 8 libraries done <em>20 pts (shared)</em>
                         </th>
+                        <td class="best">
+                            <span class="pill p-good">8 / 8</span>
+                        </td>
                         <td class="best">
                             <span class="pill p-good">8 / 8</span>
                         </td>
@@ -1237,6 +1372,9 @@
                         <td class="best">
                             <span class="pill p-good">clean</span>
                         </td>
+                        <td class="best">
+                            <span class="pill p-good">clean</span>
+                        </td>
                         <td><span class="pill p-mid">rimraf ×2 left</span></td>
                         <td><span class="pill p-mid">rimraf ×2 left</span></td>
                         <td><span class="pill p-bad">12 sites left</span></td>
@@ -1251,6 +1389,9 @@
                             <span class="pill p-good">all gone</span>
                         </td>
                         <td><span class="pill p-mid">1 left</span></td>
+                        <td class="best">
+                            <span class="pill p-good">all gone</span>
+                        </td>
                         <td class="best">
                             <span class="pill p-good">all gone</span>
                         </td>
@@ -1284,6 +1425,9 @@
                         <td class="best">
                             <span class="pill p-good">found</span>
                         </td>
+                        <td class="best">
+                            <span class="pill p-good">found + fixed</span>
+                        </td>
                         <td><span class="pill p-bad">missed</span></td>
                         <td><span class="pill p-bad">missed</span></td>
                         <td><span class="pill p-bad">missed</span></td>
@@ -1296,13 +1440,14 @@
                         <td><b>15</b></td>
                         <td class="best"><b>20</b></td>
                         <td class="best"><b>20</b></td>
+                        <td class="best"><b>20</b></td>
                         <td><b>8</b></td>
                         <td><b>11</b></td>
                         <td><b>7</b></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Dependency hygiene</th>
-                        <td colspan="9"></td>
+                        <td colspan="10"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1329,6 +1474,10 @@
                                 >install ×14, not pruned</span
                             >
                             <b>4</b>
+                        </td>
+                        <td>
+                            <span class="pill p-bad">lockfile-only ×19</span>
+                            <b>2</b>
                         </td>
                         <td>
                             <span class="pill p-bad">lockfile-only ×19</span>
@@ -1381,13 +1530,16 @@
                                 ></span
                             >
                         </td>
+                        <td>
+                            <span class="pill p-mid">96 − 3 added back</span>
+                        </td>
                         <td><span class="pill p-bad">0</span></td>
                         <td><span class="pill p-bad">9</span></td>
                         <td><span class="pill p-bad">0</span></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Static checks</th>
-                        <td colspan="9"></td>
+                        <td colspan="10"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1416,6 +1568,10 @@
                         </td>
                         <td class="best">
                             <span class="pill p-good">clean · ran 42×</span>
+                            <b>5</b>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">clean · ran 43×</span>
                             <b>5</b>
                         </td>
                         <td>
@@ -1454,6 +1610,9 @@
                         <td class="best">
                             <span class="pill p-good">never hit it</span>
                         </td>
+                        <td class="best">
+                            <span class="pill p-good">never hit it</span>
+                        </td>
                         <td>
                             <span class="pill p-bad"
                                 >added it to package.json</span
@@ -1463,7 +1622,7 @@
                     </tr>
                     <tr class="group">
                         <th scope="row">Commit craft</th>
-                        <td colspan="9"></td>
+                        <td colspan="10"></td>
                     </tr>
                     <tr>
                         <th scope="row">Right type — all <code>chore</code></th>
@@ -1481,6 +1640,7 @@
                         <td class="best">
                             <span class="pill p-good">all chore</span>
                         </td>
+                        <td><span class="pill p-bad">fix/test/chore</span></td>
                         <td><span class="pill p-bad">all fix</span></td>
                         <td>
                             <span class="pill p-bad">mixed refactor/fix</span>
@@ -1491,6 +1651,9 @@
                     </tr>
                     <tr>
                         <th scope="row">One commit per package</th>
+                        <td class="best">
+                            <span class="pill p-good">yes</span>
+                        </td>
                         <td class="best">
                             <span class="pill p-good">yes</span>
                         </td>
@@ -1524,6 +1687,7 @@
                         <td><span class="pill p-mid">2 separate</span></td>
                         <td><span class="pill p-mid">2 separate</span></td>
                         <td><span class="pill p-mid">2 separate</span></td>
+                        <td><span class="pill p-mid">2 separate</span></td>
                         <td><span class="pill p-bad">never removed</span></td>
                         <td><span class="pill p-bad">never removed</span></td>
                         <td class="best">
@@ -1546,6 +1710,7 @@
                         <td class="best">
                             <span class="pill p-good">0 fail</span>
                         </td>
+                        <td><span class="pill p-bad">3 fail</span></td>
                         <td><span class="pill p-mid">1 fail</span></td>
                         <td><span class="pill p-bad">5 fail</span></td>
                         <td>
@@ -1556,6 +1721,9 @@
                     </tr>
                     <tr>
                         <th scope="row">TASKS.md kept out of git</th>
+                        <td class="best">
+                            <span class="pill p-good">clean</span>
+                        </td>
                         <td class="best">
                             <span class="pill p-good">clean</span>
                         </td>
@@ -1594,13 +1762,14 @@
                         <td><b>9</b></td>
                         <td><b>8.5</b></td>
                         <td class="best"><b>12</b></td>
+                        <td><b>7.5</b></td>
                         <td><b>5.5</b></td>
                         <td><b>3</b></td>
                         <td><b>5</b></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Working method</th>
-                        <td colspan="9"></td>
+                        <td colspan="10"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1619,6 +1788,10 @@
                         <td><span class="pill p-good">none</span> <b>7</b></td>
                         <td class="best">
                             <span class="pill p-good">none</span> <b>8</b>
+                        </td>
+                        <td>
+                            <span class="pill p-mid">1 scope-creep fix</span>
+                            <b>5</b>
                         </td>
                         <td><span class="pill p-good">none</span> <b>6</b></td>
                         <td>
@@ -1654,6 +1827,9 @@
                             <span class="pill p-good">17 runs</span>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">24 runs</span>
+                        </td>
+                        <td class="best">
                             <span class="pill p-good">10 runs</span>
                         </td>
                         <td class="best">
@@ -1683,6 +1859,7 @@
                         <td>
                             <span class="pill p-good">4 / 18</span> <b>9</b>
                         </td>
+                        <td><span class="pill p-mid">2 / 19</span> <b>7</b></td>
                         <td><span class="pill p-good">3 / 9</span> <b>9</b></td>
                         <td><span class="pill p-bad">0 / 13</span> <b>3</b></td>
                         <td><span class="pill p-mid">1 / 9</span> <b>6</b></td>
@@ -1724,6 +1901,10 @@
                             <b>2</b>
                         </td>
                         <td>
+                            <span class="pill p-mid">upfront, adapted</span>
+                            <b>2</b>
+                        </td>
+                        <td>
                             <span class="pill p-bad">full tree upfront</span>
                             <b>1</b>
                         </td>
@@ -1753,6 +1934,7 @@
                         <td class="best">
                             <span class="pill p-good">40 %</span> <b>3</b>
                         </td>
+                        <td><span class="pill p-bad">17 %</span> <b>1.5</b></td>
                         <td><span class="pill p-mid">33 %</span> <b>2</b></td>
                         <td><span class="pill p-mid">27 %</span> <b>2</b></td>
                         <td><span class="pill p-bad">0 %</span> <b>0</b></td>
@@ -1784,6 +1966,10 @@
                         <td>
                             <span class="pill p-mid">extra churn</span> <b>4</b>
                         </td>
+                        <td>
+                            <span class="pill p-mid">fixture churn</span>
+                            <b>3</b>
+                        </td>
                         <td class="best">
                             <span class="pill p-good">tight</span> <b>5</b>
                         </td>
@@ -1798,7 +1984,7 @@
                     </tr>
                     <tr class="group">
                         <th scope="row">Context economy</th>
-                        <td colspan="9"></td>
+                        <td colspan="10"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1813,6 +1999,7 @@
                         </td>
                         <td><span class="pill p-bad">43.9 M</span></td>
                         <td><span class="pill p-bad">22.1 M</span></td>
+                        <td><span class="pill p-bad">21.5 M</span></td>
                         <td class="best">
                             <span class="pill p-good">9.0 M</span>
                         </td>
@@ -1837,6 +2024,7 @@
                         <td class="best">
                             <span class="pill p-good">84 %</span>
                         </td>
+                        <td><span class="pill p-bad">overflowed</span></td>
                         <td><span class="pill p-good">42 %</span></td>
                         <td><span class="pill p-bad">4 %</span></td>
                         <td><span class="pill p-good">46 %</span></td>
@@ -1855,6 +2043,7 @@
                         </td>
                         <td><span class="pill p-bad">317</span></td>
                         <td><span class="pill p-mid">270</span></td>
+                        <td><span class="pill p-mid">194</span></td>
                         <td class="best">
                             <span class="pill p-good">126</span>
                         </td>
@@ -1885,6 +2074,7 @@
                         <td>82</td>
                         <td>82</td>
                         <td>72</td>
+                        <td>69</td>
                         <td>50</td>
                         <td>42</td>
                         <td>41</td>
@@ -2057,6 +2247,44 @@
                         </td>
                         <td class="num" data-v="97.4">97.4 %</td>
                         <td class="num" data-v="-1">xAI</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">gpt-5.6-sol</th>
+                        <td class="num" data-v="6.97">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(Flex est.)</em
+                            >
+                            $6.97
+                        </td>
+                        <td class="num" data-v="0.51">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(plan share)</em
+                            >
+                            $0.51
+                        </td>
+                        <td class="num" data-v="434">434 k</td>
+                        <td class="num" data-v="26">26 k</td>
+                        <td class="num" data-v="21.1">21.1 M</td>
+                        <td class="num" data-v="13.94">$13.94</td>
+                        <td class="num" data-v="5">5.00 → 10.00</td>
+                        <td class="num" data-v="30">30.00 → 45.00</td>
+                        <td class="num" data-v="0.5">
+                            <span class="pill p-bad">0.50 → 1.00</span>
+                        </td>
+                        <td class="num" data-v="97.9">97.9 %</td>
+                        <td class="num" data-v="-1">ChatGPT plan</td>
                     </tr>
                     <tr>
                         <th scope="row" class="model">kimi-k3</th>
@@ -2290,7 +2518,16 @@
                     <tr>
                         <th scope="row" class="model">claude-opus-5</th>
                         <td class="num" data-v="0.56">
-                            <span class="pill p-bad">≈ $0.56 est.</span>
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(est)</em
+                            >
+                            <span class="pill p-bad">≈ $0.56</span>
                         </td>
                         <td class="num" data-v="8.45">
                             <span class="pill p-bad">$8.45</span>
@@ -2346,7 +2583,16 @@
                     <tr>
                         <th scope="row" class="model">claude-sonnet-5</th>
                         <td class="num" data-v="0.67">
-                            <span class="pill p-bad">≈ $0.67 est.</span>
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(est)</em
+                            >
+                            <span class="pill p-bad">≈ $0.67</span>
                         </td>
                         <td class="num" data-v="10.17">
                             <span class="pill p-bad">$10.17</span>
@@ -2374,9 +2620,44 @@
                         </td>
                     </tr>
                     <tr>
+                        <th scope="row" class="model">gpt-5.6-sol</th>
+                        <td class="num" data-v="0.51">
+                            <span class="pill p-bad">≈ $0.51</span>
+                        </td>
+                        <td class="num" data-v="13.94">
+                            <span class="pill p-bad">$13.94</span>
+                        </td>
+                        <td class="num" data-v="9">≈ 9</td>
+                        <td class="num" data-v="20">ChatGPT Plus $20/mo</td>
+                        <td class="num" data-v="20">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >all of it</em
+                            >
+                            $20
+                        </td>
+                        <td class="num" data-v="4.62">$4.62</td>
+                        <td class="num" data-v="74">74 %</td>
+                        <td class="num" data-v="11">≈ 11 %</td>
+                    </tr>
+                    <tr>
                         <th scope="row" class="model">claude-haiku-4.5</th>
                         <td class="num" data-v="0.08">
-                            <span class="pill p-good">≈ $0.08 est.</span>
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(est)</em
+                            >
+                            <span class="pill p-good">≈ $0.08</span>
                         </td>
                         <td class="num" data-v="1.24">
                             <span class="pill p-good">$1.24</span>
@@ -2832,6 +3113,48 @@
     </footer>
 </div>
 <script>
+    (() => {
+        const tbody = document.querySelector('#scoreboard tbody');
+        const note = document.getElementById('plan-note');
+        const apply = () => {
+            const mode = document.querySelector(
+                'input[name="costmode"]:checked'
+            ).value;
+            const rows = [...tbody.rows];
+            let vals = rows.map((r) => {
+                const d = r.dataset;
+                if (mode === 'none') return Number(d.base);
+                const cost = mode === 'or' ? Number(d.or) : Number(d.plan);
+                return (
+                    Number(d.base) /
+                    (1 + cost + 2 * Number(d.crit) + 0.01 * Number(d.wall))
+                );
+            });
+            if (mode !== 'none') {
+                const mx = Math.max(...vals);
+                vals = vals.map((v) => (100 * v) / mx);
+            }
+            rows.forEach((r, i) => {
+                r.dataset.adj = vals[i];
+                r.querySelector('.scoreval').textContent = Math.round(vals[i]);
+                r.querySelector('.bar span').style.width =
+                    Math.round(vals[i]) + '%';
+            });
+            rows.sort((a, b) => Number(b.dataset.adj) - Number(a.dataset.adj));
+            rows.forEach((r, i) => {
+                tbody.appendChild(r);
+                const rank = r.querySelector('.rank');
+                rank.textContent = i + 1;
+                rank.classList.toggle('rank-1', i === 0);
+                r.querySelector('.bar').classList.toggle('gold', i === 0);
+                r.querySelector('.model').classList.toggle('best', i === 0);
+            });
+            note.style.display = mode === 'plan' ? 'block' : 'none';
+        };
+        document
+            .querySelectorAll('input[name="costmode"]')
+            .forEach((el) => el.addEventListener('change', apply));
+    })();
     document.querySelectorAll('table.sortable th[data-sort]').forEach((th) => {
         th.style.cursor = 'pointer';
         th.addEventListener('click', () => {

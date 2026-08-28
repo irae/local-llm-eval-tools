@@ -889,6 +889,112 @@
         "rate_tone": null,
         "provider_label": "local"
       }
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "model_id": "gpt-5.6-sol",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "openai-codex",
+      "local": false,
+      "serving": null,
+      "branch": "gpt-5.6-sol-issue-13",
+      "base_commit": "182b07f",
+      "partial": false,
+      "score_total": 69,
+      "scores": {
+        "bugs": 16,
+        "completion": 20,
+        "node_modules": 2,
+        "lint": 5,
+        "commit_craft": 7.5,
+        "first_time": 5,
+        "test_discipline": 7,
+        "conventions": 3,
+        "task_list": 2,
+        "truncation": 1.5
+      },
+      "defects": [
+        {
+          "severity": "medium",
+          "summary": "validate-manifest.js exit hook deletes the debug manifest right after printing its path"
+        },
+        {
+          "severity": "minor",
+          "summary": "scope-creep commit swaps a mendel-config test fixture plugin and adds a workspace dependency"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 27.8,
+        "tokens_total": 21511151,
+        "tokens_in": 434084,
+        "tokens_out": 25675,
+        "cache_read": 21051392,
+        "peak_context": 302478,
+        "window_pct": 111,
+        "compactions": 1,
+        "assistant_msgs": 153,
+        "tool_calls": 194,
+        "tool_errors": 12,
+        "commits": 19,
+        "failed_commits": 3,
+        "truncation_pct": 17
+      },
+      "cost_usd": 13.94,
+      "cost_basis": "plan",
+      "matrix_cells": [
+        "<td><span class=\"pill p-bad\">1 med · 1 min</span> <b>16</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">works</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
+        "<td class=\"best\"><b>20</b></td>",
+        "<td><span class=\"pill p-bad\">lockfile-only ×19</span> <b>2</b></td>",
+        "<td><span class=\"pill p-mid\">96 − 3 added back</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · ran 43×</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">never hit it</span></td>",
+        "<td><span class=\"pill p-bad\">fix/test/chore</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
+        "<td><span class=\"pill p-mid\">2 separate</span></td>",
+        "<td><span class=\"pill p-bad\">3 fail</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td><b>7.5</b></td>",
+        "<td><span class=\"pill p-mid\">1 scope-creep fix</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">24 runs</span></td>",
+        "<td><span class=\"pill p-mid\">2 / 19</span> <b>7</b></td>",
+        "<td><span class=\"pill p-mid\">upfront, adapted</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">17 %</span> <b>1.5</b></td>",
+        "<td><span class=\"pill p-mid\">fixture churn</span> <b>3</b></td>",
+        "<td><span class=\"pill p-bad\">21.5 M</span></td>",
+        "<td><span class=\"pill p-bad\">overflowed</span></td>",
+        "<td><span class=\"pill p-mid\">194</span></td>"
+      ],
+      "matrix_total": "69",
+      "cost": {
+        "or_route": "Flex est.",
+        "or_usd": "6.97",
+        "paid_basis": "plan share",
+        "paid_usd": "0.51",
+        "vendor_usd": "13.94",
+        "rate_in": "5.00 → 10.00",
+        "rate_out": "30.00 → 45.00",
+        "rate_cr": "0.50 → 1.00",
+        "rate_tone": "bad",
+        "provider_label": "ChatGPT plan"
+      },
+      "plan": {
+        "marginal": "≈ $0.51",
+        "marginal_tone": null,
+        "plan": "ChatGPT Plus $20/mo",
+        "alloc": "$20",
+        "alloc_note": "all of it",
+        "week": "$4.62",
+        "w5h": "74 %",
+        "wweek": "≈ 11 %",
+        "rpw": "≈ 9"
+      }
     }
   ],
   "matrix_rows": [

@@ -16,6 +16,7 @@ const SHORT = {
     'claude-sonnet-5': 'sonnet-5',
     'claude-haiku-4.5': 'haiku-4.5',
     'gpt-5.6-luna': 'luna',
+    'gpt-5.6-sol': 'sol',
     'deepseek-v4-pro-0813': 'deepseek',
     'qwen3.6-35b-a3b': 'qwen',
     'gemma-4-26b-a4b': 'gemma',
@@ -52,7 +53,15 @@ const sub = (r) =>
         .filter(Boolean)
         .join(' · ');
 
-const min = (key) => Math.min(...runs.map((r) => r.telemetry[key]));
+const topCut = (values) => {
+    const k = Math.max(1, Math.round(values.length * 0.2));
+    return [...values].sort((a, b) => a - b)[k - 1] * 1.05;
+};
+const cuts = {};
+const isTop = (key, v) => {
+    if (!(key in cuts)) cuts[key] = topCut(runs.map((r) => r.telemetry[key]));
+    return v <= cuts[key];
+};
 
 const numVal = (x) => {
     const m = String(x)
@@ -101,22 +110,36 @@ function scoreboard() {
             const cost = `${orMain}${smallBlock(paid)}`;
             const bp = bugPoints(r);
             const winTone = t.window_pct > 90 ? 'bad' : null;
-            return `          <tr>
+            const crit = r.defects.filter(
+                (d) => d.severity === 'critical'
+            ).length;
+            const planUsd = r.plan
+                ? numVal(r.plan.marginal)
+                : Number(r.cost.or_usd);
+            const attrs = ` data-base="${r.score_total}" data-or="${r.cost.or_usd}" data-plan="${planUsd}" data-crit="${crit}" data-wall="${Math.round(t.wall_clock_min)}"`;
+            return `          <tr${attrs}>
             <td class="rank${i === 0 ? ' rank-1' : ''}">${i + 1}</td>
             <th scope="row" class="model${i === 0 ? ' best' : ''}">${r.model}<small>${sub(r)}</small></th>
             <td>${gauge}</td>
             <td class="num">${cost}</td>
-            <td class="num${best(t.wall_clock_min === min('wall_clock_min'))}">${Math.round(t.wall_clock_min)} min</td>
-            <td class="num${best(t.tokens_total === min('tokens_total'))}">${mFmt(t.tokens_total)}</td>
-            <td class="num${best(t.peak_context === min('peak_context'))}">${kFmt(t.peak_context)}</td>
+            <td class="num${best(isTop('wall_clock_min', t.wall_clock_min))}">${Math.round(t.wall_clock_min)} min</td>
+            <td class="num${best(isTop('tokens_total', t.tokens_total))}">${mFmt(t.tokens_total)}</td>
+            <td class="num${best(isTop('peak_context', t.peak_context))}">${kFmt(t.peak_context)}</td>
             <td class="num">${pill(winTone, t.window_pct + ' %')}</td>
-            <td class="num${best(t.compactions === 0)}">${t.compactions}</td>
+            <td class="num${best(isTop('compactions', t.compactions))}">${t.compactions}</td>
             <td class="num">${t.commits}</td>
             <td class="num${best(bp === 0)}">${pill(bugTone(bp), String(bp))}</td>
           </tr>`;
         })
         .join('\n');
-    return `<table>
+    const radios = `<p class="lede" id="costmode-radios">
+        <label><input type="radio" name="costmode" value="none" checked> quality only</label>
+        &nbsp; <label><input type="radio" name="costmode" value="or"> weighted by OpenRouter cost</label>
+        &nbsp; <label><input type="radio" name="costmode" value="plan"> weighted by plan estimate</label>
+      </p>
+      <p class="lede" id="plan-note" style="display:none">Cost-weighted score = 100 × quality score ÷ (1 + cost + $2 per critical bug + $0.01 per minute of wall clock), normalised to the leader. Plan mode uses the marginal plan estimate where one exists; runs without a plan keep their OpenRouter figure; local runs cost $0 plus time.</p>`;
+    return `${radios}
+      <div class="scroller"><table id="scoreboard">
         <thead>
           <tr>
             ${head}
@@ -125,7 +148,7 @@ function scoreboard() {
         <tbody>
 ${body}
         </tbody>
-      </table>`;
+      </table></div>`;
 }
 
 function matrix() {
@@ -254,14 +277,17 @@ function planTable() {
                       ? 'good'
                       : null;
             const cells = [
-                pill(
-                    numVal(p.marginal) <= 0.1
-                        ? 'good'
-                        : numVal(p.marginal) <= 0.5
-                          ? 'mid'
-                          : 'bad',
-                    p.marginal
-                ),
+                (() => {
+                    const est = / est\.?$/.test(p.marginal);
+                    const val = p.marginal.replace(/ est\.?$/, '');
+                    const tone =
+                        numVal(val) <= 0.1
+                            ? 'good'
+                            : numVal(val) <= 0.5
+                              ? 'mid'
+                              : 'bad';
+                    return (est ? faint('(est)') + ' ' : '') + pill(tone, val);
+                })(),
                 pill(metTone, `$${r.cost.vendor_usd}`),
                 p.rpw,
                 p.plan,
@@ -295,6 +321,48 @@ ${body}
 
 const SORTER =
     `<script>
+(() => {
+    const tbody = document.querySelector('#scoreboard tbody');
+    const note = document.getElementById('plan-note');
+    const apply = () => {
+        const mode = document.querySelector(
+            'input[name="costmode"]:checked'
+        ).value;
+        const rows = [...tbody.rows];
+        let vals = rows.map((r) => {
+            const d = r.dataset;
+            if (mode === 'none') return Number(d.base);
+            const cost = mode === 'or' ? Number(d.or) : Number(d.plan);
+            return (
+                Number(d.base) /
+                (1 + cost + 2 * Number(d.crit) + 0.01 * Number(d.wall))
+            );
+        });
+        if (mode !== 'none') {
+            const mx = Math.max(...vals);
+            vals = vals.map((v) => (100 * v) / mx);
+        }
+        rows.forEach((r, i) => {
+            r.dataset.adj = vals[i];
+            r.querySelector('.scoreval').textContent = Math.round(vals[i]);
+            r.querySelector('.bar span').style.width =
+                Math.round(vals[i]) + '%';
+        });
+        rows.sort((a, b) => Number(b.dataset.adj) - Number(a.dataset.adj));
+        rows.forEach((r, i) => {
+            tbody.appendChild(r);
+            const rank = r.querySelector('.rank');
+            rank.textContent = i + 1;
+            rank.classList.toggle('rank-1', i === 0);
+            r.querySelector('.bar').classList.toggle('gold', i === 0);
+            r.querySelector('.model').classList.toggle('best', i === 0);
+        });
+        note.style.display = mode === 'plan' ? 'block' : 'none';
+    };
+    document
+        .querySelectorAll('input[name="costmode"]')
+        .forEach((el) => el.addEventListener('change', apply));
+})();
 document.querySelectorAll('table.sortable th[data-sort]').forEach((th) => {
     th.style.cursor = 'pointer';
     th.addEventListener('click', () => {
