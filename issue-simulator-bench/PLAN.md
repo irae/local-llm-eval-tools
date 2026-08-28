@@ -62,6 +62,12 @@ After scoring, update and commit on this branch:
   no `<script src>`, no `@import`, no web fonts. Light and dark theme via CSS custom
   properties.
 
+The report keeps two separate cost tables. The **per-run cost table** holds real
+money only: the metered vendor rate and the cheapest OpenRouter quote. The **plan
+table** amortises flat subscriptions (X Premium+, ChatGPT Plus, Claude Max) against
+the share of the allowance the run consumed. Claude Code does not expose plan-window
+usage, so Claude plan figures are estimates — state the assumption in the table lede.
+
 The sibling project `../choose-a-local-llm/` reads `results.json` and `results.csv`.
 Keep the field names stable.
 

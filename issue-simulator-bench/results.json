@@ -1,0 +1,461 @@
+{
+  "task": "issue-13",
+  "base_commit": "182b07f",
+  "runs": [
+    {
+      "model": "grok-4.6",
+      "model_id": "grok-4.6",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "xai",
+      "local": false,
+      "serving": null,
+      "branch": "grok-4.6-issue-13",
+      "base_commit": "182b07f",
+      "partial": false,
+      "score_total": 88,
+      "scores": {
+        "bugs": 25,
+        "completion": 15,
+        "node_modules": 8,
+        "lint": 5,
+        "commit_craft": 11.5,
+        "first_time": 7,
+        "test_discipline": 9,
+        "conventions": 5,
+        "task_list": 1,
+        "truncation": 1.5
+      },
+      "defects": [],
+      "telemetry": {
+        "wall_clock_min": 19.7,
+        "tokens_total": 11620000,
+        "tokens_in": 266195,
+        "tokens_out": 32603,
+        "cache_read": 11324032,
+        "peak_context": 259619,
+        "window_pct": 52,
+        "compactions": 0,
+        "assistant_msgs": 113,
+        "tool_calls": 188,
+        "tool_errors": 16,
+        "commits": 17,
+        "failed_commits": 1,
+        "truncation_pct": 6
+      },
+      "cost_usd": 7.76,
+      "cost_basis": "plan"
+    },
+    {
+      "model": "claude-opus-5",
+      "model_id": "claude-opus-5",
+      "harness": "claude-code",
+      "harness_guessed": false,
+      "provider": "anthropic",
+      "local": false,
+      "serving": null,
+      "branch": "opus-issue-13",
+      "base_commit": "182b07f",
+      "partial": false,
+      "score_total": 87,
+      "scores": {
+        "bugs": 25,
+        "completion": 20,
+        "node_modules": 2,
+        "lint": 5,
+        "commit_craft": 7.5,
+        "first_time": 8,
+        "test_discipline": 10,
+        "conventions": 4,
+        "task_list": 2.5,
+        "truncation": 3
+      },
+      "defects": [],
+      "telemetry": {
+        "wall_clock_min": 44.4,
+        "tokens_total": 12137930,
+        "tokens_in": 304,
+        "tokens_out": 51495,
+        "cache_read": 11968861,
+        "peak_context": 130560,
+        "window_pct": 65,
+        "compactions": 0,
+        "assistant_msgs": 152,
+        "tool_calls": 151,
+        "tool_errors": 6,
+        "commits": 18,
+        "failed_commits": 0,
+        "truncation_pct": 43
+      },
+      "cost_usd": 8.45,
+      "cost_basis": "plan"
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "model_id": "gpt-5.6-luna",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "openai-codex",
+      "local": false,
+      "serving": null,
+      "branch": "luna-5.6-max-issue-13",
+      "base_commit": "182b07f",
+      "partial": false,
+      "score_total": 85,
+      "scores": {
+        "bugs": 19,
+        "completion": 20,
+        "node_modules": 7,
+        "lint": 5,
+        "commit_craft": 9,
+        "first_time": 4,
+        "test_discipline": 10,
+        "conventions": 5,
+        "task_list": 4,
+        "truncation": 1.5
+      },
+      "defects": [
+        {
+          "severity": "medium",
+          "summary": "validate-manifest.js exit hook deletes the debug manifest right after printing its path"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 39.4,
+        "tokens_total": 28000000,
+        "tokens_in": 486867,
+        "tokens_out": 44118,
+        "cache_read": 27468288,
+        "peak_context": 353875,
+        "window_pct": 130,
+        "compactions": 1,
+        "assistant_msgs": 200,
+        "tool_calls": 265,
+        "tool_errors": 22,
+        "commits": 20,
+        "failed_commits": 0,
+        "truncation_pct": 8
+      },
+      "cost_usd": 0.84,
+      "cost_basis": "plan"
+    },
+    {
+      "model": "kimi-k3",
+      "model_id": "accounts/fireworks/models/kimi-k3",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "fireworks",
+      "local": false,
+      "serving": null,
+      "branch": "kimi-k3-issue-13",
+      "base_commit": "182b07f",
+      "partial": false,
+      "score_total": 82,
+      "scores": {
+        "bugs": 19,
+        "completion": 15,
+        "node_modules": 7,
+        "lint": 5,
+        "commit_craft": 9,
+        "first_time": 7,
+        "test_discipline": 10,
+        "conventions": 4,
+        "task_list": 2.5,
+        "truncation": 3
+      },
+      "defects": [
+        {
+          "severity": "minor",
+          "summary": "duplicate require('fs') in mendel-mocha-runner/index.js"
+        },
+        {
+          "severity": "minor",
+          "summary": "21 unrelated supports-color lockfile lines folded into dependency commits"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 21.5,
+        "tokens_total": 4820000,
+        "tokens_in": 62908,
+        "tokens_out": 31575,
+        "cache_read": 4730383,
+        "peak_context": 62766,
+        "window_pct": 6,
+        "compactions": 0,
+        "assistant_msgs": 143,
+        "tool_calls": 158,
+        "tool_errors": 5,
+        "commits": 17,
+        "failed_commits": 1,
+        "truncation_pct": 62
+      },
+      "cost_usd": 2.08,
+      "cost_basis": "metered"
+    },
+    {
+      "model": "claude-sonnet-5",
+      "model_id": "claude-sonnet-5",
+      "harness": "claude-code",
+      "harness_guessed": false,
+      "provider": "anthropic",
+      "local": false,
+      "serving": null,
+      "branch": "sonnet-issue-13",
+      "base_commit": "182b07f",
+      "partial": false,
+      "score_total": 81.5,
+      "scores": {
+        "bugs": 19,
+        "completion": 20,
+        "node_modules": 4,
+        "lint": 5,
+        "commit_craft": 8.5,
+        "first_time": 7,
+        "test_discipline": 9,
+        "conventions": 5,
+        "task_list": 2,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "medium",
+          "summary": "styleText port leaves stream validation on; forced colour off a TTY is lost"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 54.5,
+        "tokens_total": 43888803,
+        "tokens_in": 630,
+        "tokens_out": 64727,
+        "cache_read": 43599726,
+        "peak_context": 228232,
+        "window_pct": 23,
+        "compactions": 0,
+        "assistant_msgs": 315,
+        "tool_calls": 317,
+        "tool_errors": 10,
+        "commits": 18,
+        "failed_commits": 1,
+        "truncation_pct": 31
+      },
+      "cost_usd": 10.17,
+      "cost_basis": "plan"
+    },
+    {
+      "model": "deepseek-v4-pro-0813",
+      "model_id": "accounts/fireworks/models/deepseek-v4-pro-0813",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "fireworks",
+      "local": false,
+      "serving": null,
+      "branch": "deepseekv4-pro-0813-issue-13",
+      "base_commit": "182b07f",
+      "partial": false,
+      "score_total": 72,
+      "scores": {
+        "bugs": 7,
+        "completion": 20,
+        "node_modules": 2,
+        "lint": 5,
+        "commit_craft": 12,
+        "first_time": 8,
+        "test_discipline": 9,
+        "conventions": 4,
+        "task_list": 2,
+        "truncation": 3
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "fs.promises.glob(...).then TypeError at three call sites in apply-extra-options.js"
+        },
+        {
+          "severity": "medium",
+          "summary": "validate-manifest.js exit hook deletes the debug manifest right after printing its path"
+        },
+        {
+          "severity": "minor",
+          "summary": "98 unrelated lockfile lines from babel churn"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 29.1,
+        "tokens_total": 22150000,
+        "tokens_in": 316109,
+        "tokens_out": 81936,
+        "cache_read": 21748456,
+        "peak_context": 162379,
+        "window_pct": 16,
+        "compactions": 0,
+        "assistant_msgs": 253,
+        "tool_calls": 270,
+        "tool_errors": 9,
+        "commits": 18,
+        "failed_commits": 0,
+        "truncation_pct": 40
+      },
+      "cost_usd": 1.7,
+      "cost_basis": "metered"
+    },
+    {
+      "model": "claude-haiku-4.5",
+      "model_id": "claude-haiku-4-5-20251001",
+      "harness": "claude-code",
+      "harness_guessed": false,
+      "provider": "anthropic",
+      "local": false,
+      "serving": null,
+      "branch": "haiku-issue-13",
+      "base_commit": "182b07f",
+      "partial": false,
+      "score_total": 49.5,
+      "scores": {
+        "bugs": 10,
+        "completion": 8,
+        "node_modules": 0,
+        "lint": 3,
+        "commit_craft": 5.5,
+        "first_time": 6,
+        "test_discipline": 9,
+        "conventions": 5,
+        "task_list": 1,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "fs.promises.glob(...).then TypeError at three call sites in apply-extra-options.js"
+        },
+        {
+          "severity": "medium",
+          "summary": "forced colour level dropped; enableColor no longer forces colour off a TTY"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 20.2,
+        "tokens_total": 9036952,
+        "tokens_in": 1018,
+        "tokens_out": 30965,
+        "cache_read": 8906737,
+        "peak_context": 116307,
+        "window_pct": 58,
+        "compactions": 0,
+        "assistant_msgs": 127,
+        "tool_calls": 126,
+        "tool_errors": 2,
+        "commits": 9,
+        "failed_commits": 1,
+        "truncation_pct": 33
+      },
+      "cost_usd": 1.24,
+      "cost_basis": "plan"
+    },
+    {
+      "model": "qwen3.6-35b-a3b",
+      "model_id": "qwen3.6-35b-a3b",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "llama",
+      "local": true,
+      "serving": "llama-server",
+      "branch": "qwen3.6-35b-a3b-issue-13",
+      "base_commit": "182b07f",
+      "partial": false,
+      "score_total": 42,
+      "scores": {
+        "bugs": 10,
+        "completion": 11,
+        "node_modules": 4,
+        "lint": 3,
+        "commit_craft": 3,
+        "first_time": 2,
+        "test_discipline": 3,
+        "conventions": 3,
+        "task_list": 1,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "fs.promises.glob(...).then TypeError at three call sites"
+        },
+        {
+          "severity": "medium",
+          "summary": "forced colour level deleted; enableColor dead and no colour off a TTY"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 132.0,
+        "tokens_total": 10090000,
+        "tokens_in": 134400,
+        "tokens_out": 40277,
+        "cache_read": 9913632,
+        "peak_context": 94447,
+        "window_pct": 96,
+        "compactions": 1,
+        "assistant_msgs": 210,
+        "tool_calls": 258,
+        "tool_errors": 28,
+        "commits": 13,
+        "failed_commits": 5,
+        "truncation_pct": 27
+      },
+      "cost_usd": 0,
+      "cost_basis": "local"
+    },
+    {
+      "model": "gemma-4-26b-a4b",
+      "model_id": "gemma-4-26b-a4b",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "llama",
+      "local": true,
+      "serving": "llama-server",
+      "branch": "gemma-4-26b-a4b-issue-13",
+      "base_commit": "182b07f",
+      "partial": true,
+      "score_total": 41,
+      "scores": {
+        "bugs": 13,
+        "completion": 7,
+        "node_modules": 0,
+        "lint": 3,
+        "commit_craft": 5,
+        "first_time": 3,
+        "test_discipline": 6,
+        "conventions": 3,
+        "task_list": 1,
+        "truncation": 0
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "fs.promises.glob(...).then TypeError at three call sites"
+        },
+        {
+          "severity": "minor",
+          "summary": "duplicate require('fs') in mendel-mocha-runner/index.js"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 104.0,
+        "tokens_total": 8150000,
+        "tokens_in": 131593,
+        "tokens_out": 17308,
+        "cache_read": 8004513,
+        "peak_context": 141462,
+        "window_pct": 54,
+        "compactions": 0,
+        "assistant_msgs": 116,
+        "tool_calls": 115,
+        "tool_errors": 20,
+        "commits": 9,
+        "failed_commits": 2,
+        "truncation_pct": 0
+      },
+      "cost_usd": 0,
+      "cost_basis": "local"
+    }
+  ]
+}
