@@ -995,6 +995,109 @@
         "wweek": "≈ 11 %",
         "rpw": "≈ 9"
       }
+    },
+    {
+      "model": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
+      "model_id": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "mlx",
+      "local": true,
+      "serving": "mlx_lm.server",
+      "branch": "prism-ml-Ternary-Bonsai-27B-mlx-2bit-issue-13",
+      "base_commit": "182b07f",
+      "partial": true,
+      "score_total": 55,
+      "scores": {
+        "bugs": 25,
+        "completion": 7.5,
+        "node_modules": 0,
+        "lint": 0,
+        "commit_craft": 6.5,
+        "first_time": 6,
+        "test_discipline": 1,
+        "conventions": 4,
+        "task_list": 3,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "mlx_lm.server's qwen3_coder tool-call parser crashes on a multi-line edit-tool JSON argument with embedded quotes (ast.literal_eval SyntaxError, stream ends with no finish_reason); reproducible across two attempts, blocked the run before it reached rimraf, glob, chalk, tmp, or shasum"
+        },
+        {
+          "severity": "medium",
+          "summary": "no real pnpm install or lockfile update after removing 3 dependencies from package.json; pnpm-lock.yaml still lists uuid, xtend, urlsafe-base64"
+        },
+        {
+          "severity": "medium",
+          "summary": "zero test runs before any of the 3 commits, despite the prompt's per-package test instruction"
+        },
+        {
+          "severity": "minor",
+          "summary": "xtend commit spans two packages (mendel-core, mendel-config) in one commit instead of one commit per package; commit type is fix, not chore"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 101.8,
+        "tokens_total": 887328,
+        "tokens_in": 707694,
+        "tokens_out": 8603,
+        "cache_read": 171031,
+        "peak_context": 28102,
+        "window_pct": 49,
+        "compactions": 0,
+        "assistant_msgs": 57,
+        "tool_calls": 53,
+        "tool_errors": 5,
+        "commits": 3,
+        "failed_commits": 0,
+        "truncation_pct": 0
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "matrix_cells": [
+        "<td class=\"best\"><span class=\"pill p-good\">no bugs in 3 landed fixes</span> <b>25</b></td>",
+        "<td><span class=\"pill p-bad\">never run</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td><span class=\"pill p-bad\">3 / 8 done</span></td>",
+        "<td><span class=\"pill p-bad\">5 left</span></td>",
+        "<td><span class=\"pill p-bad\">5 left</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td><b>7.5</b></td>",
+        "<td><span class=\"pill p-bad\">no pnpm install</span> <b>0</b></td>",
+        "<td><span class=\"pill p-bad\">untouched</span></td>",
+        "<td><span class=\"pill p-bad\">never run</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td><span class=\"pill p-bad\">used fix, not chore</span></td>",
+        "<td><span class=\"pill p-mid\">xtend spans 2 pkgs</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean, no bypasses</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">kept out</span></td>",
+        "<td><b>6.5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no repairs in 3 landed</span> <b>6</b></td>",
+        "<td><span class=\"pill p-bad\">none run</span></td>",
+        "<td><span class=\"pill p-bad\">never run</span> <b>1</b></td>",
+        "<td><span class=\"pill p-mid\">built upfront, marked done</span> <b>3</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no noisy output</span> <b>2</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">minimal diff</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">887 K</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">51 %</span></td>",
+        "<td><span class=\"pill p-mid\">53, crashed twice</span></td>"
+      ],
+      "matrix_total": "55",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      }
     }
   ],
   "matrix_rows": [
