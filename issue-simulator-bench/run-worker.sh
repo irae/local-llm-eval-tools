@@ -9,11 +9,11 @@ model="${1:?usage: run-worker.sh <model> [harness]}"
 harness="${2:-pi}"
 BENCH_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$BENCH_DIR/.." && pwd)"
-BASE_COMMIT=182b07f
+BASE_COMMIT=4679b5a
 RUNS="$BENCH_DIR/runs"
 slug="$(echo "$model" | tr '/:' '--')"
-branch="${slug}-issue-13"
-wt="$REPO/../mendel-bench-$slug"
+branch="${slug}-issue-13-r2"
+wt="$REPO/../mendel-bench2-$slug"
 mkdir -p "$RUNS"
 
 if git -C "$REPO" show-ref --quiet "refs/heads/$branch"; then

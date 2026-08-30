@@ -1,15 +1,38 @@
-# Mendel model benchmark
+# Mendel model benchmark — round 2 (guided prompt)
 
-This branch (`benchmark`) is the formal record of the issue-13 model bake-off. It never
-merges into `master`. It can be pushed to `irae/mendel` only. Redact private data before
-each commit (see "Redaction").
+This branch (`benchmark2`) is the formal record of round 2 of the issue-13 model
+bake-off. It never merges into `master`. It can be pushed to `irae/mendel` only.
+Redact private data before each commit (see "Redaction").
+
+## What round 2 changes
+
+Round 1 (branch `benchmark`) used a terse prompt and base commit `182b07f`. Round 2
+asks one question: how much of the score gap was the prompt's fault? Everything else
+stays fixed so the two rounds are comparable per model.
+
+- **New prompt** (`prompt.txt`): a detailed step-by-step workflow that names the known
+  pitfalls (the glob AsyncIterator trap, the incomplete reference list, the tmp
+  exit-hook regression, the chalk `enableColor` contract, the `node:` prefix lint
+  convention, the fixture file to leave alone). Round 1's terse prompt is preserved on
+  the `benchmark` branch.
+- **New base commit `4679b5a`** = `182b07f` plus one fix that master needed anyway:
+  the root now declares `mendel-pipeline` as a workspace devDependency, so the hoisted
+  `node_modules/.bin/mendel` link resolves and the full-example karma test runs on a
+  fresh install instead of dying with `mendel: command not found`.
+- **Run branches are `<model>-issue-13-r2`**, worktrees `../mendel-bench2-<model>`.
+- **The rubric is unchanged** (`RUBRIC.md`). Because the prompt now discloses the
+  traps, round-2 scores measure instruction-following more than trap discovery; never
+  compare a round-2 score to a round-1 score of a different model, only to the same
+  model's round-1 score.
+- `results.json`/`results.csv` on this branch keep the round-1 rows as the baseline;
+  round-2 rows are appended with the `-r2` branch name.
 
 ## What the benchmark measures
 
 Each model gets one identical task, one identical prompt (`prompt.txt`), and one
-identical starting commit (`182b07f`). The task is issue 13: replace eight small npm
-dependencies with native Node equivalents. The issue contains known traps. The rubric
-in `RUBRIC.md` scores each run on 100 points.
+identical starting commit (`4679b5a` in round 2). The task is issue 13: replace eight
+small npm dependencies with native Node equivalents. The issue contains known traps.
+The rubric in `RUBRIC.md` scores each run on 100 points.
 
 ## How to run a new model
 

@@ -1,5 +1,28 @@
-We have `gh` installed so you can use it, read-only for now. Fetch https://github.com/irae/mendel/issues/13 and start working on it. Commit often. Some items might not have found all references of libs. Commit
-once per package fix, then run tests just for this package. If fixing is needed, fix and commit when passing. Continue working this way and every 5 commits, run the full test suite, just to make sure also
-interconnected deps didn't break. Don't read all the code. First library, remove, read the code where it is missing, fix it, and move on. Write TASKS.md for yourself and never commit it. It should have
-markdown style todo list ` - [ ]` and mark as done after commit. Each library is an item. You list all libraries to remove upfront. Then you grep the codebase, and each affected package becomes a sub-item.
-When all done, move to next task. You are done when all tasks are done.
+We have `gh` installed; use it read-only. Fetch https://github.com/irae/mendel/issues/13. Your job is to complete that issue: replace eight npm packages with native Node equivalents: uuid, xtend, urlsafe-base64, rimraf, glob, chalk, tmp, shasum. Follow the workflow below exactly, in order. Do not read all the code — read only the files your greps point you to.
+
+WORKFLOW
+
+1. Read issue 13 with gh. It describes each replacement and the call sites it knows about.
+2. Create TASKS.md at the repo root. Never stage or commit it (do not add it to .gitignore either). Write the eight libraries upfront as a markdown todo list, one ` - [ ]` item per library, with no sub-items yet.
+3. Work one library at a time, in the issue's order. For the current library:
+   a. Grep the whole repo for `require('<lib>')` and for `"<lib>":` in every package.json. Each affected package becomes a ` - [ ]` sub-item under the library in TASKS.md. Trust your grep over the issue's list — the issue misses some references.
+   b. For one affected package at a time: edit only the files the grep found, remove the dependency from that package.json, and keep the diff minimal — match the neighboring code's style, no drive-by cleanups.
+   c. Run only that package's tests (for example `npx tap packages/<pkg>/test/*.js`). If something broke, fix it before committing.
+   d. When the package's tests pass, commit that one package's change: commit type `chore`, stage exact file paths (never `git add -A`), never `--no-verify`. Then mark the sub-item done in TASKS.md.
+   e. When every sub-item of the library is done, mark the library done and move to the next library.
+4. After every 5 commits, run the full unit suite (`pnpm run unit`) to catch cross-package breakage. Pipe it through `tail` — it is noisy.
+5. Run a real `pnpm install` after removing dependencies so node_modules and pnpm-lock.yaml actually shrink. Do not hand-edit pnpm-lock.yaml.
+6. Before you declare the work done: re-run the greps from 3a (they must return nothing except the known fixture listed below), then run `npx prettier --check .` and `npx eslint .` yourself and fix what they flag.
+7. You are done when every TASKS.md item is checked, the greps are clean, the full suite is at its baseline, and prettier and eslint are silent.
+
+KNOWN PITFALLS — each one of these has caused real failures; read them carefully.
+
+- glob: `fs.promises.glob()` returns an AsyncIterator, NOT a promise. A `glob(pattern).then(...)` swap throws a TypeError at runtime, and no unit test covers `packages/mendel-development/apply-extra-options.js`, so tests will not save you. Use `Array.fromAsync(fs.promises.glob(pattern))` to get a promise of an array.
+- The issue's reference list is incomplete. At least one package under `legacy-packages/` still uses one of the eight libraries in its test files and declares it in its package.json. Your grep in step 3a finds it; the issue does not.
+- tmp: the issue claims `tmp` auto-cleans on process exit. It only does that when `setGracefulCleanup()` is called, and nothing in this repo calls it, so the current behavior is: temp dirs stay. In `packages/mendel-development/validate-manifest.js` the code prints the temp path so a person can inspect the file — do NOT add an exit hook that deletes it; that is a regression. In test files, clean up with `fs.rmSync(dir, {recursive: true, force: true})` in the suite's teardown hook instead.
+- chalk: `packages/mendel-pipeline/src/helpers/analytics/cli-printer.js` sets `chalk.level = options.enableColor !== false ? 3 : 0`. That is a hard on/off switch: color is forced ON even when output is piped, and forced OFF when `enableColor` is false. A `util.styleText` port must keep both directions — honor `enableColor: false`, and pass `{validateStream: false}` so color survives redirection when it is on.
+- rimraf silently no-ops on a missing path. `fs.rmSync` throws unless you pass `{recursive: true, force: true}` — always pass `force: true` where rimraf was used.
+- House convention: bare core-module names, `require('crypto')` not `require('node:crypto')`. The repo's eslint (eslint-plugin-implicit-dependencies) flags the `node:` prefix; using it will fail lint.
+- `packages/mendel-deps/test/fixtures/js/es5/foo/browser.js` contains `require('glob')` as fixture data for the dependency parser. Leave that file untouched; it is the one grep hit that must remain.
+- Pre-existing failures that are NOT yours to fix (they fail the same way before your change): `legacy-packages/mendel-requirify` tap tests fail 3/3 (you still must remove the library references there — just do not chase the failing tests); `mendel-config` can flake in the full run and passes when re-run standalone; anything that needs a live daemon socket (MENDEL_IPC) fails without a daemon.
+- Pipe noisy commands (installs, full test runs, long greps) through `tail` or `head`.
