@@ -4,10 +4,20 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const dir = dirname(fileURLToPath(import.meta.url));
-const data = JSON.parse(readFileSync(join(dir, 'results.json'), 'utf8'));
-const template = readFileSync(join(dir, 'report-template.html'), 'utf8');
-const outputs = process.argv.slice(2);
-if (!outputs.length) outputs.push(join(dir, 'report.html'));
+// Two tests, independent artifacts (see PLAN.md): the default is the blind
+// bake-off; `--guided` switches every input and output to the guided run.
+const args = process.argv.slice(2);
+const guided = args[0] === '--guided';
+if (guided) args.shift();
+const resultsFile = guided ? 'results-guided.json' : 'results.json';
+const templateFile = guided
+    ? 'report-guided-template.html'
+    : 'report-template.html';
+const data = JSON.parse(readFileSync(join(dir, resultsFile), 'utf8'));
+const template = readFileSync(join(dir, templateFile), 'utf8');
+const outputs = args;
+if (!outputs.length)
+    outputs.push(join(dir, guided ? 'report-guided.html' : 'report.html'));
 
 const runs = [...data.runs].sort((a, b) => b.score_total - a.score_total);
 

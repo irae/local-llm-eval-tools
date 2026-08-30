@@ -1,54 +1,64 @@
-# Mendel model benchmark — round 2 (guided prompt)
+# Mendel model benchmark
 
-This branch (`benchmark2`) is the formal record of round 2 of the issue-13 model
-bake-off. It never merges into `master`. It can be pushed to `irae/mendel` only.
-Redact private data before each commit (see "Redaction").
+This branch (`benchmark`) is the formal record of the issue-13 model bake-offs. It
+never merges into `master`. It can be pushed to `irae/mendel` only. Redact private
+data before each commit (see "Redaction").
 
-## What round 2 changes
+## Two tests, independent artifacts
 
-Round 1 (branch `benchmark`) used a terse prompt and base commit `182b07f`. Round 2
-asks one question: how much of the score gap was the prompt's fault? Everything else
-stays fixed so the two rounds are comparable per model.
+The branch holds two separate tests of the same task (issue 13: replace eight small
+npm dependencies with native Node equivalents). They share the rubric (`RUBRIC.md`,
+100 points, applied unchanged to both) but nothing else — each has its own prompt,
+base commit, branch suffix, results files, and report. Never mix their rows, and
+never compare a score across the two tests; a model compares only against its own
+run of the same test.
 
-- **New prompt** (`prompt.txt`): a detailed step-by-step workflow that names the known
-  pitfalls (the glob AsyncIterator trap, the incomplete reference list, the tmp
-  exit-hook regression, the chalk `enableColor` contract, the `node:` prefix lint
-  convention, the fixture file to leave alone). Round 1's terse prompt is preserved on
-  the `benchmark` branch.
-- **New base commit `4679b5a`** = `182b07f` plus one fix that master needed anyway:
-  the root now declares `mendel-pipeline` as a workspace devDependency, so the hoisted
-  `node_modules/.bin/mendel` link resolves and the full-example karma test runs on a
-  fresh install instead of dying with `mendel: command not found`.
-- **Run branches are `<model>-issue-13-r2`**, worktrees `../mendel-bench2-<model>`.
-- **The rubric is unchanged** (`RUBRIC.md`). Because the prompt now discloses the
-  traps, round-2 scores measure instruction-following more than trap discovery; never
-  compare a round-2 score to a round-1 score of a different model, only to the same
-  model's round-1 score.
-- `results.json`/`results.csv` on this branch keep the round-1 rows as the baseline;
-  round-2 rows are appended with the `-r2` branch name.
+|              | Blind run                              | Guided run                                           |
+| ------------ | -------------------------------------- | ---------------------------------------------------- |
+| Question     | Can the model discover the traps?      | How far does a structured plan lift it?              |
+| Prompt       | `prompt-blind.txt` (terse)             | `prompt-guided.txt` (numbered plan, traps disclosed) |
+| Base commit  | `182b07f`                              | `4679b5a`                                            |
+| Run branches | `<model>-issue-13`                     | `<model>-issue-13-r2`                                |
+| Worktrees    | `../mendel-bench-<model>`              | `../mendel-bench2-<model>`                           |
+| Results      | `results.json` / `results.csv`         | `results-guided.json` / `results-guided.csv`         |
+| Report       | `report.html` (`report-template.html`) | `report-guided.html` (`report-guided-template.html`) |
+| Status       | complete (6 models, Aug 2026)          | active — all new runs go here                        |
 
-## What the benchmark measures
+The guided run exists because the blind run showed the weaker (and local) models
+losing most of their points to discoverable traps. Its prompt is a detailed
+step-by-step workflow that names the known pitfalls (the glob AsyncIterator trap,
+the incomplete reference list, the tmp exit-hook regression, the chalk
+`enableColor` contract, the `node:` prefix lint convention, the fixture file to
+leave alone). With the traps disclosed, its scores measure instruction-following
+more than trap discovery.
 
-Each model gets one identical task, one identical prompt (`prompt.txt`), and one
-identical starting commit (`4679b5a` in round 2). The task is issue 13: replace eight
-small npm dependencies with native Node equivalents. The issue contains known traps.
-The rubric in `RUBRIC.md` scores each run on 100 points.
+The guided base commit `4679b5a` is `182b07f` plus one fix master needed anyway:
+the root declares `mendel-pipeline` as a workspace devDependency, so the hoisted
+`node_modules/.bin/mendel` link resolves and the full-example karma test runs on a
+fresh install instead of dying with `mendel: command not found`.
+
+The guided prompt is frozen at v2.1. One haiku run (`…-issue-13-r2-p0`, tagged
+`r2.0` in the results) predates the freeze; keep it as a variance data point, and
+run every new model against the frozen prompt.
 
 ## How to run a new model
 
 1. Make sure the harness for the model is installed and authenticated.
-2. Run `./run-worker.sh <model> [harness]` for one model. The default harness is
-   `pi`; use `claude` for Claude Code (subscription pressure can force the choice).
-   `./spawn-claude-workers.sh <model ...>` runs several Claude workers in parallel.
-   Each worker:
-    - Creates a sibling worktree `../mendel-bench-<model>` at the base commit.
-    - Creates the branch `<model>-issue-13`.
+2. Run `./run-worker.sh <model> [harness] [bench]` for one model. The default
+   harness is `pi`; use `claude` for Claude Code (subscription pressure can force
+   the choice). The default bench is `guided`; pass `blind` only to extend the
+   closed blind table. `./spawn-claude-workers.sh <model ...>` runs several Claude
+   workers in parallel. Each worker:
+    - Creates a sibling worktree at the bench's base commit.
+    - Creates the bench's run branch for the model.
     - Runs a real `pnpm install` in the worktree.
-    - Spawns `claude -p` with `prompt.txt` and writes results to `runs/` (not versioned).
-3. For other harnesses (pi, codex), start the harness in a worktree prepared the same
-   way, paste `prompt.txt` verbatim, and let it run to completion without help.
+    - Spawns `claude -p` with the bench's prompt and writes results to `runs/`
+      (not versioned).
+3. For other harnesses (pi, codex), start the harness in a worktree prepared the
+   same way, paste the bench's prompt verbatim, and let it run to completion
+   without help.
 4. Rules that apply to every run:
-    - Same base commit for all models.
+    - Same base commit for all models of the same bench.
     - Real `pnpm install` before the run starts.
     - No mid-run human help. If a run is cut short, mark it as partial.
 
@@ -76,17 +86,22 @@ When the harness is not recorded, guess from the pi provider config and mark the
 
 ## Versioned outputs
 
-After scoring, update and commit on this branch:
+After scoring, update and commit on this branch — always the files of the bench the
+run belongs to (blind: `results.json`/`results.csv`/`report.html`; guided:
+`results-guided.json`/`results-guided.csv`/`report-guided.html`):
 
-- `results.json` — full structured results: per model, the harness, provider, scores
-  per criterion, defects, telemetry.
-- `results.csv` — flat one-row-per-model summary for spreadsheet use.
-- `report.html` — the self-contained HTML report. **Do not edit its tables by hand.**
-  The report is data driven: `generate-report.mjs` reads `results.json` and
-  `report-template.html` (prose + `{{SCOREBOARD}}`/`{{MATRIX}}`/`{{COST}}`/`{{PLAN}}`
-  placeholders) and writes the output paths given as arguments. Fix data in
-  `results.json`, prose in the template, then regenerate:
-  `node benchmark/generate-report.mjs benchmark/report.html docs/superpowers/issue13-model-bakeoff.html`.
+- the results `.json` — full structured results: per model, the harness, provider,
+  scores per criterion, defects, telemetry (guided rows also carry
+  `prompt_version`).
+- the results `.csv` — flat one-row-per-model summary for spreadsheet use.
+- the report `.html` — the self-contained HTML report. **Do not edit its tables by
+  hand.** The report is data driven: `generate-report.mjs` reads the bench's
+  results file and template (prose + `{{SCOREBOARD}}`/`{{MATRIX}}`/`{{COST}}`/`{{PLAN}}`
+  placeholders) and writes the output paths given as arguments. Fix data in the
+  results file, prose in the template, then regenerate:
+  `node benchmark/generate-report.mjs benchmark/report.html docs/superpowers/issue13-model-bakeoff.html`
+  for the blind report, or `node benchmark/generate-report.mjs --guided` for the
+  guided one (default output `benchmark/report-guided.html`).
   The headline cost everywhere is the **cheapest OpenRouter route**; what was
   actually paid (metered, plan share, or plan estimate) sits under it. Zero external requests: no `<link>`,
   no `<script src>`, no `@import`, no web fonts. Light and dark theme via CSS custom
@@ -104,8 +119,8 @@ table** amortises flat subscriptions (X Premium+, ChatGPT Plus, Claude Max) agai
 the share of the allowance the run consumed. Claude Code does not expose plan-window
 usage, so Claude plan figures are estimates — state the assumption in the table lede.
 
-The sibling project `../choose-a-local-llm/` reads `results.json` and `results.csv`.
-Keep the field names stable.
+The sibling project `../choose-a-local-llm/` reads `results.json`/`results.csv`
+and can read the `-guided` pair the same way. Keep the field names stable.
 
 ### `results.json` shape
 

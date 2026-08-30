@@ -50,13 +50,13 @@
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">works</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
-        "<td><span class=\"pill p-mid\">rimraf \u00d72 left</span></td>",
+        "<td><span class=\"pill p-mid\">rimraf ×2 left</span></td>",
         "<td><span class=\"pill p-mid\">1 left</span></td>",
         "<td><span class=\"pill p-bad\">missed</span></td>",
         "<td><b>15</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">real install \u00d717</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real install ×17</span> <b>8</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">96</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 ran 40\u00d7</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · ran 40×</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">1 turn</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">all chore</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
@@ -81,14 +81,14 @@
         "paid_basis": "plan share",
         "paid_usd": "0.14",
         "vendor_usd": "7.76",
-        "rate_in": "2.00 \u2192 4.00",
-        "rate_out": "6.00 \u2192 12.00",
-        "rate_cr": "0.50 \u2192 1.00",
+        "rate_in": "2.00 → 4.00",
+        "rate_out": "6.00 → 12.00",
+        "rate_cr": "0.50 → 1.00",
         "rate_tone": "bad",
         "provider_label": "xAI"
       },
       "plan": {
-        "marginal": "\u2248 $0.14",
+        "marginal": "≈ $0.14",
         "marginal_tone": "mid",
         "plan": "X Premium+ $40/mo",
         "alloc": "$30",
@@ -96,7 +96,7 @@
         "week": "$6.92",
         "w5h": "not exposed",
         "wweek": "2 %",
-        "rpw": "\u2248 50"
+        "rpw": "≈ 50"
       }
     },
     {
@@ -151,9 +151,9 @@
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
         "<td class=\"best\"><b>20</b></td>",
-        "<td><span class=\"pill p-bad\">lockfile-only \u00d718</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">lockfile-only ×18</span> <b>2</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">96</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 ran 34\u00d7</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · ran 34×</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">never hit it</span></td>",
         "<td><span class=\"pill p-bad\">refactor/test/chore</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
@@ -185,7 +185,7 @@
         "provider_label": "Claude plan"
       },
       "plan": {
-        "marginal": "\u2248 $0.56 est.",
+        "marginal": "≈ $0.56 est.",
         "marginal_tone": null,
         "plan": "Claude Max 5x $100/mo",
         "alloc": "$100",
@@ -193,7 +193,7 @@
         "week": "$23.08",
         "w5h": "not exposed",
         "wweek": "not exposed",
-        "rpw": "\u2248 41"
+        "rpw": "≈ 41"
       }
     },
     {
@@ -255,7 +255,7 @@
         "<td class=\"best\"><b>20</b></td>",
         "<td><span class=\"pill p-good\">verified by hand</span> <b>7</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">96</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 ran 40\u00d7</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · ran 40×</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">1 turn</span></td>",
         "<td><span class=\"pill p-bad\">all fix</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
@@ -280,14 +280,14 @@
         "paid_basis": "plan share",
         "paid_usd": "0.05",
         "vendor_usd": "0.84",
-        "rate_in": "0.20 \u2192 0.40",
-        "rate_out": "1.20 \u2192 1.80",
-        "rate_cr": "0.02 \u2192 0.04",
+        "rate_in": "0.20 → 0.40",
+        "rate_out": "1.20 → 1.80",
+        "rate_cr": "0.02 → 0.04",
         "rate_tone": "good",
         "provider_label": "ChatGPT plan"
       },
       "plan": {
-        "marginal": "\u2248 $0.05",
+        "marginal": "≈ $0.05",
         "marginal_tone": "good",
         "plan": "ChatGPT Plus $20/mo",
         "alloc": "$20",
@@ -295,7 +295,7 @@
         "week": "$4.62",
         "w5h": "8 %",
         "wweek": "1 %",
-        "rpw": "\u2248 100"
+        "rpw": "≈ 100"
       }
     },
     {
@@ -355,13 +355,13 @@
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">works</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
-        "<td><span class=\"pill p-mid\">rimraf \u00d72 left</span></td>",
+        "<td><span class=\"pill p-mid\">rimraf ×2 left</span></td>",
         "<td><span class=\"pill p-mid\">1 left</span></td>",
         "<td><span class=\"pill p-bad\">excluded it</span></td>",
         "<td><b>15</b></td>",
-        "<td><span class=\"pill p-good\">real install \u00d73</span> <b>7</b></td>",
+        "<td><span class=\"pill p-good\">real install ×3</span> <b>7</b></td>",
         "<td><span class=\"pill p-mid\">113 <em style=\"display:inline\">+ peer churn</em></span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 ran 15\u00d7</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · ran 15×</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">1 turn</span></td>",
         "<td><span class=\"pill p-bad\">refactor/test/chore</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
@@ -450,9 +450,9 @@
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
         "<td class=\"best\"><b>20</b></td>",
-        "<td><span class=\"pill p-mid\">install \u00d714, not pruned</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">install ×14, not pruned</span> <b>4</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">96</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 ran 29\u00d7</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · ran 29×</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">never hit it</span></td>",
         "<td><span class=\"pill p-bad\">fix/test/chore</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
@@ -484,7 +484,7 @@
         "provider_label": "Claude plan"
       },
       "plan": {
-        "marginal": "\u2248 $0.67 est.",
+        "marginal": "≈ $0.67 est.",
         "marginal_tone": null,
         "plan": "Claude Max 5x $100/mo",
         "alloc": "$100",
@@ -492,7 +492,7 @@
         "week": "$23.08",
         "w5h": "not exposed",
         "wweek": "not exposed",
-        "rpw": "\u2248 34"
+        "rpw": "≈ 34"
       }
     },
     {
@@ -552,7 +552,7 @@
       "cost_usd": 1.7,
       "cost_basis": "metered",
       "matrix_cells": [
-        "<td><span class=\"pill p-bad\">1 crit \u00b7 1 med \u00b7 1 min</span> <b>7</b></td>",
+        "<td><span class=\"pill p-bad\">1 crit · 1 med · 1 min</span> <b>7</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
         "<td><span class=\"pill p-bad\">TypeError</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
@@ -560,9 +560,9 @@
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">found</span></td>",
         "<td class=\"best\"><b>20</b></td>",
-        "<td><span class=\"pill p-bad\">lockfile-only \u00d719</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">lockfile-only ×19</span> <b>2</b></td>",
         "<td><span class=\"pill p-mid\">194 <em style=\"display:inline\">+ unrelated churn</em></span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 ran 42\u00d7</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · ran 42×</span> <b>5</b></td>",
         "<td><span class=\"pill p-mid\">2 turns</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">all chore</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
@@ -647,12 +647,12 @@
       "cost_usd": 1.24,
       "cost_basis": "plan",
       "matrix_cells": [
-        "<td><span class=\"pill p-bad\">1 crit \u00b7 1 med</span> <b>10</b></td>",
+        "<td><span class=\"pill p-bad\">1 crit · 1 med</span> <b>10</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
         "<td><span class=\"pill p-bad\">TypeError</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
-        "<td><span class=\"pill p-mid\">rimraf \u00d72 left</span></td>",
-        "<td><span class=\"pill p-bad\">17 left \u2014 none removed</span></td>",
+        "<td><span class=\"pill p-mid\">rimraf ×2 left</span></td>",
+        "<td><span class=\"pill p-bad\">17 left — none removed</span></td>",
         "<td><span class=\"pill p-bad\">missed</span></td>",
         "<td><b>8</b></td>",
         "<td><span class=\"pill p-bad\">never ran pnpm</span> <b>0</b></td>",
@@ -689,7 +689,7 @@
         "provider_label": "Claude plan"
       },
       "plan": {
-        "marginal": "\u2248 $0.08 est.",
+        "marginal": "≈ $0.08 est.",
         "marginal_tone": null,
         "plan": "Claude Max 5x $100/mo",
         "alloc": "$100",
@@ -697,7 +697,7 @@
         "week": "$23.08",
         "w5h": "not exposed",
         "wweek": "not exposed",
-        "rpw": "\u2248 280"
+        "rpw": "≈ 280"
       }
     },
     {
@@ -753,15 +753,15 @@
       "cost_usd": 0,
       "cost_basis": "local",
       "matrix_cells": [
-        "<td><span class=\"pill p-bad\">1 crit \u00b7 1 med</span> <b>10</b></td>",
+        "<td><span class=\"pill p-bad\">1 crit · 1 med</span> <b>10</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
         "<td><span class=\"pill p-bad\">TypeError</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
-        "<td><span class=\"pill p-mid\">rimraf \u00d72 left</span></td>",
+        "<td><span class=\"pill p-mid\">rimraf ×2 left</span></td>",
         "<td><span class=\"pill p-bad\">3 left</span></td>",
         "<td><span class=\"pill p-bad\">missed</span></td>",
         "<td><b>11</b></td>",
-        "<td><span class=\"pill p-mid\">install \u00d72, unverified</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">install ×2, unverified</span> <b>4</b></td>",
         "<td><span class=\"pill p-bad\">9</span></td>",
         "<td><span class=\"pill p-mid\">clean via hooks</span> <b>3</b></td>",
         "<td><span class=\"pill p-bad\">added it to package.json</span></td>",
@@ -848,7 +848,7 @@
       "cost_usd": 0,
       "cost_basis": "local",
       "matrix_cells": [
-        "<td><span class=\"pill p-bad\">1 crit \u00b7 1 min</span> <b>13</b></td>",
+        "<td><span class=\"pill p-bad\">1 crit · 1 min</span> <b>13</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
         "<td><span class=\"pill p-bad\">TypeError</span></td>",
         "<td><span class=\"pill p-bad\">5 / 8</span></td>",
@@ -863,7 +863,7 @@
         "<td><span class=\"pill p-bad\">mixed fix/refactor</span></td>",
         "<td><span class=\"pill p-mid\">mostly</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">alongside</span></td>",
-        "<td><span class=\"pill p-bad\">2 fail \u00b7 2\u00d7 --no-verify</span></td>",
+        "<td><span class=\"pill p-bad\">2 fail · 2× --no-verify</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
         "<td><b>5</b></td>",
         "<td><span class=\"pill p-bad\">unfinished</span> <b>3</b></td>",
@@ -943,7 +943,7 @@
       "cost_usd": 13.94,
       "cost_basis": "plan",
       "matrix_cells": [
-        "<td><span class=\"pill p-bad\">1 med \u00b7 1 min</span> <b>16</b></td>",
+        "<td><span class=\"pill p-bad\">1 med · 1 min</span> <b>16</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">works</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
@@ -951,9 +951,9 @@
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
         "<td class=\"best\"><b>20</b></td>",
-        "<td><span class=\"pill p-bad\">lockfile-only \u00d719</span> <b>2</b></td>",
-        "<td><span class=\"pill p-mid\">96 \u2212 3 added back</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 ran 43\u00d7</span> <b>5</b></td>",
+        "<td><span class=\"pill p-bad\">lockfile-only ×19</span> <b>2</b></td>",
+        "<td><span class=\"pill p-mid\">96 − 3 added back</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · ran 43×</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">never hit it</span></td>",
         "<td><span class=\"pill p-bad\">fix/test/chore</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
@@ -978,179 +978,23 @@
         "paid_basis": "plan share",
         "paid_usd": "0.51",
         "vendor_usd": "13.94",
-        "rate_in": "5.00 \u2192 10.00",
-        "rate_out": "30.00 \u2192 45.00",
-        "rate_cr": "0.50 \u2192 1.00",
+        "rate_in": "5.00 → 10.00",
+        "rate_out": "30.00 → 45.00",
+        "rate_cr": "0.50 → 1.00",
         "rate_tone": "bad",
         "provider_label": "ChatGPT plan"
       },
       "plan": {
-        "marginal": "\u2248 $0.51",
+        "marginal": "≈ $0.51",
         "marginal_tone": null,
         "plan": "ChatGPT Plus $20/mo",
         "alloc": "$20",
         "alloc_note": "all of it",
         "week": "$4.62",
         "w5h": "74 %",
-        "wweek": "\u2248 11 %",
-        "rpw": "\u2248 9"
+        "wweek": "≈ 11 %",
+        "rpw": "≈ 9"
       }
-    },
-    {
-      "model": "claude-haiku-4.5",
-      "model_id": "claude-haiku-4-5-20251001",
-      "harness": "claude-code",
-      "harness_guessed": false,
-      "provider": "anthropic",
-      "local": false,
-      "serving": null,
-      "branch": "claude-haiku-4-5-20251001-issue-13-r2-p0",
-      "base_commit": "4679b5a",
-      "partial": false,
-      "round": 2,
-      "prompt_version": "r2.0",
-      "score_total": 79,
-      "scores": {
-        "bugs": 19,
-        "completion": 20,
-        "node_modules": 0,
-        "lint": 5,
-        "commit_craft": 10,
-        "first_time": 8,
-        "test_discipline": 7,
-        "conventions": 5,
-        "task_list": 4,
-        "truncation": 1
-      },
-      "defects": [
-        {
-          "severity": "medium",
-          "summary": "styleText port leaves stream validation on; forced colour off a TTY is lost"
-        },
-        {
-          "severity": "minor",
-          "summary": "no pnpm install at all; lockfile untouched (scored in node_modules)"
-        }
-      ],
-      "telemetry": {
-        "wall_clock_min": 11.8,
-        "tokens_total": 16817717,
-        "tokens_in": 1538,
-        "tokens_out": 41816,
-        "cache_read": 16638539,
-        "peak_context": null,
-        "window_pct": null,
-        "compactions": 0,
-        "assistant_msgs": 395,
-        "tool_calls": 191,
-        "tool_errors": 1,
-        "commits": 14,
-        "failed_commits": 0,
-        "truncation_pct": 26
-      },
-      "cost_usd": 2.15,
-      "cost_basis": "plan"
-    },
-    {
-      "model": "claude-haiku-4.5",
-      "model_id": "claude-haiku-4-5-20251001",
-      "harness": "claude-code",
-      "harness_guessed": false,
-      "provider": "anthropic",
-      "local": false,
-      "serving": null,
-      "branch": "claude-haiku-4-5-20251001-issue-13-r2",
-      "base_commit": "4679b5a",
-      "partial": false,
-      "round": 2,
-      "prompt_version": "r2.1",
-      "score_total": 66.5,
-      "scores": {
-        "bugs": 16,
-        "completion": 12,
-        "node_modules": 8,
-        "lint": 0,
-        "commit_craft": 7,
-        "first_time": 6,
-        "test_discipline": 10,
-        "conventions": 4,
-        "task_list": 2,
-        "truncation": 1.5
-      },
-      "defects": [
-        {
-          "severity": "critical",
-          "summary": "chalk removed from mendel-pipeline package.json but src/cache/client.js and src/pipeline.js still require it; crashes on a fresh install and eslint fails with 2 errors"
-        },
-        {
-          "severity": "minor",
-          "summary": "multi-package commits for glob, tmp, shasum; one repair commit typed fix instead of chore"
-        }
-      ],
-      "telemetry": {
-        "wall_clock_min": 18.1,
-        "tokens_total": 20300799,
-        "tokens_in": 1914,
-        "tokens_out": 53503,
-        "cache_read": 20106656,
-        "peak_context": null,
-        "window_pct": null,
-        "compactions": 0,
-        "assistant_msgs": 488,
-        "tool_calls": 238,
-        "tool_errors": 6,
-        "commits": 12,
-        "failed_commits": 0,
-        "truncation_pct": 40
-      },
-      "cost_usd": 2.56,
-      "cost_basis": "plan"
-    },
-    {
-      "model": "claude-sonnet-5",
-      "model_id": "claude-sonnet-5",
-      "harness": "claude-code",
-      "harness_guessed": false,
-      "provider": "anthropic",
-      "local": false,
-      "serving": null,
-      "branch": "claude-sonnet-5-issue-13-r2",
-      "base_commit": "4679b5a",
-      "partial": false,
-      "round": 2,
-      "prompt_version": "r2.1",
-      "score_total": 97.5,
-      "scores": {
-        "bugs": 25,
-        "completion": 20,
-        "node_modules": 8,
-        "lint": 5,
-        "commit_craft": 12,
-        "first_time": 8,
-        "test_discipline": 10,
-        "conventions": 5,
-        "task_list": 3,
-        "truncation": 1.5
-      },
-      "defects": [],
-      "telemetry": {
-        "wall_clock_min": 31.4,
-        "tokens_total": 36132162,
-        "tokens_in": 738,
-        "tokens_out": 56662,
-        "cache_read": 35782514,
-        "peak_context": 179504,
-        "window_pct": null,
-        "compactions": 0,
-        "assistant_msgs": 373,
-        "tool_calls": 243,
-        "tool_errors": 1,
-        "commits": 18,
-        "failed_commits": 0,
-        "truncation_pct": 46
-      },
-      "cost_usd": 5.73,
-      "cost_basis": "plan"
     }
   ],
   "matrix_rows": [
@@ -1212,7 +1056,7 @@
     },
     {
       "type": "row",
-      "label": "Prettier &amp; ESLint clean <em>5 pts \u00b7 re-run on the branch</em>"
+      "label": "Prettier &amp; ESLint clean <em>5 pts · re-run on the branch</em>"
     },
     {
       "type": "row",
@@ -1224,7 +1068,7 @@
     },
     {
       "type": "row",
-      "label": "Right type \u2014 all <code>chore</code>"
+      "label": "Right type — all <code>chore</code>"
     },
     {
       "type": "row",
@@ -1252,7 +1096,7 @@
     },
     {
       "type": "row",
-      "label": "Right the first time <em>8 pts \u00b7 self-inflicted repairs</em>"
+      "label": "Right the first time <em>8 pts · self-inflicted repairs</em>"
     },
     {
       "type": "row",
@@ -1264,15 +1108,15 @@
     },
     {
       "type": "row",
-      "label": "Task list built progressively <em>4 pts \u00b7 high level first, sub-items on arrival</em>"
+      "label": "Task list built progressively <em>4 pts · high level first, sub-items on arrival</em>"
     },
     {
       "type": "row",
-      "label": "Truncated noisy commands <em>3 pts \u00b7 piped to tail/head</em>"
+      "label": "Truncated noisy commands <em>3 pts · piped to tail/head</em>"
     },
     {
       "type": "row",
-      "label": "Followed house conventions <em>5 pts \u00b7 minimal diff, matched neighbours</em>"
+      "label": "Followed house conventions <em>5 pts · minimal diff, matched neighbours</em>"
     },
     {
       "type": "group",
