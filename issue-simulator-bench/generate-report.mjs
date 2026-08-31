@@ -98,7 +98,6 @@ function scoreboard() {
         'Tokens',
         'Peak ctx',
         'Window',
-        'Compact',
         'Commits',
         'Bugs',
     ];
@@ -136,7 +135,6 @@ function scoreboard() {
             <td class="num${best(isTop('tokens_total', t.tokens_total))}">${mFmt(t.tokens_total)}</td>
             <td class="num${best(isTop('peak_context', t.peak_context))}">${kFmt(t.peak_context)}</td>
             <td class="num">${pill(winTone, t.window_pct + ' %')}</td>
-            <td class="num${best(isTop('compactions', t.compactions))}">${t.compactions}</td>
             <td class="num">${t.commits}</td>
             <td class="num${best(bp === 0)}">${pill(bugTone(bp), String(bp))}</td>
           </tr>`;

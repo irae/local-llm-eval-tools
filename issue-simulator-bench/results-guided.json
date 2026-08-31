@@ -15,7 +15,7 @@
       "partial": false,
       "round": 2,
       "prompt_version": "r2.1",
-      "score_total": 97.5,
+      "score_total": 98.5,
       "scores": {
         "bugs": 25,
         "completion": 20,
@@ -26,7 +26,7 @@
         "test_discipline": 10,
         "conventions": 5,
         "task_list": 3,
-        "truncation": 1.5
+        "truncation": 2.5
       },
       "defects": [],
       "telemetry": {
@@ -60,7 +60,7 @@
         "provider_label": "Claude plan"
       },
       "plan": {
-        "marginal": "\u2248 $0.38 est.",
+        "marginal": "≈ $0.38 est.",
         "marginal_tone": null,
         "plan": "Claude Max 5x $100/mo",
         "alloc": "$100",
@@ -68,7 +68,7 @@
         "week": "$23.08",
         "w5h": "not exposed",
         "wweek": "not exposed",
-        "rpw": "\u2248 60"
+        "rpw": "≈ 60"
       },
       "matrix_total": "97.5",
       "matrix_cells": [
@@ -80,9 +80,9 @@
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
         "<td class=\"best\"><b>20</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">real installs \u00d78</span> <b>8</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">\u221296 lines</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 self-run</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs ×8</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">−96 lines</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · self-run</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">18 / 18</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">one each</span></td>",
@@ -94,9 +94,10 @@
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">9 runs</span> <b>10</b></td>",
         "<td><span class=\"pill p-mid\">via one subagent</span> <b>3</b></td>",
-        "<td><span class=\"pill p-mid\">46 %</span> <b>1.5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">46 % + log-redirect</span> <b>2.5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">minimal</span> <b>5</b></td>",
         "<td>36.1 M</td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">18 %</span></td>",
         "<td>247</td>"
       ]
@@ -114,18 +115,18 @@
       "partial": false,
       "round": 2,
       "prompt_version": "r2.1",
-      "score_total": 66.5,
+      "score_total": 68,
       "scores": {
         "bugs": 16,
         "completion": 12,
         "node_modules": 8,
-        "lint": 0,
+        "lint": 1,
         "commit_craft": 7,
         "first_time": 6,
-        "test_discipline": 10,
+        "test_discipline": 8,
         "conventions": 4,
-        "task_list": 2,
-        "truncation": 1.5
+        "task_list": 4,
+        "truncation": 2
       },
       "defects": [
         {
@@ -168,7 +169,7 @@
         "provider_label": "Claude plan"
       },
       "plan": {
-        "marginal": "\u2248 $0.17 est.",
+        "marginal": "≈ $0.17 est.",
         "marginal_tone": null,
         "plan": "Claude Max 5x $100/mo",
         "alloc": "$100",
@@ -176,21 +177,21 @@
         "week": "$23.08",
         "w5h": "not exposed",
         "wweek": "not exposed",
-        "rpw": "\u2248 135"
+        "rpw": "≈ 135"
       },
       "matrix_total": "66.5",
       "matrix_cells": [
-        "<td><span class=\"pill p-bad\">1 crit \u00b7 stale chalk</span> <b>16</b></td>",
+        "<td><span class=\"pill p-bad\">1 crit · stale chalk</span> <b>16</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">SYNC OK</span></td>",
-        "<td><span class=\"pill p-mid\">7\u00bd / 8</span></td>",
-        "<td><span class=\"pill p-bad\">chalk \u00d72 left</span></td>",
+        "<td><span class=\"pill p-mid\">7½ / 8</span></td>",
+        "<td><span class=\"pill p-bad\">chalk ×2 left</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
         "<td><b>12</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">real installs \u00d711</span> <b>8</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">\u221296 lines</span></td>",
-        "<td><span class=\"pill p-bad\">eslint \u00d72 \u00b7 never ran</span> <b>0</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs ×11</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">−96 lines</span></td>",
+        "<td><span class=\"pill p-bad\">eslint ×2 · prettier clean · never ran</span> <b>1</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
         "<td><span class=\"pill p-mid\">1 fix commit</span></td>",
         "<td><span class=\"pill p-bad\">3 multi-package</span></td>",
@@ -200,11 +201,12 @@
         "<td><b>7</b></td>",
         "<td><span class=\"pill p-mid\">1 repair</span> <b>6</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">4 runs</span> <b>10</b></td>",
-        "<td><span class=\"pill p-mid\">batched</span> <b>2</b></td>",
-        "<td><span class=\"pill p-mid\">40 %</span> <b>1.5</b></td>",
+        "<td><span class=\"pill p-mid\">4 full runs · 4 libs untested pre-commit</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">textbook, checked per commit</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">40 %</span> <b>2</b></td>",
         "<td><span class=\"pill p-mid\">stale requires</span> <b>4</b></td>",
         "<td>20.3 M</td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-mid\">80 %</span></td>",
         "<td>238</td>"
       ]
@@ -222,17 +224,17 @@
       "partial": false,
       "round": 2,
       "prompt_version": "r2.1",
-      "score_total": 67.5,
+      "score_total": 65.5,
       "scores": {
         "bugs": 10,
         "completion": 20,
         "node_modules": 8,
-        "lint": 1,
+        "lint": 0,
         "commit_craft": 4.5,
         "first_time": 5,
         "test_discipline": 9,
         "conventions": 4,
-        "task_list": 4,
+        "task_list": 3,
         "truncation": 2
       },
       "defects": [
@@ -286,7 +288,7 @@
         "<td class=\"best\"><b>20</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">real installs ×9</span> <b>8</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">−96 lines</span></td>",
-        "<td><span class=\"pill p-bad\">eslint 1 err · prettier 2 files</span> <b>1</b></td>",
+        "<td><span class=\"pill p-bad\">eslint 1 err · prettier 2 files · never ran</span> <b>0</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
         "<td><span class=\"pill p-bad\">5 multi-package</span></td>",
@@ -297,10 +299,11 @@
         "<td><span class=\"pill p-mid\">bug slipped through</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">23 runs</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">3 runs</span> <b>9</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">upfront, marked done</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">all greps upfront, marked done</span> <b>3</b></td>",
         "<td><span class=\"pill p-mid\">32 %</span> <b>2</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">bare requires, minimal diff</span> <b>4</b></td>",
         "<td><span class=\"pill p-mid\">12.1 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-bad\">4 %</span></td>",
         "<td><span class=\"pill p-mid\">251</span></td>"
       ],
@@ -331,15 +334,15 @@
       "partial": true,
       "round": 2,
       "prompt_version": "r2.1",
-      "score_total": 70,
+      "score_total": 69.0,
       "scores": {
         "bugs": 25,
         "completion": 7.5,
         "node_modules": 8,
-        "lint": 0,
+        "lint": 2,
         "commit_craft": 11,
-        "first_time": 4,
-        "test_discipline": 7,
+        "first_time": 3,
+        "test_discipline": 5,
         "conventions": 4,
         "task_list": 1.5,
         "truncation": 2
@@ -391,7 +394,7 @@
         "<td><b>7.5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">real installs ×3</span> <b>8</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">−23 lines</span></td>",
-        "<td><span class=\"pill p-bad\">never ran, clean by luck</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">clean diff, never ran itself</span> <b>2</b></td>",
         "<td><span class=\"pill p-mid\">not reached</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
         "<td><span class=\"pill p-mid\">1 multi-package</span></td>",
@@ -399,13 +402,14 @@
         "<td class=\"best\"><span class=\"pill p-good\">clean, no bypasses</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">untracked</span></td>",
         "<td><b>11</b></td>",
-        "<td><span class=\"pill p-bad\">stuck 45+ min, never recovered</span> <b>4</b></td>",
+        "<td><span class=\"pill p-bad\">3 repair loops, 11-18 min each</span> <b>3</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">7 runs</span></td>",
-        "<td><span class=\"pill p-mid\">no checkpoint reached</span> <b>7</b></td>",
+        "<td><span class=\"pill p-bad\">wrong package tested, no full suite</span> <b>5</b></td>",
         "<td><span class=\"pill p-bad\">no checkboxes marked</span> <b>1.5</b></td>",
         "<td><span class=\"pill p-mid\">35 %</span> <b>2</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">minimal diff</span> <b>4</b></td>",
         "<td><span class=\"pill p-mid\">2.1 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-bad\">11 %</span></td>",
         "<td><span class=\"pill p-mid\">94</span></td>"
       ],
@@ -508,6 +512,7 @@
         "<td class=\"best\"><span class=\"pill p-good\">53 %</span> <b>3</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">minimal diff</span> <b>5</b></td>",
         "<td><span class=\"pill p-mid\">1.1 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">15 %</span></td>",
         "<td><span class=\"pill p-mid\">95</span></td>"
       ],
@@ -585,7 +590,7 @@
     },
     {
       "type": "row",
-      "label": "Prettier &amp; ESLint clean <em>5 pts \u00b7 re-run on the branch</em>"
+      "label": "Prettier &amp; ESLint clean <em>5 pts · re-run on the branch</em>"
     },
     {
       "type": "row",
@@ -597,7 +602,7 @@
     },
     {
       "type": "row",
-      "label": "Right type \u2014 all <code>chore</code>"
+      "label": "Right type — all <code>chore</code>"
     },
     {
       "type": "row",
@@ -625,7 +630,7 @@
     },
     {
       "type": "row",
-      "label": "Right the first time <em>8 pts \u00b7 self-inflicted repairs</em>"
+      "label": "Right the first time <em>8 pts · self-inflicted repairs</em>"
     },
     {
       "type": "row",
@@ -637,15 +642,15 @@
     },
     {
       "type": "row",
-      "label": "Task list built progressively <em>4 pts \u00b7 high level first, sub-items on arrival</em>"
+      "label": "Task list built progressively <em>4 pts · high level first, sub-items on arrival</em>"
     },
     {
       "type": "row",
-      "label": "Truncated noisy commands <em>3 pts \u00b7 piped to tail/head</em>"
+      "label": "Truncated noisy commands <em>3 pts · piped to tail/head</em>"
     },
     {
       "type": "row",
-      "label": "Followed house conventions <em>5 pts \u00b7 minimal diff, matched neighbours</em>"
+      "label": "Followed house conventions <em>5 pts · minimal diff, matched neighbours</em>"
     },
     {
       "type": "group",
@@ -654,6 +659,9 @@
     {
       "type": "row",
       "label": "Tokens burned <em>all requests, compaction included</em>"
+    },
+    {
+      "label": "Compactions <em>context rebuilds mid-run</em>"
     },
     {
       "type": "row",

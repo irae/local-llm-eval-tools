@@ -71,6 +71,7 @@
         "<td><span class=\"pill p-bad\">6 %</span> <b>1.5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">tight</span> <b>5</b></td>",
         "<td><span class=\"pill p-mid\">11.6 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-good\">48 %</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">188</span></td>"
       ],
@@ -168,6 +169,7 @@
         "<td class=\"best\"><span class=\"pill p-good\">43 %</span> <b>3</b></td>",
         "<td><span class=\"pill p-mid\">one restating comment</span> <b>4</b></td>",
         "<td><span class=\"pill p-mid\">12.1 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-mid\">35 %</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">151</span></td>"
       ],
@@ -270,6 +272,7 @@
         "<td><span class=\"pill p-bad\">8 %</span> <b>1.5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">tight</span> <b>5</b></td>",
         "<td><span class=\"pill p-bad\">28.0 M</span></td>",
+        "<td>1</td>",
         "<td><span class=\"pill p-bad\">overflowed</span></td>",
         "<td><span class=\"pill p-mid\">265</span></td>"
       ],
@@ -376,6 +379,7 @@
         "<td class=\"best\"><span class=\"pill p-good\">62 %</span> <b>3</b></td>",
         "<td><span class=\"pill p-mid\">duplicate require</span> <b>4</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">4.8 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">94 %</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">158</span></td>"
       ],
@@ -467,6 +471,7 @@
         "<td><span class=\"pill p-mid\">31 %</span> <b>2</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">tight</span> <b>5</b></td>",
         "<td><span class=\"pill p-bad\">43.9 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">77 %</span></td>",
         "<td><span class=\"pill p-bad\">317</span></td>"
       ],
@@ -577,6 +582,7 @@
         "<td class=\"best\"><span class=\"pill p-good\">40 %</span> <b>3</b></td>",
         "<td><span class=\"pill p-mid\">extra churn</span> <b>4</b></td>",
         "<td><span class=\"pill p-bad\">22.1 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">84 %</span></td>",
         "<td><span class=\"pill p-mid\">270</span></td>"
       ],
@@ -672,6 +678,7 @@
         "<td><span class=\"pill p-mid\">33 %</span> <b>2</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">tight</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">9.0 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-good\">42 %</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">126</span></td>"
       ],
@@ -778,6 +785,7 @@
         "<td><span class=\"pill p-mid\">27 %</span> <b>2</b></td>",
         "<td><span class=\"pill p-mid\">dropped an option</span> <b>3</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">10.1 M</span></td>",
+        "<td>1</td>",
         "<td><span class=\"pill p-bad\">4 %</span></td>",
         "<td><span class=\"pill p-bad\">258 <em style=\"display:inline\">for less work</em></span></td>"
       ],
@@ -873,6 +881,7 @@
         "<td><span class=\"pill p-bad\">0 %</span> <b>0</b></td>",
         "<td><span class=\"pill p-mid\">duplicate require</span> <b>3</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">8.2 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-good\">46 %</span></td>",
         "<td><span class=\"pill p-mid\">115 <em style=\"display:inline\">unfinished</em></span></td>"
       ],
@@ -968,6 +977,7 @@
         "<td><span class=\"pill p-bad\">17 %</span> <b>1.5</b></td>",
         "<td><span class=\"pill p-mid\">fixture churn</span> <b>3</b></td>",
         "<td><span class=\"pill p-bad\">21.5 M</span></td>",
+        "<td>1</td>",
         "<td><span class=\"pill p-bad\">overflowed</span></td>",
         "<td><span class=\"pill p-mid\">194</span></td>"
       ],
@@ -1082,6 +1092,7 @@
         "<td class=\"best\"><span class=\"pill p-good\">no noisy output</span> <b>2</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">minimal diff</span> <b>4</b></td>",
         "<td><span class=\"pill p-mid\">887 K</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">51 %</span></td>",
         "<td><span class=\"pill p-mid\">53, crashed twice</span></td>"
       ],
@@ -1181,6 +1192,7 @@
         "<td><span class=\"pill p-mid\">31 %</span> <b>2</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">minimal diff</span> <b>4</b></td>",
         "<td><span class=\"pill p-bad\">1.78 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-mid\">10 %</span></td>",
         "<td><span class=\"pill p-bad\">135, mid-run restart</span></td>"
       ],
@@ -1327,6 +1339,9 @@
     {
       "type": "row",
       "label": "Tokens burned <em>all requests, compaction included</em>"
+    },
+    {
+      "label": "Compactions <em>context rebuilds mid-run</em>"
     },
     {
       "type": "row",

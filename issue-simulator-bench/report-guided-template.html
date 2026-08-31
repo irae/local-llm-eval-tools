@@ -711,7 +711,17 @@
             against what the model said it did. Weights in the left column; the
             best cell in each row is highlighted.
         </p>
-        <div class="scroller">{{MATRIX}}</div>
+        <div class="scroller">
+            {{MATRIX}}
+            <p class="lede">
+                Provenance note: the final commit of the Qwen3.8-27B low-effort
+                run (0bc6869, mendel-pipeline rimraf) postdates the last event
+                in its recorded session logs by 22 minutes; no command for it
+                appears in either session file. The commit content is consistent
+                with the run and is scored as part of it, but its harness record
+                is missing.
+            </p>
+        </div>
     </section>
 
     <section>
