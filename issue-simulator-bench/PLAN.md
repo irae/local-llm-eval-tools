@@ -13,16 +13,16 @@ base commit, branch suffix, results files, and report. Never mix their rows, and
 never compare a score across the two tests; a model compares only against its own
 run of the same test.
 
-|              | Blind run                              | Guided run                                           |
-| ------------ | -------------------------------------- | ---------------------------------------------------- |
-| Question     | Can the model discover the traps?      | How far does a structured plan lift it?              |
-| Prompt       | `prompt-blind.txt` (terse)             | `prompt-guided.txt` (numbered plan, traps disclosed) |
-| Base commit  | `182b07f`                              | `4679b5a`                                            |
-| Run branches | `<model>-issue-13`                     | `<model>-issue-13-r2`                                |
-| Worktrees    | `../mendel-bench-<model>`              | `../mendel-bench2-<model>`                           |
-| Results      | `results.json` / `results.csv`         | `results-guided.json` / `results-guided.csv`         |
-| Report       | `report.html` (`report-template.html`) | `report-guided.html` (`report-guided-template.html`) |
-| Status       | complete (6 models, Aug 2026)          | active — all new runs go here                        |
+|              | Blind run                              | Guided run                                             |
+| ------------ | -------------------------------------- | ------------------------------------------------------ |
+| Question     | Can the model discover the traps?      | How far does a structured plan lift it?                |
+| Prompt       | `prompt-blind.txt` (terse)             | `prompt-guided.txt` (numbered plan, traps disclosed)   |
+| Base commit  | `182b07f`                              | `23050bd` (tag `guided-v3-base`; v2.1 rows: `4679b5a`) |
+| Run branches | `<model>-issue-13`                     | `<model>-issue-13-r2`                                  |
+| Worktrees    | `../mendel-bench-<model>`              | `../mendel-bench2-<model>`                             |
+| Results      | `results.json` / `results.csv`         | `results-guided.json` / `results-guided.csv`           |
+| Report       | `report.html` (`report-template.html`) | `report-guided.html` (`report-guided-template.html`)   |
+| Status       | complete (6 models, Aug 2026)          | active — all new runs go here                          |
 
 The guided run exists because the blind run showed the weaker (and local) models
 losing most of their points to discoverable traps. Its prompt is a detailed
@@ -37,7 +37,9 @@ the root declares `mendel-pipeline` as a workspace devDependency, so the hoisted
 `node_modules/.bin/mendel` link resolves and the full-example karma test runs on a
 fresh install instead of dying with `mendel: command not found`.
 
-The guided prompt is frozen at v2.1. One result row per model: a pre-freeze
+The guided prompt is now v3.0 (base `guided-v3-base`); the blind prompt is v1.1.
+The five v2.1 guided rows (base `4679b5a`) are a closed set — do not add to them.
+One result row per model per prompt version: a pre-freeze
 haiku run exists only as branch `…-issue-13-r2-p0` and in git history, not in the
 results files. Run every new model against the frozen prompt.
 

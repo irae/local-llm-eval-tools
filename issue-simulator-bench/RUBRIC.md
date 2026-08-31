@@ -24,8 +24,9 @@ prompt warns about missing references; the issue does not list this one.
 hook to `packages/mendel-development/validate-manifest.js` is a regression: it
 deletes the debug manifest one line after the code prints its path.
 
-Also: `packages/mendel-deps/test/fixtures/js/es5/foo/browser.js:2` contains
-`require('glob')` as parser fixture data. Leaving it is correct.
+Also, on the blind and v2.1 bases only: `packages/mendel-deps/test/fixtures/js/es5/foo/browser.js:2`
+contains `require('glob')` as parser fixture data. Leaving it is correct. The v3 guided
+base (`guided-v3-base`) has that fixture requiring `debug` instead, so no exception applies.
 
 ## Verification battery
 
@@ -45,7 +46,7 @@ git grep -nE '"(uuid|xtend|urlsafe-base64|rimraf|glob|chalk|tmp|shasum)":' $b --
 git diff --stat master..$b -- pnpm-lock.yaml
 ```
 
-A perfect branch leaves only the fixture file. Note: `git grep -E` has no
+A perfect branch leaves only the fixture file (older bases) or nothing (v3 base). Note: `git grep -E` has no
 backreferences — write the quotes literally.
 
 ### Runtime repro for trap A (decisive)
@@ -66,20 +67,25 @@ node /tmp/repro-glob.js "$d"
 
 `SYNC OK` = pass. A `TypeError` on `.then` = critical bug.
 
-### Chalk / `enableColor` contract
+### Chalk / colour behaviour
 
-Master forces color level: `chalk.level = options.enableColor !== false ? 3 : 0`.
-A faithful `util.styleText` port must honor `enableColor: false` and pass
-`{ validateStream: false }` so color survives redirection. Load
-`packages/mendel-pipeline/src/helpers/analytics/cli-printer.js`, capture output of
-`print()` with `{enableColor:false}` and `{}`, and test for ANSI escapes. Correct:
-`false` then `true`.
+Master forces the colour level: `chalk.level = options.enableColor !== false ? 3 : 0`.
+Scoring depends on the prompt version:
+
+- **v2.1 and blind v1.0**: a faithful `util.styleText` port must honor `enableColor: false`
+  and pass `{ validateStream: false }` so colour survives redirection. Load
+  `packages/mendel-pipeline/src/helpers/analytics/cli-printer.js`, capture `print()` with
+  `{enableColor:false}` and `{}`, test for ANSI escapes. Correct: `false` then `true`.
+- **guided v3.0 and blind v1.1**: the direction is Node defaults. Correct: no forced level,
+  no `enableColor` handling, plain `util.styleText(styles, text)` — colour follows the
+  stream (ANSI on a TTY, none when piped). Forcing colour either way is a medium defect.
 
 ### Lint and format
 
 `prettier --check .` and `eslint .` from the repo's own `node_modules/.bin` must be
-silent. Known trap: `eslint-plugin-implicit-dependencies` flags `require('node:crypto')`;
-the repo convention is bare `require('crypto')`. Grade recovery speed.
+silent. The `node:` prefix trap is retired as of the v3 guided base: the patched
+`eslint-plugin-implicit-dependencies` accepts both `require('node:crypto')` and
+`require('crypto')`. It still applies when scoring runs on the older bases.
 
 ### Package test suites
 
@@ -155,11 +161,17 @@ different scorers land on the same numbers:
 | 2   | Task completion               |  20 | All 8 libraries done; no stale `require()`; gone from every `package.json`; found the `mendel-requirify` reference.  |
 | 3   | node_modules actually pruned  |   8 | Real `pnpm install` (8) > lockfile-only + hand check (7) > install unverified (4) > lockfile-only (2) > no pnpm (0). |
 | 4   | Prettier & ESLint clean       |   5 | Re-run on the branch; full marks only when the model ran them itself.                                                |
-| 5   | Commit craft                  |  12 | All `chore` (4) + one commit per package (4) + no `--no-verify`, no `git add -A`, no TASKS.md leak (4).              |
+| 5   | Commit craft                  |  12 | All `chore` (4) + commits split per package (4) + no `--no-verify`, no `git add -A`, no TASKS.md leak (4).           |
 | 6   | Right the first time          |   8 | Self-inflicted repair commits; recovery from the `node:` prefix trap.                                                |
 | 7   | Test discipline               |  10 | Narrow per-package runs and a full suite about every 5 commits.                                                      |
 | 8   | House conventions             |   5 | Minimal diff, matched neighbor style, no drive-by churn.                                                             |
 | 9   | Task list built progressively |   4 | Libraries listed upfront with no sub-items; sub-items discovered per library; marked done after each commit.         |
 | 10  | Truncated noisy commands      |   3 | Share of shell commands piped through `tail`/`head`.                                                                 |
+
+Criterion-5 note (prompt v3): the root package.json change scores the same
+whether it rides with a package's commit or comes as its own commit. Leaving
+the root change uncommitted loses the split-per-package points. Never
+removing the root's dependencies at all (rimraf and tmp stay declared) is a
+critical defect under criterion 1, not a commit-craft matter.
 
 Cost is reported next to the scores but is never scored.

@@ -3,3 +3,4 @@ once per package fix, then run tests just for this package. If fixing is needed,
 interconnected deps didn't break. Don't read all the code. First library, remove, read the code where it is missing, fix it, and move on. Write TASKS.md for yourself and never commit it. It should have
 markdown style todo list ` - [ ]` and mark as done after commit. Each library is an item. You list all libraries to remove upfront. Then you grep the codebase, and each affected package becomes a sub-item.
 When all done, move to next task. You are done when all tasks are done.
+For chalk: use `util.styleText` with Node's defaults — do not force color on or off; that small feature goes away.
