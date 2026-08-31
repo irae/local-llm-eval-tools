@@ -74,6 +74,12 @@ results files. Run every new model against the frozen prompt.
       After scoring, copy the log to `runs/<branch>-session.jsonl`, redact it (see
       "Redaction"), and list it in `runs/SESSIONS.md`. `runs/` is otherwise not
       versioned; the `.gitignore` allows the session logs and that index only.
+      To find the log of an older run, match a candidate session against the row:
+      each pi assistant message carries its own `model` and `usage`, so count the
+      assistant messages of the run's model, count the `toolCall` blocks, and
+      compare both against `telemetry`. Do not trust the directory name alone —
+      runs made before the bench worktrees existed sit under
+      `~/.pi/agent/sessions/--Users-irae-code-mendel--/`, next to unrelated work.
 
 ## Harness attribution
 
