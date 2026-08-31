@@ -147,7 +147,7 @@ function scoreboard() {
         &nbsp; <label><input type="radio" name="costmode" value="or"> weighted by OpenRouter cost</label>
         &nbsp; <label><input type="radio" name="costmode" value="plan"> weighted by plan estimate</label>
       </p>
-      <p class="lede" id="plan-note" style="display:none">Cost-weighted score = 100 × quality score ÷ (1 + cost + $2 per critical bug + $0.01 per minute of wall clock), normalised to the leader. Plan mode uses the marginal plan estimate where one exists; runs without a plan keep their OpenRouter figure; local runs cost $0 plus time.</p>`;
+      <p class="lede" id="plan-note" style="display:none">Cost-weighted score = 100 × quality score ÷ (1 + cost × (1 + criticals) + $0.01 per minute of wall clock), normalised to the leader. A critical bug is priced as one extra run of the same model — fixing after a cheap run is cheap, fixing after an expensive run is expensive. Plan mode uses the marginal plan estimate where one exists; runs without a plan keep their OpenRouter figure; local runs cost $0 plus time.</p>`;
     return `${radios}
       <div class="scroller"><table id="scoreboard">
         <thead>
@@ -345,7 +345,9 @@ const SORTER =
             const cost = mode === 'or' ? Number(d.or) : Number(d.plan);
             return (
                 Number(d.base) /
-                (1 + cost + 2 * Number(d.crit) + 0.01 * Number(d.wall))
+                (1 +
+                    cost * (1 + Number(d.crit)) +
+                    0.01 * Number(d.wall))
             );
         });
         if (mode !== 'none') {
