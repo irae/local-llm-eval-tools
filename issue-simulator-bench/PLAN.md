@@ -199,4 +199,7 @@ git worktree remove --force ../mendel-bench-<model>
 git worktree prune
 ```
 
-Keep the `<model>-issue-13` branch — it is the run's artifact.
+Keep the `<model>-issue-13` branch — it is the run's artifact. Push it to
+`origin` when the run is scored (`git push origin <branch>`), together with the
+run's session log, so anyone can inspect the raw data from any machine. Policy
+change 2026-08-31: run branches were kept local before; push them all.
