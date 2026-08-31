@@ -208,6 +208,115 @@
         "<td><span class=\"pill p-mid\">80 %</span></td>",
         "<td>238</td>"
       ]
+    },
+    {
+      "model": "qwen3.6-35b-a3b",
+      "model_id": "qwen3.6-35b-a3b",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "llama",
+      "local": true,
+      "serving": "llama-server",
+      "branch": "qwen3.6-35b-a3b-issue-13-r2",
+      "base_commit": "4679b5a",
+      "partial": false,
+      "round": 2,
+      "prompt_version": "r2.1",
+      "score_total": 67.5,
+      "scores": {
+        "bugs": 10,
+        "completion": 20,
+        "node_modules": 8,
+        "lint": 1,
+        "commit_craft": 4.5,
+        "first_time": 5,
+        "test_discipline": 9,
+        "conventions": 4,
+        "task_list": 4,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "packages/mendel-mocha-runner/index.js destructures only { globSync } from require('fs') but line 49 calls fs.readFileSync; fs is undefined, throwing ReferenceError whenever a prelude entry is missing from the registry (confirmed with eslint no-undef and a direct call)"
+        },
+        {
+          "severity": "medium",
+          "summary": "cli-printer.js's top-level print() method calls colorize() unconditionally; only the nested _print() method checks this._enableColor, so enableColor:false still emits ANSI codes — the exact chalk trap the guided prompt disclosed, only half-fixed (confirmed by capturing print() output with and without enableColor:false, both contain escape codes)"
+        },
+        {
+          "severity": "minor",
+          "summary": "all 8 commits used --no-verify, against the guided prompt's explicit rule, with no hook failure in the session log to explain it — a systematic bypass, not a reaction to a broken hook"
+        },
+        {
+          "severity": "minor",
+          "summary": "5 of 8 commits combine two or three packages in one commit, against the guided prompt's explicit one-package-per-commit rule"
+        },
+        {
+          "severity": "minor",
+          "summary": "prettier --check flags 2 real source files (cli-printer.js, pipeline.js) not reformatted, despite the guided prompt's mandatory step 5 self-check"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 75.6,
+        "tokens_total": 12081153,
+        "tokens_in": 93894,
+        "tokens_out": 40013,
+        "cache_read": 11947246,
+        "peak_context": 94294,
+        "window_pct": 96,
+        "compactions": 0,
+        "assistant_msgs": 253,
+        "tool_calls": 251,
+        "tool_errors": 18,
+        "commits": 8,
+        "failed_commits": 0,
+        "truncation_pct": 32
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "matrix_cells": [
+        "<td><span class=\"pill p-bad\">1 crit · 1 med</span> <b>10</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">ran 23x, pass</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">SYNC OK</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
+        "<td class=\"best\"><b>20</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs ×9</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">−96 lines</span></td>",
+        "<td><span class=\"pill p-bad\">eslint 1 err · prettier 2 files</span> <b>1</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
+        "<td><span class=\"pill p-bad\">5 multi-package</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">both dropped</span></td>",
+        "<td><span class=\"pill p-bad\">bypassed ×8</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">untracked</span></td>",
+        "<td><b>4.5</b></td>",
+        "<td><span class=\"pill p-mid\">bug slipped through</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">23 runs</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">3 runs</span> <b>9</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">upfront, marked done</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">32 %</span> <b>2</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">bare requires, minimal diff</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">12.1 M</span></td>",
+        "<td><span class=\"pill p-bad\">4 %</span></td>",
+        "<td><span class=\"pill p-mid\">251</span></td>"
+      ],
+      "matrix_total": "67.5",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      }
     }
   ],
   "matrix_rows": [
