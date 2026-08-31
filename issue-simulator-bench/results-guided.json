@@ -422,6 +422,108 @@
         "rate_tone": null,
         "provider_label": "local"
       }
+    },
+    {
+      "model": "mlx-community/Qwen3.8-27B-4bit",
+      "model_id": "mlx-community/Qwen3.8-27B-4bit",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "mlx",
+      "local": true,
+      "serving": "mlx_lm.server",
+      "branch": "mlx-community-Qwen3.8-27B-4bit-issue-13-r2-low",
+      "base_commit": "4679b5a",
+      "partial": true,
+      "round": 2,
+      "prompt_version": "r2.1",
+      "config_note": "reasoning effort: low",
+      "score_total": 84,
+      "scores": {
+        "bugs": 25,
+        "completion": 9.5,
+        "node_modules": 8,
+        "lint": 5,
+        "commit_craft": 12,
+        "first_time": 7,
+        "test_discipline": 7,
+        "conventions": 5,
+        "task_list": 2.5,
+        "truncation": 3
+      },
+      "defects": [
+        {
+          "severity": "medium",
+          "summary": "missed the disclosed legacy-packages/mendel-requirify rimraf reference; the guided prompt explicitly warns this exists, and the model never found it despite finishing rimraf's other 3 sites cleanly"
+        },
+        {
+          "severity": "minor",
+          "summary": "never ran the mandatory full-suite check after the 5th commit"
+        },
+        {
+          "severity": "minor",
+          "summary": "TASKS.md sub-items for rimraf's completed sites (mendel-transform-less, mendel-pipeline) were never checked off despite the work landing cleanly"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 153.8,
+        "tokens_total": 1122671,
+        "tokens_in": 791319,
+        "tokens_out": 17144,
+        "cache_read": 314208,
+        "peak_context": 22498,
+        "window_pct": 85,
+        "compactions": 0,
+        "assistant_msgs": 73,
+        "tool_calls": 95,
+        "tool_errors": 9,
+        "commits": 6,
+        "failed_commits": 0,
+        "truncation_pct": 53
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "matrix_cells": [
+        "<td class=\"best\"><span class=\"pill p-good\">no bugs in 6 landed commits</span> <b>25</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">ran 12x, pass</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">SYNC OK</span></td>",
+        "<td><span class=\"pill p-mid\">3 done, rimraf mostly</span></td>",
+        "<td><span class=\"pill p-bad\">4 left, rimraf partial</span></td>",
+        "<td><span class=\"pill p-bad\">4 left, rimraf partial</span></td>",
+        "<td><span class=\"pill p-bad\">missed mendel-requirify</span></td>",
+        "<td><b>9.5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs ×6</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">−37 lines</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean, ran itself</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">all chore</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">all 6, one per package</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean, no bypasses</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">untracked</span></td>",
+        "<td class=\"best\"><b>12</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no repairs</span> <b>7</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">12 runs</span></td>",
+        "<td><span class=\"pill p-bad\">no full-suite checkpoint</span> <b>7</b></td>",
+        "<td><span class=\"pill p-mid\">top-level only</span> <b>2.5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">53 %</span> <b>3</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">minimal diff</span> <b>5</b></td>",
+        "<td><span class=\"pill p-mid\">1.1 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">15 %</span></td>",
+        "<td><span class=\"pill p-mid\">95</span></td>"
+      ],
+      "matrix_total": "84",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      }
     }
   ],
   "matrix_rows": [
