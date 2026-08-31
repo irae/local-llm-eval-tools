@@ -1098,6 +1098,105 @@
         "rate_tone": null,
         "provider_label": "local"
       }
+    },
+    {
+      "model": "mlx-community/Qwen3.8-27B-4bit",
+      "model_id": "mlx-community/Qwen3.8-27B-4bit",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "mlx",
+      "local": true,
+      "serving": "mlx_lm.server",
+      "branch": "mlx-community-Qwen3.8-27B-4bit-issue-13",
+      "base_commit": "182b07f",
+      "partial": true,
+      "score_total": 79.5,
+      "scores": {
+        "bugs": 25,
+        "completion": 8.5,
+        "node_modules": 8,
+        "lint": 5,
+        "commit_craft": 10,
+        "first_time": 7,
+        "test_discipline": 7,
+        "conventions": 4,
+        "task_list": 3,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "medium",
+          "summary": "one run stalled and the pi client exited silently after mlx_lm.server logged \"Failed to parse tool call (ValueError: No function provided.) — tool text was likely truncated mid-generation\"; resumed in the same worktree with a fresh pi session, which correctly found and committed the pending diff"
+        },
+        {
+          "severity": "minor",
+          "summary": "one commit used --no-verify; one commit used git add -A instead of naming files"
+        },
+        {
+          "severity": "minor",
+          "summary": "closed out at the ~4-hour soft time budget with 3 of 8 libraries fully done and rimraf partially done (root devDep and one of three usage sites); did not reach glob, chalk, tmp, or shasum"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 253.5,
+        "tokens_total": 1777285,
+        "tokens_in": 1372216,
+        "tokens_out": 22008,
+        "cache_read": 383061,
+        "peak_context": 23839,
+        "window_pct": 90,
+        "compactions": 0,
+        "assistant_msgs": 120,
+        "tool_calls": 135,
+        "tool_errors": 12,
+        "commits": 6,
+        "failed_commits": 0,
+        "truncation_pct": 31
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "matrix_cells": [
+        "<td class=\"best\"><span class=\"pill p-good\">no bugs in 6 landed commits</span> <b>25</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">ran 13x</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td><span class=\"pill p-bad\">3 done, rimraf partial</span></td>",
+        "<td><span class=\"pill p-bad\">4 left, rimraf partial</span></td>",
+        "<td><span class=\"pill p-bad\">4 left, rimraf partial</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td><b>8.5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs ×3</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">29 lines removed</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean · ran 7×</span> <b>5</b></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">all chore</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">one per package</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td><span class=\"pill p-bad\">1 no-verify, 1 add -A</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">kept out</span></td>",
+        "<td><b>10</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no repairs</span> <b>7</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">13 runs</span></td>",
+        "<td><span class=\"pill p-mid\">no full-suite cadence seen</span> <b>7</b></td>",
+        "<td><span class=\"pill p-mid\">built upfront, stale checkboxes</span> <b>3</b></td>",
+        "<td><span class=\"pill p-mid\">31 %</span> <b>2</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">minimal diff</span> <b>4</b></td>",
+        "<td><span class=\"pill p-bad\">1.78 M</span></td>",
+        "<td><span class=\"pill p-mid\">10 %</span></td>",
+        "<td><span class=\"pill p-bad\">135, mid-run restart</span></td>"
+      ],
+      "matrix_total": "79.5",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      }
     }
   ],
   "matrix_rows": [
