@@ -16,7 +16,7 @@ case "$bench" in
     guided)
         BASE_COMMIT=4679b5a
         PROMPT="$BENCH_DIR/prompt-guided.txt"
-        suffix="-issue-13-r2"
+        suffix="-guided-issue-13"
         wtprefix="mendel-bench2-"
         ;;
     blind)

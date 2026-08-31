@@ -18,7 +18,7 @@ run of the same test.
 | Question     | Can the model discover the traps?      | How far does a structured plan lift it?                |
 | Prompt       | `prompt-blind.txt` (terse)             | `prompt-guided.txt` (numbered plan, traps disclosed)   |
 | Base commit  | `182b07f`                              | `23050bd` (tag `guided-v3-base`; v2.1 rows: `4679b5a`) |
-| Run branches | `<model>-issue-13`                     | `<model>-issue-13-r2`                                  |
+| Run branches | `<model>-issue-13`                     | `<model>-guided-issue-13`                                  |
 | Worktrees    | `../mendel-bench-<model>`              | `../mendel-bench2-<model>`                             |
 | Results      | `results.json` / `results.csv`         | `results-guided.json` / `results-guided.csv`           |
 | Report       | `report.html` (`report-template.html`) | `report-guided.html` (`report-guided-template.html`)   |
@@ -40,7 +40,7 @@ fresh install instead of dying with `mendel: command not found`.
 The guided prompt is now v3.0 (base `guided-v3-base`); the blind prompt is v1.1.
 The five v2.1 guided rows (base `4679b5a`) are a closed set — do not add to them.
 One result row per model per prompt version: a pre-freeze
-haiku run exists only as branch `…-issue-13-r2-p0` and in git history, not in the
+haiku run exists only as branch `…-p0-guided-issue-13` and in git history, not in the
 results files. Run every new model against the frozen prompt.
 
 ## How to run a new model
