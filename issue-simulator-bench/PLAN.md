@@ -53,7 +53,7 @@ results files. Run every new model against the frozen prompt.
     - Creates the bench's run branch for the model.
     - Runs a real `pnpm install` in the worktree.
     - Spawns `claude -p` with the bench's prompt and writes results to `runs/`
-      (not versioned).
+      (not versioned, except the session logs listed in `runs/SESSIONS.md`).
 3. For other harnesses (pi, codex), start the harness in a worktree prepared the
    same way, paste the bench's prompt verbatim, and let it run to completion
    without help.
@@ -71,6 +71,9 @@ results files. Run every new model against the frozen prompt.
     - Claude Code: `runs/<model>-result.json` (cost, usage, session id) and the
       session transcript under `~/.claude/projects/`.
     - pi: session JSONL under `~/.pi/agent/sessions/`; use the `analyze-sessions` skill.
+      After scoring, copy the log to `runs/<branch>-session.jsonl`, redact it (see
+      "Redaction"), and list it in `runs/SESSIONS.md`. `runs/` is otherwise not
+      versioned; the `.gitignore` allows the session logs and that index only.
 
 ## Harness attribution
 
@@ -201,5 +204,6 @@ git worktree prune
 
 Keep the `<model>-issue-13` branch — it is the run's artifact. Push it to
 `origin` when the run is scored (`git push origin <branch>`), together with the
-run's session log, so anyone can inspect the raw data from any machine. Policy
-change 2026-08-31: run branches were kept local before; push them all.
+run's session log in `runs/`, so anyone can inspect the raw data from any
+machine. Policy change 2026-08-31: run branches were kept local before; push
+them all.
