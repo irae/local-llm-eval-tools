@@ -106,6 +106,47 @@ duration, commit count, failed commits, share of shell commands piped to
 `git log master..$b` — one package per commit, all types `chore`, no TASKS.md leak,
 root devDependencies (`rimraf`, `tmp`) removed.
 
+## Scorer discipline — pitfalls found in the 2026-08-31 re-score
+
+Earlier scoring passes missed each of these at least once. Check them all so
+different scorers land on the same numbers:
+
+1. **Never trust a prior scorer's cell labels.** Re-derive every judgement
+   from the branch and the session log. The re-score found labels that were
+   simply wrong ("batched" task lists that were textbook, "never recovered"
+   loops that recovered).
+2. **Re-run flaky-looking suites standalone, three times.** A batch failure
+   that persists 3/3 standalone is a real regression, not the documented
+   flake (this is how the gpt-5.6-sol generator-config regression was found).
+3. **Distinguish vacuous passes.** Trap A and the chalk contract "pass" on a
+   branch that never touched those files. That is absence of work, not
+   correctness; score completion accordingly and say so in the cell.
+4. **Classify commit failures by cause.** A bash quoting error, a test-first
+   `&&` chain that stopped, and a husky reject are three different things;
+   only hook rejects and bypasses belong to the commit-hooks bucket.
+5. **Check TASKS.md at the branch tip**, not just in the log. A "removed the
+   file" commit can modify it instead of deleting it (qwen3.6 blind).
+6. **Match commits against session events.** A branch commit with no command
+   in any session log is a provenance gap; an in-session commit missing from
+   the pushed branch is one too. Record both (Qwen3.8-low guided; gemma
+   blind 60b93f8).
+7. **Search the session log for human messages inside the scored region.**
+   Any mid-run instruction, nudge, or "continue" violates the no-help rule:
+   flag the run as assisted in the report prose and dock any criterion the
+   help directly satisfied (deepseek's trap-B credit).
+8. **Truncation is about effect, not just the pipe count.** Redirecting a
+   noisy run to a file and grepping it is truncation by better means; a raw
+   run into the harness output cap is not truncation at all.
+9. **Task-list scale, applied uniformly:** textbook progressive discovery
+   with per-commit ticks = 4; upfront full tree but faithful ticks = 2-3;
+   bulk/batched check-offs = 1.5; coarse or unmaintained = 1 or less.
+10. **Lint credit needs both facts:** is the branch clean when you re-run
+    the tools, and did the model run them itself (or at least let the hooks
+    run — a `--no-verify` bypass forfeits "clean via hooks" credit).
+11. **Harness failures are not model failures.** Server crashes, silent
+    client exits, and restarts do not count against right-the-first-time;
+    self-inflicted broken edits do. Keep the two lists separate.
+
 ## Scoring rubric — 100 points
 
 | #   | Criterion                     | Max | Measurement                                                                                                          |
