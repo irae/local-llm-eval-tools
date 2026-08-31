@@ -1,6 +1,6 @@
 {
   "bench": "guided",
-  "prompt": "prompt-guided.txt (frozen v2.1; the r2.0 haiku row predates the freeze)",
+  "prompt": "prompt-guided.txt (frozen v2.1)",
   "runs": [
     {
       "model": "claude-sonnet-5",
@@ -99,114 +99,6 @@
         "<td>36.1 M</td>",
         "<td class=\"best\"><span class=\"pill p-good\">18 %</span></td>",
         "<td>247</td>"
-      ]
-    },
-    {
-      "model": "claude-haiku-4.5",
-      "model_id": "claude-haiku-4-5-20251001",
-      "harness": "claude-code",
-      "harness_guessed": false,
-      "provider": "anthropic",
-      "local": false,
-      "serving": null,
-      "branch": "claude-haiku-4-5-20251001-issue-13-r2-p0",
-      "base_commit": "4679b5a",
-      "partial": false,
-      "round": 2,
-      "prompt_version": "r2.0",
-      "score_total": 79,
-      "scores": {
-        "bugs": 19,
-        "completion": 20,
-        "node_modules": 0,
-        "lint": 5,
-        "commit_craft": 10,
-        "first_time": 8,
-        "test_discipline": 7,
-        "conventions": 5,
-        "task_list": 4,
-        "truncation": 1
-      },
-      "defects": [
-        {
-          "severity": "medium",
-          "summary": "styleText port leaves stream validation on; forced colour off a TTY is lost"
-        },
-        {
-          "severity": "minor",
-          "summary": "no pnpm install at all; lockfile untouched (scored in node_modules)"
-        }
-      ],
-      "telemetry": {
-        "wall_clock_min": 11.8,
-        "tokens_total": 16817717,
-        "tokens_in": 1538,
-        "tokens_out": 41816,
-        "cache_read": 16638539,
-        "peak_context": 149427,
-        "window_pct": 75,
-        "compactions": 0,
-        "assistant_msgs": 395,
-        "tool_calls": 191,
-        "tool_errors": 1,
-        "commits": 14,
-        "failed_commits": 0,
-        "truncation_pct": 26
-      },
-      "cost_usd": 2.15,
-      "cost_basis": "plan",
-      "cost": {
-        "or_route": "Anthropic",
-        "or_usd": "2.15",
-        "paid_basis": "plan est.",
-        "paid_usd": "0.14",
-        "vendor_usd": "2.15",
-        "rate_in": "1.00",
-        "rate_out": "5.00",
-        "rate_cr": "0.10",
-        "rate_tone": "mid",
-        "provider_label": "Claude plan"
-      },
-      "plan": {
-        "marginal": "\u2248 $0.14 est.",
-        "marginal_tone": null,
-        "plan": "Claude Max 5x $100/mo",
-        "alloc": "$100",
-        "alloc_note": "all of it",
-        "week": "$23.08",
-        "w5h": "not exposed",
-        "wweek": "not exposed",
-        "rpw": "\u2248 161"
-      },
-      "matrix_total": "79",
-      "matrix_cells": [
-        "<td><span class=\"pill p-mid\">1 medium</span> <b>19</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">SYNC OK</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
-        "<td class=\"best\"><b>20</b></td>",
-        "<td><span class=\"pill p-bad\">never ran pnpm</span> <b>0</b></td>",
-        "<td><span class=\"pill p-bad\">untouched</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 self-run</span> <b>5</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">14 / 14</span></td>",
-        "<td><span class=\"pill p-mid\">2 multi-package</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">both dropped</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">0 / 0</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">untracked</span></td>",
-        "<td><b>10</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">none</span> <b>8</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
-        "<td><span class=\"pill p-bad\">1 run</span> <b>7</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">live ticks</span> <b>4</b></td>",
-        "<td><span class=\"pill p-mid\">26 %</span> <b>1</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">minimal</span> <b>5</b></td>",
-        "<td>16.8 M</td>",
-        "<td><span class=\"pill p-mid\">75 %</span></td>",
-        "<td>191</td>"
       ]
     },
     {

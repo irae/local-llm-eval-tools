@@ -698,11 +698,9 @@
         </p>
         {{SCOREBOARD}}
         <p class="lede">
-            <b>Bugs</b> are weighted: critical 3, medium 2, minor 1. The haiku
-            row tagged <code>r2.0</code> ran one prompt revision before the
-            freeze; every other run uses the frozen
-            <code>prompt-guided.txt</code>. Claude runs on a subscription plan
-            show computed token cost, not a metered bill.
+            <b>Bugs</b> are weighted: critical 3, medium 2, minor 1. Every run
+            uses the frozen <code>prompt-guided.txt</code>. Claude runs on a
+            subscription plan show computed token cost, not a metered bill.
         </p>
     </section>
 
@@ -855,10 +853,11 @@
             <div class="note">
                 <h3>Run-to-run variance is visible</h3>
                 <p>
-                    The two haiku rows are the same model on near-identical
-                    prompts; which instructions get dropped changes between
-                    runs. One guided run per model is a data point, not a
-                    verdict.
+                    A pre-freeze haiku run (branch
+                    <code>…-issue-13-r2-p0</code>, kept in git history) scored
+                    79 by dropping a different set of instructions than the
+                    scored run. Which steps get skipped changes between runs —
+                    one guided run per model is a data point, not a verdict.
                 </p>
             </div>
         </div>

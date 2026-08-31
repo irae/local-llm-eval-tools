@@ -37,9 +37,9 @@ the root declares `mendel-pipeline` as a workspace devDependency, so the hoisted
 `node_modules/.bin/mendel` link resolves and the full-example karma test runs on a
 fresh install instead of dying with `mendel: command not found`.
 
-The guided prompt is frozen at v2.1. One haiku run (`…-issue-13-r2-p0`, tagged
-`r2.0` in the results) predates the freeze; keep it as a variance data point, and
-run every new model against the frozen prompt.
+The guided prompt is frozen at v2.1. One result row per model: a pre-freeze
+haiku run exists only as branch `…-issue-13-r2-p0` and in git history, not in the
+results files. Run every new model against the frozen prompt.
 
 ## How to run a new model
 
