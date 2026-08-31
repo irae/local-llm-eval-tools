@@ -13,18 +13,18 @@
       "branch": "grok-4.6-issue-13",
       "base_commit": "182b07f",
       "partial": false,
-      "score_total": 88,
+      "score_total": 89.5,
       "scores": {
         "bugs": 25,
         "completion": 15,
         "node_modules": 8,
         "lint": 5,
-        "commit_craft": 11.5,
-        "first_time": 7,
+        "commit_craft": 12,
+        "first_time": 8,
         "test_discipline": 9,
         "conventions": 5,
-        "task_list": 1,
-        "truncation": 1.5
+        "task_list": 2,
+        "truncation": 0.5
       },
       "defects": [],
       "telemetry": {
@@ -61,14 +61,14 @@
         "<td class=\"best\"><span class=\"pill p-good\">all chore</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
         "<td><span class=\"pill p-mid\">2 separate</span></td>",
-        "<td><span class=\"pill p-mid\">1 fail</span></td>",
+        "<td>0 hook fails</td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
-        "<td class=\"best\"><b>11.5</b></td>",
-        "<td><span class=\"pill p-good\">none</span> <b>7</b></td>",
+        "<td class=\"best\"><b>12</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">none</span> <b>8</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">14 runs</span></td>",
         "<td><span class=\"pill p-good\">4 / 17</span> <b>9</b></td>",
-        "<td><span class=\"pill p-bad\">full tree upfront</span> <b>1</b></td>",
-        "<td><span class=\"pill p-bad\">6 %</span> <b>1.5</b></td>",
+        "<td><span class=\"pill p-mid\">full tree upfront, live ticks</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">6 %</span> <b>0.5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">tight</span> <b>5</b></td>",
         "<td><span class=\"pill p-mid\">11.6 M</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
@@ -209,18 +209,18 @@
       "branch": "luna-5.6-max-issue-13",
       "base_commit": "182b07f",
       "partial": false,
-      "score_total": 85,
+      "score_total": 84.5,
       "scores": {
         "bugs": 19,
         "completion": 20,
         "node_modules": 7,
         "lint": 5,
         "commit_craft": 9,
-        "first_time": 4,
+        "first_time": 5,
         "test_discipline": 10,
         "conventions": 5,
         "task_list": 4,
-        "truncation": 1.5
+        "truncation": 0.5
       },
       "defects": [
         {
@@ -265,11 +265,11 @@
         "<td class=\"best\"><span class=\"pill p-good\">0 fail</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
         "<td><b>9</b></td>",
-        "<td><span class=\"pill p-mid\">2 fix commits</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">2 fix commits</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">19 runs</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">6 / 20</span> <b>10</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">exactly this</span> <b>4</b></td>",
-        "<td><span class=\"pill p-bad\">8 %</span> <b>1.5</b></td>",
+        "<td><span class=\"pill p-bad\">8 %</span> <b>0.5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">tight</span> <b>5</b></td>",
         "<td><span class=\"pill p-bad\">28.0 M</span></td>",
         "<td>1</td>",
@@ -299,7 +299,10 @@
         "w5h": "8 %",
         "wweek": "1 %",
         "rpw": "≈ 100"
-      }
+      },
+      "notes": [
+        "Mid-run human help: a 9.4-minute stall was broken by the user typing \"continue\"."
+      ]
     },
     {
       "model": "kimi-k3",
@@ -312,7 +315,7 @@
       "branch": "kimi-k3-issue-13",
       "base_commit": "182b07f",
       "partial": false,
-      "score_total": 82,
+      "score_total": 80.5,
       "scores": {
         "bugs": 19,
         "completion": 15,
@@ -322,7 +325,7 @@
         "first_time": 7,
         "test_discipline": 10,
         "conventions": 4,
-        "task_list": 2.5,
+        "task_list": 1.5,
         "truncation": 3
       },
       "defects": [
@@ -375,7 +378,7 @@
         "<td><span class=\"pill p-good\">none</span> <b>7</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">19 runs</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">5 / 17</span> <b>10</b></td>",
-        "<td><span class=\"pill p-mid\">right shape, 3 updates</span> <b>2.5</b></td>",
+        "<td><span class=\"pill p-bad\">bulk rewrites ×2</span> <b>1.5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">62 %</span> <b>3</b></td>",
         "<td><span class=\"pill p-mid\">duplicate require</span> <b>4</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">4.8 M</span></td>",
@@ -511,18 +514,18 @@
       "branch": "deepseekv4-pro-0813-issue-13",
       "base_commit": "182b07f",
       "partial": false,
-      "score_total": 72,
+      "score_total": 70.5,
       "scores": {
         "bugs": 7,
-        "completion": 20,
+        "completion": 18,
         "node_modules": 2,
         "lint": 5,
         "commit_craft": 12,
         "first_time": 8,
-        "test_discipline": 9,
+        "test_discipline": 10,
         "conventions": 4,
         "task_list": 2,
-        "truncation": 3
+        "truncation": 2.5
       },
       "defects": [
         {
@@ -563,8 +566,8 @@
         "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">found</span></td>",
-        "<td class=\"best\"><b>20</b></td>",
+        "<td><span class=\"pill p-mid\">told by owner</span></td>",
+        "<td><b>18</b></td>",
         "<td><span class=\"pill p-bad\">lockfile-only ×19</span> <b>2</b></td>",
         "<td><span class=\"pill p-mid\">194 <em style=\"display:inline\">+ unrelated churn</em></span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean · ran 42×</span> <b>5</b></td>",
@@ -577,9 +580,9 @@
         "<td class=\"best\"><b>12</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">none</span> <b>8</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">17 runs</span></td>",
-        "<td><span class=\"pill p-good\">4 / 18</span> <b>9</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">4 / 18</span> <b>10</b></td>",
         "<td><span class=\"pill p-mid\">upfront, but adapted</span> <b>2</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">40 %</span> <b>3</b></td>",
+        "<td><span class=\"pill p-mid\">40 %</span> <b>2.5</b></td>",
         "<td><span class=\"pill p-mid\">extra churn</span> <b>4</b></td>",
         "<td><span class=\"pill p-bad\">22.1 M</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
@@ -598,7 +601,10 @@
         "rate_cr": "0.044",
         "rate_tone": "good",
         "provider_label": "Fireworks"
-      }
+      },
+      "notes": [
+        "Mid-run human help: two unsolicited owner instructions scoped the legacy-package work, including the trap-B area."
+      ]
     },
     {
       "model": "claude-haiku-4.5",
@@ -718,7 +724,7 @@
       "branch": "qwen3.6-35b-a3b-issue-13",
       "base_commit": "182b07f",
       "partial": false,
-      "score_total": 42,
+      "score_total": 41.5,
       "scores": {
         "bugs": 10,
         "completion": 11,
@@ -729,7 +735,7 @@
         "test_discipline": 3,
         "conventions": 3,
         "task_list": 1,
-        "truncation": 2
+        "truncation": 1.5
       },
       "defects": [
         {
@@ -782,7 +788,7 @@
         "<td class=\"best\"><span class=\"pill p-good\">31 runs</span></td>",
         "<td><span class=\"pill p-bad\">0 / 13</span> <b>3</b></td>",
         "<td><span class=\"pill p-bad\">full tree upfront</span> <b>1</b></td>",
-        "<td><span class=\"pill p-mid\">27 %</span> <b>2</b></td>",
+        "<td><span class=\"pill p-mid\">27 %</span> <b>1.5</b></td>",
         "<td><span class=\"pill p-mid\">dropped an option</span> <b>3</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">10.1 M</span></td>",
         "<td>1</td>",
@@ -801,7 +807,10 @@
         "rate_cr": null,
         "rate_tone": null,
         "provider_label": "local"
-      }
+      },
+      "notes": [
+        "Mid-run human help: three substantive user interventions — a \"please continue\" after a 34.9-minute stall, TASKS.md coaching, and a memory-pressure instruction."
+      ]
     },
     {
       "model": "gemma-4-26b-a4b",
@@ -814,15 +823,15 @@
       "branch": "gemma-4-26b-a4b-issue-13",
       "base_commit": "182b07f",
       "partial": true,
-      "score_total": 41,
+      "score_total": 38,
       "scores": {
         "bugs": 13,
         "completion": 7,
         "node_modules": 0,
-        "lint": 3,
-        "commit_craft": 5,
+        "lint": 2,
+        "commit_craft": 4,
         "first_time": 3,
-        "test_discipline": 6,
+        "test_discipline": 5,
         "conventions": 3,
         "task_list": 1,
         "truncation": 0
@@ -866,17 +875,17 @@
         "<td><b>7</b></td>",
         "<td><span class=\"pill p-bad\">never ran pnpm</span> <b>0</b></td>",
         "<td><span class=\"pill p-bad\">0</span></td>",
-        "<td><span class=\"pill p-mid\">clean via hooks</span> <b>3</b></td>",
+        "<td><span class=\"pill p-mid\">clean, hooks bypassed</span> <b>2</b></td>",
         "<td><span class=\"pill p-mid\">3 turns</span></td>",
         "<td><span class=\"pill p-bad\">mixed fix/refactor</span></td>",
         "<td><span class=\"pill p-mid\">mostly</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">alongside</span></td>",
         "<td><span class=\"pill p-bad\">2 fail · 2× --no-verify</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
-        "<td><b>5</b></td>",
+        "<td><b>4</b></td>",
         "<td><span class=\"pill p-bad\">unfinished</span> <b>3</b></td>",
         "<td><span class=\"pill p-mid\">8 runs</span></td>",
-        "<td><span class=\"pill p-mid\">1 / 9</span> <b>6</b></td>",
+        "<td><span class=\"pill p-bad\">1 / 9</span> <b>5</b></td>",
         "<td><span class=\"pill p-bad\">full tree upfront</span> <b>1</b></td>",
         "<td><span class=\"pill p-bad\">0 %</span> <b>0</b></td>",
         "<td><span class=\"pill p-mid\">duplicate require</span> <b>3</b></td>",
@@ -897,7 +906,11 @@
         "rate_cr": null,
         "rate_tone": null,
         "provider_label": "local"
-      }
+      },
+      "notes": [
+        "Mid-run human help inside the scored region: an owner instruction triggered the final commit.",
+        "Provenance: in-session commit 60b93f8 (root/pipeline rimraf) is absent from the pushed branch."
+      ]
     },
     {
       "model": "gpt-5.6-sol",
@@ -910,18 +923,18 @@
       "branch": "gpt-5.6-sol-issue-13",
       "base_commit": "182b07f",
       "partial": false,
-      "score_total": 69,
+      "score_total": 65.5,
       "scores": {
-        "bugs": 16,
+        "bugs": 10,
         "completion": 20,
         "node_modules": 2,
         "lint": 5,
-        "commit_craft": 7.5,
+        "commit_craft": 8.5,
         "first_time": 5,
-        "test_discipline": 7,
+        "test_discipline": 9,
         "conventions": 3,
         "task_list": 2,
-        "truncation": 1.5
+        "truncation": 1
       },
       "defects": [
         {
@@ -931,6 +944,10 @@
         {
           "severity": "minor",
           "summary": "scope-creep commit swaps a mendel-config test fixture plugin and adds a workspace dependency"
+        },
+        {
+          "severity": "medium",
+          "summary": "mendel-config test/generator-config.js fails deterministically on the branch (3/3 standalone reruns) — introduced by the fixture-swap scope-creep commit"
         }
       ],
       "telemetry": {
@@ -952,8 +969,8 @@
       "cost_usd": 13.94,
       "cost_basis": "plan",
       "matrix_cells": [
-        "<td><span class=\"pill p-bad\">1 med · 1 min</span> <b>16</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
+        "<td><span class=\"pill p-bad\">2 med · 1 min</span> <b>10</b></td>",
+        "<td><span class=\"pill p-bad\">generator-config fails 3/3</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">works</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
@@ -967,14 +984,14 @@
         "<td><span class=\"pill p-bad\">fix/test/chore</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
         "<td><span class=\"pill p-mid\">2 separate</span></td>",
-        "<td><span class=\"pill p-bad\">3 fail</span></td>",
+        "<td>3 test-first fails</td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
-        "<td><b>7.5</b></td>",
+        "<td><b>8.5</b></td>",
         "<td><span class=\"pill p-mid\">1 scope-creep fix</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">24 runs</span></td>",
-        "<td><span class=\"pill p-mid\">2 / 19</span> <b>7</b></td>",
+        "<td><span class=\"pill p-good\">4 / 19</span> <b>9</b></td>",
         "<td><span class=\"pill p-mid\">upfront, adapted</span> <b>2</b></td>",
-        "<td><span class=\"pill p-bad\">17 %</span> <b>1.5</b></td>",
+        "<td><span class=\"pill p-bad\">17 %</span> <b>1</b></td>",
         "<td><span class=\"pill p-mid\">fixture churn</span> <b>3</b></td>",
         "<td><span class=\"pill p-bad\">21.5 M</span></td>",
         "<td>1</td>",
@@ -1017,13 +1034,13 @@
       "branch": "prism-ml-Ternary-Bonsai-27B-mlx-2bit-issue-13",
       "base_commit": "182b07f",
       "partial": true,
-      "score_total": 55,
+      "score_total": 58.0,
       "scores": {
         "bugs": 25,
         "completion": 7.5,
         "node_modules": 0,
-        "lint": 0,
-        "commit_craft": 6.5,
+        "lint": 2,
+        "commit_craft": 7.5,
         "first_time": 6,
         "test_discipline": 1,
         "conventions": 4,
@@ -1077,14 +1094,14 @@
         "<td><b>7.5</b></td>",
         "<td><span class=\"pill p-bad\">no pnpm install</span> <b>0</b></td>",
         "<td><span class=\"pill p-bad\">untouched</span></td>",
-        "<td><span class=\"pill p-bad\">never run</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">clean diff, never ran itself</span> <b>2</b></td>",
         "<td><span class=\"pill p-mid\">not reached</span></td>",
         "<td><span class=\"pill p-bad\">used fix, not chore</span></td>",
         "<td><span class=\"pill p-mid\">xtend spans 2 pkgs</span></td>",
         "<td><span class=\"pill p-mid\">not reached</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean, no bypasses</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">kept out</span></td>",
-        "<td><b>6.5</b></td>",
+        "<td><b>7.5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">no repairs in 3 landed</span> <b>6</b></td>",
         "<td><span class=\"pill p-bad\">none run</span></td>",
         "<td><span class=\"pill p-bad\">never run</span> <b>1</b></td>",
@@ -1121,17 +1138,17 @@
       "branch": "mlx-community-Qwen3.8-27B-4bit-issue-13",
       "base_commit": "182b07f",
       "partial": true,
-      "score_total": 79.5,
+      "score_total": 80.0,
       "scores": {
         "bugs": 25,
         "completion": 8.5,
         "node_modules": 8,
         "lint": 5,
-        "commit_craft": 10,
+        "commit_craft": 9,
         "first_time": 7,
-        "test_discipline": 7,
+        "test_discipline": 9,
         "conventions": 4,
-        "task_list": 3,
+        "task_list": 2.5,
         "truncation": 2
       },
       "defects": [
@@ -1184,11 +1201,11 @@
         "<td><span class=\"pill p-mid\">not reached</span></td>",
         "<td><span class=\"pill p-bad\">1 no-verify, 1 add -A</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">kept out</span></td>",
-        "<td><b>10</b></td>",
+        "<td><b>9</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">no repairs</span> <b>7</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">13 runs</span></td>",
-        "<td><span class=\"pill p-mid\">no full-suite cadence seen</span> <b>7</b></td>",
-        "<td><span class=\"pill p-mid\">built upfront, stale checkboxes</span> <b>3</b></td>",
+        "<td><span class=\"pill p-good\">full suite at 5 and 6</span> <b>9</b></td>",
+        "<td><span class=\"pill p-mid\">late (39 min), stale boxes</span> <b>2.5</b></td>",
         "<td><span class=\"pill p-mid\">31 %</span> <b>2</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">minimal diff</span> <b>4</b></td>",
         "<td><span class=\"pill p-bad\">1.78 M</span></td>",

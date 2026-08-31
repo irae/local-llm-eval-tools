@@ -713,7 +713,23 @@
             against what the model said it did. Weights in the left column; the
             best cell in each row is highlighted.
         </p>
-        <div class="scroller">{{MATRIX}}</div>
+        <div class="scroller">
+            {{MATRIX}}
+            <p class="lede">
+                Fable re-scored every run from the pushed branches and the
+                versioned session logs (2026-08-31). Four runs received mid-run
+                human help, against the no-help rule: gpt-5.6-luna (a "continue"
+                after a 9.4-minute stall), deepseek-v4-pro (two unsolicited
+                scope instructions covering the trap-B area), qwen3.6-35b-a3b
+                (three interventions, including a nudge after a 35-minute
+                stall), and gemma-4-26b-a4b (an owner instruction inside the
+                scored region). Their scores stand but read them with that
+                asterisk. gpt-5.6-sol carries a newly found deterministic test
+                regression (mendel-config generator-config). gemma-4-26b-a4b's
+                final in-session commit (60b93f8) is absent from the pushed
+                branch.
+            </p>
+        </div>
     </section>
 
     <section>
