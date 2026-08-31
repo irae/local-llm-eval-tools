@@ -784,13 +784,58 @@
                         </td>
                     </tr>
                     <tr
+                        data-base="70"
+                        data-or="0"
+                        data-plan="0"
+                        data-crit="0"
+                        data-wall="230"
+                    >
+                        <td class="rank">2</td>
+                        <th scope="row" class="model">
+                            prism-ml/Ternary-Bonsai-27B-mlx-2bit<small
+                                >pi · mlx · local</small
+                            >
+                        </th>
+                        <td>
+                            <div class="scorewrap">
+                                <span class="scoreval">70</span>
+                                <div class="bar">
+                                    <span style="width: 70%"></span>
+                                </div>
+                            </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >local</small
+                            >
+                        </td>
+                        <td class="num">
+                            <span class="pill p-good">$0</span
+                            ><small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid ≈$0.00</small
+                            >
+                        </td>
+                        <td class="num">230 min</td>
+                        <td class="num best">2.1 M</td>
+                        <td class="num best">51 k</td>
+                        <td class="num">89 %</td>
+                        <td class="num best">0</td>
+                        <td class="num">3</td>
+                        <td class="num"><span class="pill p-bad">5</span></td>
+                    </tr>
+                    <tr
                         data-base="67.5"
                         data-or="0"
                         data-plan="0"
                         data-crit="1"
                         data-wall="76"
                     >
-                        <td class="rank">2</td>
+                        <td class="rank">3</td>
                         <th scope="row" class="model">
                             qwen3.6-35b-a3b<small>pi · llama · local</small>
                         </th>
@@ -819,8 +864,8 @@
                             >
                         </td>
                         <td class="num">76 min</td>
-                        <td class="num best">12.1 M</td>
-                        <td class="num best">94 k</td>
+                        <td class="num">12.1 M</td>
+                        <td class="num">94 k</td>
                         <td class="num">
                             <span class="pill p-bad">96 %</span>
                         </td>
@@ -835,7 +880,7 @@
                         data-crit="1"
                         data-wall="18"
                     >
-                        <td class="rank">3</td>
+                        <td class="rank">4</td>
                         <th scope="row" class="model">
                             claude-haiku-4.5<small
                                 >claude-code · anthropic</small
@@ -895,6 +940,7 @@
                     <tr>
                         <th>Criterion</th>
                         <th>sonnet-5</th>
+                        <th>prism-ml/Ternary-Bonsai-27B-mlx-2bit (partial)</th>
                         <th>qwen</th>
                         <th>haiku-4.5</th>
                     </tr>
@@ -902,7 +948,7 @@
                 <tbody>
                     <tr class="group">
                         <th scope="row">Correctness</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -910,6 +956,12 @@
                         </th>
                         <td class="best">
                             <span class="pill p-good">none</span> <b>25</b>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good"
+                                >no bugs in 3 landed commits</span
+                            >
+                            <b>25</b>
                         </td>
                         <td>
                             <span class="pill p-bad">1 crit · 1 med</span>
@@ -928,6 +980,9 @@
                             <span class="pill p-good">pass</span>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">ran 7x, pass</span>
+                        </td>
+                        <td class="best">
                             <span class="pill p-good">ran 23x, pass</span>
                         </td>
                         <td class="best">
@@ -942,6 +997,7 @@
                         <td class="best">
                             <span class="pill p-good">SYNC OK</span>
                         </td>
+                        <td><span class="pill p-mid">not reached</span></td>
                         <td class="best">
                             <span class="pill p-good">SYNC OK</span>
                         </td>
@@ -951,7 +1007,7 @@
                     </tr>
                     <tr class="group">
                         <th scope="row">Task completion</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -960,6 +1016,7 @@
                         <td class="best">
                             <span class="pill p-good">8 / 8</span>
                         </td>
+                        <td><span class="pill p-bad">3 / 8 done</span></td>
                         <td class="best">
                             <span class="pill p-good">8 / 8</span>
                         </td>
@@ -970,6 +1027,7 @@
                         <td class="best">
                             <span class="pill p-good">all gone</span>
                         </td>
+                        <td><span class="pill p-bad">5 left</span></td>
                         <td class="best">
                             <span class="pill p-good">all gone</span>
                         </td>
@@ -980,6 +1038,7 @@
                         <td class="best">
                             <span class="pill p-good">all gone</span>
                         </td>
+                        <td><span class="pill p-bad">5 left</span></td>
                         <td class="best">
                             <span class="pill p-good">all gone</span>
                         </td>
@@ -995,6 +1054,7 @@
                         <td class="best">
                             <span class="pill p-good">found + fixed</span>
                         </td>
+                        <td><span class="pill p-mid">not reached</span></td>
                         <td class="best">
                             <span class="pill p-good">found + fixed</span>
                         </td>
@@ -1005,12 +1065,13 @@
                     <tr>
                         <th scope="row">Subtotal <em>20 pts</em></th>
                         <td class="best"><b>20</b></td>
+                        <td><b>7.5</b></td>
                         <td class="best"><b>20</b></td>
                         <td><b>12</b></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Dependency hygiene</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1018,6 +1079,10 @@
                         </th>
                         <td class="best">
                             <span class="pill p-good">real installs ×8</span>
+                            <b>8</b>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">real installs ×3</span>
                             <b>8</b>
                         </td>
                         <td class="best">
@@ -1037,6 +1102,9 @@
                             <span class="pill p-good">−96 lines</span>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">−23 lines</span>
+                        </td>
+                        <td class="best">
                             <span class="pill p-good">−96 lines</span>
                         </td>
                         <td class="best">
@@ -1045,7 +1113,7 @@
                     </tr>
                     <tr class="group">
                         <th scope="row">Static checks</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1055,6 +1123,12 @@
                         <td class="best">
                             <span class="pill p-good">clean · self-run</span>
                             <b>5</b>
+                        </td>
+                        <td>
+                            <span class="pill p-bad"
+                                >never ran, clean by luck</span
+                            >
+                            <b>0</b>
                         </td>
                         <td>
                             <span class="pill p-bad"
@@ -1076,6 +1150,7 @@
                         <td class="best">
                             <span class="pill p-good">avoided</span>
                         </td>
+                        <td><span class="pill p-mid">not reached</span></td>
                         <td class="best">
                             <span class="pill p-good">avoided</span>
                         </td>
@@ -1085,12 +1160,15 @@
                     </tr>
                     <tr class="group">
                         <th scope="row">Commit craft</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">Right type — all <code>chore</code></th>
                         <td class="best">
                             <span class="pill p-good">18 / 18</span>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">yes</span>
                         </td>
                         <td class="best">
                             <span class="pill p-good">yes</span>
@@ -1102,6 +1180,7 @@
                         <td class="best">
                             <span class="pill p-good">one each</span>
                         </td>
+                        <td><span class="pill p-mid">1 multi-package</span></td>
                         <td><span class="pill p-bad">5 multi-package</span></td>
                         <td><span class="pill p-bad">3 multi-package</span></td>
                     </tr>
@@ -1113,6 +1192,7 @@
                         <td class="best">
                             <span class="pill p-good">both dropped</span>
                         </td>
+                        <td><span class="pill p-mid">not reached</span></td>
                         <td class="best">
                             <span class="pill p-good">both dropped</span>
                         </td>
@@ -1126,6 +1206,9 @@
                         </th>
                         <td class="best">
                             <span class="pill p-good">0 / 0</span>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">clean, no bypasses</span>
                         </td>
                         <td><span class="pill p-bad">bypassed ×8</span></td>
                         <td class="best">
@@ -1143,16 +1226,20 @@
                         <td class="best">
                             <span class="pill p-good">untracked</span>
                         </td>
+                        <td class="best">
+                            <span class="pill p-good">untracked</span>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="row">Subtotal <em>12 pts</em></th>
                         <td class="best"><b>12</b></td>
+                        <td><b>11</b></td>
                         <td><b>4.5</b></td>
                         <td><b>7</b></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Working method</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1161,6 +1248,12 @@
                         </th>
                         <td class="best">
                             <span class="pill p-good">none</span> <b>8</b>
+                        </td>
+                        <td>
+                            <span class="pill p-bad"
+                                >stuck 45+ min, never recovered</span
+                            >
+                            <b>4</b>
                         </td>
                         <td>
                             <span class="pill p-mid">bug slipped through</span>
@@ -1178,6 +1271,9 @@
                             <span class="pill p-good">yes</span>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">7 runs</span>
+                        </td>
+                        <td class="best">
                             <span class="pill p-good">23 runs</span>
                         </td>
                         <td class="best">
@@ -1190,6 +1286,12 @@
                         </th>
                         <td class="best">
                             <span class="pill p-good">9 runs</span> <b>10</b>
+                        </td>
+                        <td>
+                            <span class="pill p-mid"
+                                >no checkpoint reached</span
+                            >
+                            <b>7</b>
                         </td>
                         <td class="best">
                             <span class="pill p-good">3 runs</span> <b>9</b>
@@ -1210,6 +1312,10 @@
                             <span class="pill p-mid">via one subagent</span>
                             <b>3</b>
                         </td>
+                        <td>
+                            <span class="pill p-bad">no checkboxes marked</span>
+                            <b>1.5</b>
+                        </td>
                         <td class="best">
                             <span class="pill p-good"
                                 >upfront, marked done</span
@@ -1226,6 +1332,7 @@
                             <em>3 pts · piped to tail/head</em>
                         </th>
                         <td><span class="pill p-mid">46 %</span> <b>1.5</b></td>
+                        <td><span class="pill p-mid">35 %</span> <b>2</b></td>
                         <td><span class="pill p-mid">32 %</span> <b>2</b></td>
                         <td><span class="pill p-mid">40 %</span> <b>1.5</b></td>
                     </tr>
@@ -1236,6 +1343,10 @@
                         </th>
                         <td class="best">
                             <span class="pill p-good">minimal</span> <b>5</b>
+                        </td>
+                        <td class="best">
+                            <span class="pill p-good">minimal diff</span>
+                            <b>4</b>
                         </td>
                         <td class="best">
                             <span class="pill p-good"
@@ -1250,7 +1361,7 @@
                     </tr>
                     <tr class="group">
                         <th scope="row">Context economy</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1258,6 +1369,7 @@
                             <em>all requests, compaction included</em>
                         </th>
                         <td>36.1 M</td>
+                        <td><span class="pill p-mid">2.1 M</span></td>
                         <td><span class="pill p-mid">12.1 M</span></td>
                         <td>20.3 M</td>
                     </tr>
@@ -1266,12 +1378,14 @@
                         <td class="best">
                             <span class="pill p-good">18 %</span>
                         </td>
+                        <td><span class="pill p-bad">11 %</span></td>
                         <td><span class="pill p-bad">4 %</span></td>
                         <td><span class="pill p-mid">80 %</span></td>
                     </tr>
                     <tr>
                         <th scope="row">Tool calls to finish</th>
                         <td>247</td>
+                        <td><span class="pill p-mid">94</span></td>
                         <td><span class="pill p-mid">251</span></td>
                         <td>238</td>
                     </tr>
@@ -1280,6 +1394,7 @@
                     <tr>
                         <th scope="row">Total</th>
                         <td class="best">97.5</td>
+                        <td>70</td>
                         <td>67.5</td>
                         <td>66.5</td>
                     </tr>

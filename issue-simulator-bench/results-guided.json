@@ -317,6 +317,111 @@
         "rate_tone": null,
         "provider_label": "local"
       }
+    },
+    {
+      "model": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
+      "model_id": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "mlx",
+      "local": true,
+      "serving": "mlx_lm.server",
+      "branch": "prism-ml-Ternary-Bonsai-27B-mlx-2bit-issue-13-r2",
+      "base_commit": "4679b5a",
+      "partial": true,
+      "round": 2,
+      "prompt_version": "r2.1",
+      "score_total": 70,
+      "scores": {
+        "bugs": 25,
+        "completion": 7.5,
+        "node_modules": 8,
+        "lint": 0,
+        "commit_craft": 11,
+        "first_time": 4,
+        "test_discipline": 7,
+        "conventions": 4,
+        "task_list": 1.5,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "medium",
+          "summary": "got stuck for over 45 minutes trying to fix a self-inflicted duplicate `const fs` declaration and an invalid JSON edit (a stray comma replacing a removed package.json line) in the rimraf change for mendel-transform-less; never recovered, closed out before committing rimraf or any of the remaining 4 libraries"
+        },
+        {
+          "severity": "minor",
+          "summary": "never ran eslint or prettier itself despite the guided prompt's mandatory step 5; the final tree happens to be clean, but that is luck, not verified compliance"
+        },
+        {
+          "severity": "minor",
+          "summary": "one commit (xtend) combines two packages, against the guided prompt's one-package-per-commit rule"
+        },
+        {
+          "severity": "minor",
+          "summary": "TASKS.md checkboxes were never marked done for any of the 3 completed libraries, against the guided prompt's explicit instruction"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 230.3,
+        "tokens_total": 2142168,
+        "tokens_in": 1772265,
+        "tokens_out": 13695,
+        "cache_read": 356208,
+        "peak_context": 51045,
+        "window_pct": 89,
+        "compactions": 0,
+        "assistant_msgs": 83,
+        "tool_calls": 94,
+        "tool_errors": 4,
+        "commits": 3,
+        "failed_commits": 0,
+        "truncation_pct": 35
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "matrix_cells": [
+        "<td class=\"best\"><span class=\"pill p-good\">no bugs in 3 landed commits</span> <b>25</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">ran 7x, pass</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td><span class=\"pill p-bad\">3 / 8 done</span></td>",
+        "<td><span class=\"pill p-bad\">5 left</span></td>",
+        "<td><span class=\"pill p-bad\">5 left</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td><b>7.5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs ×3</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">−23 lines</span></td>",
+        "<td><span class=\"pill p-bad\">never ran, clean by luck</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
+        "<td><span class=\"pill p-mid\">1 multi-package</span></td>",
+        "<td><span class=\"pill p-mid\">not reached</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean, no bypasses</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">untracked</span></td>",
+        "<td><b>11</b></td>",
+        "<td><span class=\"pill p-bad\">stuck 45+ min, never recovered</span> <b>4</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">7 runs</span></td>",
+        "<td><span class=\"pill p-mid\">no checkpoint reached</span> <b>7</b></td>",
+        "<td><span class=\"pill p-bad\">no checkboxes marked</span> <b>1.5</b></td>",
+        "<td><span class=\"pill p-mid\">35 %</span> <b>2</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">minimal diff</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">2.1 M</span></td>",
+        "<td><span class=\"pill p-bad\">11 %</span></td>",
+        "<td><span class=\"pill p-mid\">94</span></td>"
+      ],
+      "matrix_total": "70",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      }
     }
   ],
   "matrix_rows": [
