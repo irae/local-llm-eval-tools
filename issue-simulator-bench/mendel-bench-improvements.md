@@ -11,7 +11,7 @@ owner's decision.
 - [x] 2. On mlx_lm.server a cut stream becomes a scored model nudge
 - [x] 3. Thinking level and sampling are not pinned and not recorded
 - [x] 4. Operator personalization leaks into every run
-- [ ] 5. Subagent use is invisible in results and report
+- [x] 5. Subagent use is invisible in results and report (resolved: no action)
 - [ ] 6. Done-check false positives: blind base, pre-existing dirt
 - [ ] 7. Rubric text and matrix labels drift from prompt v3
 - [ ] 8. Prompt-version bookkeeping is incomplete
@@ -147,6 +147,14 @@ context files that were loaded.
    report's "Harnesses" section.
 
 ## 5. Subagent use is invisible
+
+**Resolution (2026-09-01, no action).** pi does not bundle subagents (its
+docs list them as intentionally not included; the subagent is an example
+extension) and benchmark runs now start with `--no-extensions`, so a pi
+run cannot spawn one. Claude Code subagents run on the parent's model
+(the sonnet-5 guided run's `modelUsage` lists only `claude-sonnet-5`)
+and bill to the same plan. The Harnesses section already discloses the
+harness difference.
 
 **Evidence.** `runs/claude-sonnet-5-result.json` (guided, the top row at
 98.5): `num_turns: 5`, `subagent_stats.spawned: 1`
