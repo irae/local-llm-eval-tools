@@ -78,7 +78,10 @@ results files. Run every new model against the frozen prompt.
 stopped.` Budget `--max-tooling` (default 10).
     - **Model nudge — scored.** The model stopped by itself (`stop`, or `length`
       at its real output budget) while TASKS.md still has `- [ ]` items or `git
-status` is not clean. Message, always identical: `You are not done. Check
+status` shows changes the run itself made — TASKS.md and any dirt that
+      predates the first prompt are excluded (the runner snapshots the tree
+      after `pnpm install` and records it as `baseline_dirty` in the meta
+      file). Message, always identical: `You are not done. Check
 TASKS.md for unchecked items and \`git status\` for uncommitted work, then
       continue the workflow from where you stopped.`Budget`--max-model`
       (default 3).

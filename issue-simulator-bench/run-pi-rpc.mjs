@@ -90,6 +90,7 @@ const meta = {
     session_file: null,
     session_id: null,
     stats: null,
+    baseline_dirty: null,
     model_info: null,
     thinking_level: null,
     pi_flags: null,
@@ -223,6 +224,21 @@ async function turn(message) {
 }
 
 // ---- done check (mechanical, no chat reading) -------------------------------
+// Not the model's unfinished work: TASKS.md itself (both prompts keep it out
+// of git) and any dirt that predates the first prompt (snapshot below).
+let baselineDirty = new Set();
+
+const porcelainPaths = (txt) =>
+    txt
+        .split('\n')
+        .filter(Boolean)
+        .map((l) => {
+            let p = l.slice(3);
+            const arrow = p.indexOf(' -> ');
+            if (arrow >= 0) p = p.slice(arrow + 4);
+            return p;
+        });
+
 function unfinishedWork() {
     const reasons = [];
     const tasks = resolve(cwd, 'TASKS.md');
@@ -233,8 +249,14 @@ function unfinishedWork() {
         const st = execFileSync('git', ['status', '--porcelain'], {
             cwd,
             encoding: 'utf8',
-        }).trim();
-        if (st) reasons.push('uncommitted or untracked changes');
+        });
+        const fresh = porcelainPaths(st).filter(
+            (p) => p !== 'TASKS.md' && !baselineDirty.has(p)
+        );
+        if (fresh.length)
+            reasons.push(
+                `uncommitted or untracked changes (${fresh.length}: ${fresh.slice(0, 5).join(', ')}${fresh.length > 5 ? ', …' : ''})`
+            );
     } catch (e) {
         reasons.push(`git status failed: ${e.message}`);
     }
@@ -464,6 +486,20 @@ async function main() {
         meta.warnings.push(
             'model has no maxTokens — length stops cannot be classified'
         );
+    try {
+        const st = execFileSync('git', ['status', '--porcelain'], {
+            cwd,
+            encoding: 'utf8',
+        });
+        baselineDirty = new Set(porcelainPaths(st));
+        meta.baseline_dirty = [...baselineDirty];
+        if (baselineDirty.size)
+            meta.warnings.push(
+                `worktree dirty before the first prompt (${baselineDirty.size} paths) — excluded from the done-check`
+            );
+    } catch (e) {
+        meta.warnings.push(`baseline git status failed: ${e.message}`);
+    }
     for (const w of meta.warnings) say(`WARNING: ${w}`);
     saveMeta();
     // A run on a misconfigured model is not comparable. Refuse before the first prompt.

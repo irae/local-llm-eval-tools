@@ -13,7 +13,7 @@ owner's decision.
 - [x] 4. Operator personalization leaks into every run
 - [x] 5. Subagent use is invisible in results and report (resolved: no action)
 - [x] Extra: Claude Code retired as a harness (2026-09-01); pi is the only harness
-- [ ] 6. Done-check false positives: blind base, pre-existing dirt
+- [x] 6. Done-check false positives: blind base, pre-existing dirt
 - [ ] 7. Rubric text and matrix labels drift from prompt v3
 - [ ] 8. Prompt-version bookkeeping is incomplete
 - [ ] 9. "Partial" hides the end reason
@@ -22,31 +22,6 @@ owner's decision.
 - [ ] 12. Small runner bugs
 - [ ] 13. The task text is fetched live from GitHub
 - [ ] 14. Evidence gaps: footnotes, not re-runs
-
-## 6. Done-check false positives
-
-**Evidence.** `unfinishedWork()` returns "uncommitted or untracked
-changes" for any non-empty `git status --porcelain`.
-
-- Blind base `182b07f` does not gitignore TASKS.md (only the v3 guided
-  base does). PLAN.md still allows `run-worker.sh <model> pi blind`. A
-  blind run through the RPC runner has a dirty tree from the first
-  `TASKS.md` write until the end: three scored model nudges, then
-  `model_budget_exhausted`, always partial.
-- Any file that `pnpm install` or the harness leaves untracked before the
-  first prompt counts as the model's unfinished work.
-
-**Fix.**
-
-1. After `pnpm install`, before the first prompt, the runner snapshots
-   `git status --porcelain`. If it is not empty, record it in `meta` and
-   refuse to start (or, with a flag, exclude those paths from the
-   done-check).
-2. `run-worker.sh` writes `TASKS.md` into the worktree's git exclude
-   (`git -C "$wt" rev-parse --git-path info/exclude`) for the blind
-   bench, so the prompt's "never commit it" and the done-check agree.
-3. Record the done-check result (both reasons, with the porcelain output)
-   in each model-nudge entry, so the scorer can see what the runner saw.
 
 ## 7. Rubric text and matrix labels drift from prompt v3
 
@@ -372,3 +347,26 @@ already separates harnesses). Disclose it: copy `subagent_stats` into
 PLAN.md whether telemetry for such rows (assistant messages, tool calls,
 truncation share) covers the subagent transcript too, and how it was
 collected.
+
+## 6. Done-check false positives
+
+**Evidence.** `unfinishedWork()` returns "uncommitted or untracked
+changes" for any non-empty `git status --porcelain`.
+
+- Blind base `182b07f` does not gitignore TASKS.md (only the v3 guided
+  base does). PLAN.md still allows `run-worker.sh <model> pi blind`. A
+  blind run through the RPC runner has a dirty tree from the first
+  `TASKS.md` write until the end: three scored model nudges, then
+  `model_budget_exhausted`, always partial.
+- Any file that `pnpm install` or the harness leaves untracked before the
+  first prompt counts as the model's unfinished work.
+
+**Fix (as applied; the owner rejected gitignore/exclude tricks).** The
+done-check itself got smarter, all inside `run-pi-rpc.mjs`:
+
+1. Before the first prompt the runner snapshots `git status --porcelain`
+   and records the paths as `baseline_dirty` in the meta file (a warning
+   when non-empty, never fatal).
+2. The done-check ignores `TASKS.md` and every baseline path; only dirt
+   the run itself made counts, and the nudge cause names the first few
+   paths.
