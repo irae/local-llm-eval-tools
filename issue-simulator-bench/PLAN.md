@@ -17,7 +17,7 @@ run of the same test.
 | ------------ | -------------------------------------- | ------------------------------------------------------ |
 | Question     | Can the model discover the traps?      | How far does a structured plan lift it?                |
 | Prompt       | `prompt-blind.txt` (terse)             | `prompt-guided.txt` (numbered plan, traps disclosed)   |
-| Base commit  | `182b07f`                              | `23050bd` (tag `guided-v3-base`; v2.1 rows: `4679b5a`) |
+| Base commit  | `182b07f`                              | `6458616` (tag `guided-v3-base`; v2.1 rows: `4679b5a`) |
 | Run branches | `<model>-issue-13`                     | `<model>-guided-issue-13`                              |
 | Worktrees    | `../mendel-bench-<model>`              | `../mendel-bench2-<model>`                             |
 | Results      | `results.json` / `results.csv`         | `results-guided.json` / `results-guided.csv`           |
@@ -25,12 +25,15 @@ run of the same test.
 | Status       | complete (6 models, Aug 2026)          | active — all new runs go here                          |
 
 The guided run exists because the blind run showed the weaker (and local) models
-losing most of their points to discoverable traps. Its prompt is a detailed
-step-by-step workflow that names the known pitfalls (the glob AsyncIterator trap,
-the incomplete reference list, the tmp exit-hook regression, the chalk
-`enableColor` contract, the `node:` prefix lint convention, the fixture file to
-leave alone). With the traps disclosed, its scores measure instruction-following
-more than trap discovery.
+losing most of their points to discoverable traps. What its prompt
+disclosed changed by version: v2.1 named the known pitfalls one by one (the glob
+AsyncIterator trap, the incomplete reference list, the tmp exit-hook regression,
+the chalk `enableColor` contract, the `node:` prefix lint convention, the
+fixture file to leave alone); v3.0 teaches the workflow instead (grep first,
+test-first for uncovered files, `pnpm remove`, full suite before every commit)
+and keeps only the pitfalls the workflow does not cover (rimraf `force`, the
+legacy failure baseline) — traps A, B, and C are no longer named. Either way its
+scores measure instruction-following more than trap discovery.
 
 The guided base commit `4679b5a` is `182b07f` plus one fix master needed anyway:
 the root declares `mendel-pipeline` as a workspace devDependency, so the hoisted
@@ -42,6 +45,10 @@ The five v2.1 guided rows (base `4679b5a`) are a closed set — do not add to th
 One result row per model per prompt version: a pre-freeze
 haiku run exists only as branch `…-p0-guided-issue-13` and in git history, not in the
 results files. Run every new model against the frozen prompt.
+Prompt versions are git tags (`guided-prompt-v2.1`, `guided-prompt-v3.0`,
+`blind-prompt-v1.0`, `blind-prompt-v1.1`). Every row carries `prompt_version`,
+and the report renders one scoreboard and one matrix per version — never one
+table across versions.
 
 ## How to run a new model
 
@@ -242,7 +249,10 @@ One object per run in a top-level `runs` array:
     "branch": "grok-4.6-issue-13",
     "base_commit": "182b07f",
     "thinking": "high",
+    "prompt_version": "v1.0",
     "partial": false,
+    "end_reason": "complete",
+    "libraries_done": 8,
     "score_total": 88,
     "scores": {
         "bugs": 25,
@@ -283,7 +293,10 @@ One object per run in a top-level `runs` array:
 For local models, `local` is true and `serving` names the stack (`llama-server`,
 `lmstudio`). `harness_guessed` is true when the harness comes from the pi provider
 config, not from a run record. `thinking` is the pinned thinking level (`null`
-for Claude Code runs and where no record exists). The per-criterion `scores` are
+for Claude Code runs and where no record exists). `end_reason` is one of
+`complete`, `wall_clock`, `model_budget_exhausted`, `tooling_budget_exhausted`,
+`harness_crash`, `stuck` (a self-inflicted loop the operator closed),
+`operator_stop`, or `null` where no record exists; `libraries_done` is 0-8. The per-criterion `scores` are
 the single source of truth for the total: `generate-report.mjs` refuses to render
 when a matrix cell's bold number or `score_total` disagrees with them. `results.csv` is the same data flattened: one row per
 run, `scores.*` and `telemetry.*` as prefixed columns.

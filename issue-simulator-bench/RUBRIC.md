@@ -160,18 +160,34 @@ different scorers land on the same numbers:
 
 ## Scoring rubric — 100 points
 
-| #   | Criterion                     | Max | Measurement                                                                                                          |
-| --- | ----------------------------- | --: | -------------------------------------------------------------------------------------------------------------------- |
-| 1   | Bugs remaining                |  25 | `25 − 3 × weighted_bug_points`, floor 0. Critical = 3, medium = 2, minor = 1.                                        |
-| 2   | Task completion               |  20 | All 8 libraries done; no stale `require()`; gone from every `package.json`; found the `mendel-requirify` reference.  |
-| 3   | node_modules actually pruned  |   8 | Real `pnpm install` (8) > lockfile-only + hand check (7) > install unverified (4) > lockfile-only (2) > no pnpm (0). |
-| 4   | Prettier & ESLint clean       |   5 | Re-run on the branch; full marks only when the model ran them itself.                                                |
-| 5   | Commit craft                  |  12 | All `chore` (4) + commits split per package (4) + no `--no-verify`, no `git add -A`, no TASKS.md leak (4).           |
-| 6   | Right the first time          |   8 | Self-inflicted repair commits; recovery from the `node:` prefix trap.                                                |
-| 7   | Test discipline               |  10 | Narrow per-package runs and a full suite about every 5 commits.                                                      |
-| 8   | House conventions             |   5 | Minimal diff, matched neighbor style, no drive-by churn.                                                             |
-| 9   | Task list built progressively |   4 | Libraries listed upfront with no sub-items; sub-items discovered per library; marked done after each commit.         |
-| 10  | Truncated noisy commands      |   3 | Share of shell commands piped through `tail`/`head`.                                                                 |
+| #   | Criterion                     | Max | Measurement                                                                                                                             |
+| --- | ----------------------------- | --: | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Bugs remaining                |  25 | `25 − 3 × weighted_bug_points`, floor 0. Critical = 3, medium = 2, minor = 1.                                                           |
+| 2   | Task completion               |  20 | All 8 libraries done; no stale `require()`; gone from every `package.json`; found the `mendel-requirify` reference.                     |
+| 3   | node_modules actually pruned  |   8 | Real `pnpm install` (8) > lockfile-only + hand check (7) > install unverified (4) > lockfile-only (2) > no pnpm (0).                    |
+| 4   | Prettier & ESLint clean       |   5 | Re-run on the branch; split by prompt version, see below.                                                                               |
+| 5   | Commit craft                  |  12 | All `chore` (4) + commits split per package (4) + no `--no-verify`, no `git add -A`, no TASKS.md leak (4).                              |
+| 6   | Right the first time          |   8 | Self-inflicted repair commits; version-aware, see below.                                                                                |
+| 7   | Test discipline               |  10 | Narrow per-package runs and the full-suite cadence the prompt mandates, see below.                                                      |
+| 8   | House conventions             |   5 | Minimal diff, matched neighbor style, no drive-by churn.                                                                                |
+| 9   | Task list built progressively |   4 | Libraries listed upfront with no sub-items; sub-items on discovery (granularity per version, see below); marked done after each commit. |
+| 10  | Truncated noisy commands      |   3 | Share of shell commands piped through `tail`/`head`.                                                                                    |
+
+### Criteria by prompt version
+
+Four criteria measure "did the model do what the prompt said", and the prompts
+differ by version. Score against the version in the run's `prompt_version`:
+
+| #                      | Blind v1.x / guided v2.1                                                                                                                                              | Guided v3.0                                                                                                                                                                                |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 4 Prettier & ESLint    | 5 pts when clean on re-run AND the model ran the tools itself. The husky hook auto-fixes, so hook-only cleanliness caps at 3; `--no-verify` forfeits the hook credit. | Same split, explicit: 3 pts clean on re-run; 2 pts when the session log shows `prettier --check` and `eslint .` run by the model after the last code change; `--no-verify` forfeits the 3. |
+| 6 Right the first time | Includes recovery from the `node:` prefix lint trap.                                                                                                                  | The trap is retired on the v3 base — score self-inflicted repairs only.                                                                                                                    |
+| 7 Test discipline      | Full suite about every 5 commits, as the blind prompt says.                                                                                                           | Full suite before every commit — count the commits with no `pnpm run unit` before them.                                                                                                    |
+| 9 Task list            | Sub-items per affected package.                                                                                                                                       | Sub-items per affected file, grouped by package.                                                                                                                                           |
+
+The chalk check and the fixture exception above are already version-aware. The
+matrix labels are version-neutral; each version renders its own scoreboard and
+matrix in the report.
 
 Criterion-5 note (prompt v3): the root package.json change scores the same
 whether it rides with a package's commit or comes as its own commit. Leaving

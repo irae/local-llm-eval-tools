@@ -725,7 +725,7 @@
             cost $0 plus time.
         </p>
         <div class="scroller">
-            <table id="scoreboard">
+            <table class="scoreboard">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -797,6 +797,9 @@
                         <th scope="row" class="model">
                             mlx-community/Qwen3.8-27B-4bit<small
                                 >pi · mlx · local · think low</small
+                            ><small
+                                style="display: block; color: var(--ink-faint)"
+                                >partial · 6 of 8 · harness crash</small
                             >
                         </th>
                         <td>
@@ -841,6 +844,9 @@
                         <th scope="row" class="model">
                             prism-ml/Ternary-Bonsai-27B-mlx-2bit<small
                                 >pi · mlx · local · think high</small
+                            ><small
+                                style="display: block; color: var(--ink-faint)"
+                                >partial · 3 of 8 · stuck</small
                             >
                         </th>
                         <td>
@@ -1238,6 +1244,7 @@
                     <tr>
                         <th scope="row">
                             Handled the <code>node:</code> ESLint trap
+                            <em>v2.1 rows; retired on the v3 base</em>
                         </th>
                         <td class="best">
                             <span class="pill p-good">avoided</span>
@@ -1399,7 +1406,8 @@
                     </tr>
                     <tr>
                         <th scope="row">
-                            Full suite every ~5 commits <em>10 pts</em>
+                            Full suite cadence
+                            <em>10 pts · as the prompt mandates</em>
                         </th>
                         <td class="best">
                             <span class="pill p-good">9 runs</span> <b>10</b>
@@ -1995,41 +2003,49 @@
 </div>
 <script>
     (() => {
-        const tbody = document.querySelector('#scoreboard tbody');
         const note = document.getElementById('plan-note');
+        const boards = [...document.querySelectorAll('table.scoreboard tbody')];
         const apply = () => {
             const mode = document.querySelector(
                 'input[name="costmode"]:checked'
             ).value;
-            const rows = [...tbody.rows];
-            let vals = rows.map((r) => {
-                const d = r.dataset;
-                if (mode === 'none') return Number(d.base);
-                const cost = mode === 'or' ? Number(d.or) : Number(d.plan);
-                return (
-                    Number(d.base) /
-                    (1 + cost * (1 + Number(d.crit)) + 0.01 * Number(d.wall))
+            for (const tbody of boards) {
+                const rows = [...tbody.rows];
+                let vals = rows.map((r) => {
+                    const d = r.dataset;
+                    if (mode === 'none') return Number(d.base);
+                    const cost = mode === 'or' ? Number(d.or) : Number(d.plan);
+                    return (
+                        Number(d.base) /
+                        (1 +
+                            cost * (1 + Number(d.crit)) +
+                            0.01 * Number(d.wall))
+                    );
+                });
+                if (mode !== 'none') {
+                    const mx = Math.max(...vals);
+                    vals = vals.map((v) => (100 * v) / mx);
+                }
+                rows.forEach((r, i) => {
+                    r.dataset.adj = vals[i];
+                    r.querySelector('.scoreval').textContent = Math.round(
+                        vals[i]
+                    );
+                    r.querySelector('.bar span').style.width =
+                        Math.round(vals[i]) + '%';
+                });
+                rows.sort(
+                    (a, b) => Number(b.dataset.adj) - Number(a.dataset.adj)
                 );
-            });
-            if (mode !== 'none') {
-                const mx = Math.max(...vals);
-                vals = vals.map((v) => (100 * v) / mx);
+                rows.forEach((r, i) => {
+                    tbody.appendChild(r);
+                    const rank = r.querySelector('.rank');
+                    rank.textContent = i + 1;
+                    rank.classList.toggle('rank-1', i === 0);
+                    r.querySelector('.bar').classList.toggle('gold', i === 0);
+                    r.querySelector('.model').classList.toggle('best', i === 0);
+                });
             }
-            rows.forEach((r, i) => {
-                r.dataset.adj = vals[i];
-                r.querySelector('.scoreval').textContent = Math.round(vals[i]);
-                r.querySelector('.bar span').style.width =
-                    Math.round(vals[i]) + '%';
-            });
-            rows.sort((a, b) => Number(b.dataset.adj) - Number(a.dataset.adj));
-            rows.forEach((r, i) => {
-                tbody.appendChild(r);
-                const rank = r.querySelector('.rank');
-                rank.textContent = i + 1;
-                rank.classList.toggle('rank-1', i === 0);
-                r.querySelector('.bar').classList.toggle('gold', i === 0);
-                r.querySelector('.model').classList.toggle('best', i === 0);
-            });
             note.style.display = mode === 'plan' ? 'block' : 'none';
         };
         document

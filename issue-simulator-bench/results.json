@@ -98,7 +98,10 @@
         "wweek": "2 %",
         "rpw": "≈ 50"
       },
-      "thinking": "high"
+      "thinking": "high",
+      "prompt_version": "v1.0",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "claude-opus-5",
@@ -196,7 +199,10 @@
         "wweek": "not exposed",
         "rpw": "≈ 41"
       },
-      "thinking": null
+      "thinking": null,
+      "prompt_version": "v1.0",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "gpt-5.6-luna",
@@ -302,7 +308,10 @@
       "notes": [
         "Mid-run human help: a 9.4-minute stall was broken by the user typing \"continue\"."
       ],
-      "thinking": "high"
+      "thinking": "high",
+      "prompt_version": "v1.0",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "kimi-k3",
@@ -398,7 +407,10 @@
         "rate_tone": "mid",
         "provider_label": "Fireworks"
       },
-      "thinking": "high"
+      "thinking": "high",
+      "prompt_version": "v1.0",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "claude-sonnet-5",
@@ -501,7 +513,10 @@
         "wweek": "not exposed",
         "rpw": "≈ 34"
       },
-      "thinking": null
+      "thinking": null,
+      "prompt_version": "v1.0",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "deepseek-v4-pro-0813",
@@ -604,7 +619,10 @@
       "notes": [
         "Mid-run human help: two unsolicited owner instructions scoped the legacy-package work, including the trap-B area."
       ],
-      "thinking": "high"
+      "thinking": "high",
+      "prompt_version": "v1.0",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "claude-haiku-4.5",
@@ -711,7 +729,10 @@
         "wweek": "not exposed",
         "rpw": "≈ 280"
       },
-      "thinking": null
+      "thinking": null,
+      "prompt_version": "v1.0",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "qwen3.6-35b-a3b",
@@ -810,7 +831,10 @@
       "notes": [
         "Mid-run human help: three substantive user interventions — a \"please continue\" after a 34.9-minute stall, TASKS.md coaching, and a memory-pressure instruction."
       ],
-      "thinking": "xhigh"
+      "thinking": "xhigh",
+      "prompt_version": "v1.0",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "gemma-4-26b-a4b",
@@ -910,7 +934,10 @@
         "Mid-run human help inside the scored region: an owner instruction triggered the final commit.",
         "Provenance: in-session commit 60b93f8 (root/pipeline rimraf) is absent from the pushed branch."
       ],
-      "thinking": "high"
+      "thinking": "high",
+      "prompt_version": "v1.0",
+      "end_reason": "stuck",
+      "libraries_done": null
     },
     {
       "model": "gpt-5.6-sol",
@@ -1021,7 +1048,10 @@
         "wweek": "≈ 11 %",
         "rpw": "≈ 9"
       },
-      "thinking": "high"
+      "thinking": "high",
+      "prompt_version": "v1.0",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
@@ -1125,7 +1155,10 @@
         "rate_tone": null,
         "provider_label": "local"
       },
-      "thinking": "high"
+      "thinking": "high",
+      "prompt_version": "v1.0",
+      "end_reason": "harness_crash",
+      "libraries_done": 3
     },
     {
       "model": "mlx-community/Qwen3.8-27B-4bit",
@@ -1225,7 +1258,10 @@
         "rate_tone": null,
         "provider_label": "local"
       },
-      "thinking": "medium"
+      "thinking": "medium",
+      "prompt_version": "v1.0",
+      "end_reason": "wall_clock",
+      "libraries_done": 3
     }
   ],
   "matrix_rows": [
@@ -1335,7 +1371,7 @@
     },
     {
       "type": "row",
-      "label": "Full suite every ~5 commits <em>10 pts</em>"
+      "label": "Full suite cadence <em>10 pts · as the prompt mandates</em>"
     },
     {
       "type": "row",
@@ -1358,7 +1394,8 @@
       "label": "Tokens burned <em>all requests, compaction included</em>"
     },
     {
-      "label": "Compactions <em>context rebuilds mid-run</em>"
+      "label": "Compactions <em>context rebuilds mid-run</em>",
+      "type": "row"
     },
     {
       "type": "row",
@@ -1368,5 +1405,8 @@
       "type": "row",
       "label": "Tool calls to finish"
     }
-  ]
+  ],
+  "bench": "blind",
+  "prompt_versions": ["v1.0"],
+  "prompt": "prompt-blind.txt"
 }

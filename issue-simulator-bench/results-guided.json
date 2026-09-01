@@ -1,6 +1,6 @@
 {
   "bench": "guided",
-  "prompt": "prompt-guided.txt (frozen v2.1)",
+  "prompt": "prompt-guided.txt",
   "runs": [
     {
       "model": "claude-sonnet-5",
@@ -14,7 +14,7 @@
       "base_commit": "4679b5a",
       "partial": false,
       "round": 2,
-      "prompt_version": "r2.1",
+      "prompt_version": "v2.1",
       "score_total": 98.5,
       "scores": {
         "bugs": 25,
@@ -100,7 +100,9 @@
         "<td class=\"best\"><span class=\"pill p-good\">18 %</span></td>",
         "<td>247</td>"
       ],
-      "thinking": null
+      "thinking": null,
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "claude-haiku-4.5",
@@ -114,7 +116,7 @@
       "base_commit": "4679b5a",
       "partial": false,
       "round": 2,
-      "prompt_version": "r2.1",
+      "prompt_version": "v2.1",
       "score_total": 68,
       "scores": {
         "bugs": 16,
@@ -209,7 +211,9 @@
         "<td><span class=\"pill p-mid\">80 %</span></td>",
         "<td>238</td>"
       ],
-      "thinking": null
+      "thinking": null,
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "qwen3.6-35b-a3b",
@@ -223,7 +227,7 @@
       "base_commit": "4679b5a",
       "partial": false,
       "round": 2,
-      "prompt_version": "r2.1",
+      "prompt_version": "v2.1",
       "score_total": 65.5,
       "scores": {
         "bugs": 10,
@@ -319,7 +323,9 @@
         "rate_tone": null,
         "provider_label": "local"
       },
-      "thinking": "high"
+      "thinking": "high",
+      "end_reason": "complete",
+      "libraries_done": 8
     },
     {
       "model": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
@@ -333,7 +339,7 @@
       "base_commit": "4679b5a",
       "partial": true,
       "round": 2,
-      "prompt_version": "r2.1",
+      "prompt_version": "v2.1",
       "score_total": 69,
       "scores": {
         "bugs": 25,
@@ -425,7 +431,9 @@
         "rate_tone": null,
         "provider_label": "local"
       },
-      "thinking": "high"
+      "thinking": "high",
+      "end_reason": "stuck",
+      "libraries_done": 3
     },
     {
       "model": "mlx-community/Qwen3.8-27B-4bit",
@@ -439,7 +447,7 @@
       "base_commit": "4679b5a",
       "partial": true,
       "round": 2,
-      "prompt_version": "r2.1",
+      "prompt_version": "v2.1",
       "config_note": "reasoning effort: low",
       "score_total": 84,
       "scores": {
@@ -528,7 +536,9 @@
         "rate_tone": null,
         "provider_label": "local"
       },
-      "thinking": "low"
+      "thinking": "low",
+      "end_reason": "harness_crash",
+      "libraries_done": 6
     }
   ],
   "matrix_rows": [
@@ -594,7 +604,7 @@
     },
     {
       "type": "row",
-      "label": "Handled the <code>node:</code> ESLint trap"
+      "label": "Handled the <code>node:</code> ESLint trap <em>v2.1 rows; retired on the v3 base</em>"
     },
     {
       "type": "group",
@@ -638,7 +648,7 @@
     },
     {
       "type": "row",
-      "label": "Full suite every ~5 commits <em>10 pts</em>"
+      "label": "Full suite cadence <em>10 pts · as the prompt mandates</em>"
     },
     {
       "type": "row",
@@ -661,7 +671,8 @@
       "label": "Tokens burned <em>all requests, compaction included</em>"
     },
     {
-      "label": "Compactions <em>context rebuilds mid-run</em>"
+      "label": "Compactions <em>context rebuilds mid-run</em>",
+      "type": "row"
     },
     {
       "type": "row",
@@ -671,5 +682,6 @@
       "type": "row",
       "label": "Tool calls to finish"
     }
-  ]
+  ],
+  "prompt_versions": ["v2.1"]
 }

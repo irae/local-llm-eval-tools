@@ -9,6 +9,14 @@ const dir = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const guided = args[0] === '--guided';
 if (guided) args.shift();
+for (const a of args) {
+    if (a.startsWith('--') || !a.endsWith('.html')) {
+        console.error(
+            `unknown argument "${a}" — usage: generate-report.mjs [--guided] [output.html ...]`
+        );
+        process.exit(2);
+    }
+}
 const resultsFile = guided ? 'results-guided.json' : 'results.json';
 const templateFile = guided
     ? 'report-guided-template.html'
@@ -20,6 +28,20 @@ if (!outputs.length)
     outputs.push(join(dir, guided ? 'report-guided.html' : 'report.html'));
 
 const runs = [...data.runs].sort((a, b) => b.score_total - a.score_total);
+
+// Rows never mix across prompt versions (PLAN.md forbids the comparison):
+// every scoreboard and matrix renders once per version, newest first.
+const groups = (() => {
+    const m = new Map();
+    for (const r of runs) {
+        const v = r.prompt_version || 'unversioned';
+        if (!m.has(v)) m.set(v, []);
+        m.get(v).push(r);
+    }
+    return [...m.entries()].sort((a, b) =>
+        b[0].localeCompare(a[0], undefined, { numeric: true })
+    );
+})();
 
 // The matrix cells are prose, but their bold numbers must equal `scores`,
 // the single source of truth. Refuse to render a report that disagrees
@@ -76,6 +98,24 @@ const SHORT = {
 const short = (r) =>
     (SHORT[r.model] || r.model) + (r.partial ? ' (partial)' : '');
 
+const END_REASON = {
+    complete: null, // not shown; completeness is the default
+    wall_clock: 'time budget',
+    model_budget_exhausted: 'nudge budget',
+    tooling_budget_exhausted: 'harness budget',
+    harness_crash: 'harness crash',
+    stuck: 'stuck',
+    operator_stop: 'stopped',
+};
+const partialDetail = (r) => {
+    if (!r.partial) return null;
+    const parts = ['partial'];
+    if (r.libraries_done != null) parts.push(`${r.libraries_done} of 8`);
+    const why = END_REASON[r.end_reason];
+    if (why) parts.push(why);
+    return parts.join(' · ');
+};
+
 const pill = (tone, text) =>
     tone ? `<span class="pill p-${tone}">${text}</span>` : text;
 const faint = (t) =>
@@ -114,10 +154,14 @@ const topCut = (values) => {
     const k = Math.max(1, Math.round(values.length * 0.2));
     return [...values].sort((a, b) => a - b)[k - 1] * 1.05;
 };
-const cuts = {};
-const isTop = (key, v) => {
-    if (!(key in cuts)) cuts[key] = topCut(runs.map((r) => r.telemetry[key]));
-    return v <= cuts[key];
+// "best" highlighting compares only within a prompt-version group.
+const topChecker = (rows) => {
+    const cuts = {};
+    return (key, v) => {
+        if (!(key in cuts))
+            cuts[key] = topCut(rows.map((r) => r.telemetry[key]));
+        return v <= cuts[key];
+    };
 };
 
 const numVal = (x) => {
@@ -131,11 +175,16 @@ const sortHead = (labels, sortableFrom, sortableTo, initial) =>
         .map((h, i) => {
             const sortable = i >= sortableFrom && i <= sortableTo;
             const active = i === initial;
-            return `<th${i ? ' class="num"' : ''}${sortable ? ` data-sort="${i}"` : ''}${active ? ' data-dir="desc"' : ''}>${h}${sortable ? ` <span class="dir">${active ? '\u25BC' : ''}</span>` : ''}</th>`;
+            return `<th${i ? ' class="num"' : ''}${sortable ? ` data-sort="${i}"` : ''}${active ? ' data-dir="desc"' : ''}>${h}${sortable ? ` <span class="dir">${active ? '▼' : ''}</span>` : ''}</th>`;
         })
         .join('\n            ');
 
-function scoreboard() {
+const versionHeading = (v) =>
+    groups.length > 1
+        ? `<h3 class="lede">Prompt ${v === 'unversioned' ? 'version not recorded' : v}</h3>\n      `
+        : '';
+
+function scoreboardFor(rows) {
     const heads = [
         '#',
         'Model',
@@ -151,7 +200,8 @@ function scoreboard() {
     const head = heads
         .map((h, i) => `<th${i > 3 ? ' class="num"' : ''}>${h}</th>`)
         .join('\n            ');
-    const body = runs
+    const isTop = topChecker(rows);
+    const body = rows
         .map((r, i) => {
             const t = r.telemetry;
             const best = (cond) => (cond ? ' best' : '');
@@ -173,9 +223,10 @@ function scoreboard() {
                 ? numVal(r.plan.marginal)
                 : Number(r.cost.or_usd);
             const attrs = ` data-base="${r.score_total}" data-or="${r.cost.or_usd}" data-plan="${planUsd}" data-crit="${crit}" data-wall="${Math.round(t.wall_clock_min)}"`;
+            const detail = partialDetail(r);
             return `          <tr${attrs}>
             <td class="rank${i === 0 ? ' rank-1' : ''}">${i + 1}</td>
-            <th scope="row" class="model${i === 0 ? ' best' : ''}">${r.model}<small>${sub(r)}</small></th>
+            <th scope="row" class="model${i === 0 ? ' best' : ''}">${r.model}<small>${sub(r)}</small>${detail ? smallBlock(detail) : ''}</th>
             <td>${gauge}</td>
             <td class="num">${cost}</td>
             <td class="num${best(isTop('wall_clock_min', t.wall_clock_min))}">${Math.round(t.wall_clock_min)} min</td>
@@ -187,14 +238,7 @@ function scoreboard() {
           </tr>`;
         })
         .join('\n');
-    const radios = `<p class="lede" id="costmode-radios">
-        <label><input type="radio" name="costmode" value="none" checked> quality only</label>
-        &nbsp; <label><input type="radio" name="costmode" value="or"> weighted by OpenRouter cost</label>
-        &nbsp; <label><input type="radio" name="costmode" value="plan"> weighted by plan estimate</label>
-      </p>
-      <p class="lede" id="plan-note" style="display:none">Cost-weighted score = 100 × quality score ÷ (1 + cost × (1 + criticals) + $0.01 per minute of wall clock), normalised to the leader. A critical bug is priced as one extra run of the same model — fixing after a cheap run is cheap, fixing after an expensive run is expensive. Plan mode uses the marginal plan estimate where one exists; runs without a plan keep their OpenRouter figure; local runs cost $0 plus time.</p>`;
-    return `${radios}
-      <div class="scroller"><table id="scoreboard">
+    return `<div class="scroller"><table class="scoreboard">
         <thead>
           <tr>
             ${head}
@@ -206,17 +250,33 @@ ${body}
       </table></div>`;
 }
 
-function matrix() {
-    const head = ['Criterion', ...runs.map(short)]
+function scoreboard() {
+    const radios = `<p class="lede" id="costmode-radios">
+        <label><input type="radio" name="costmode" value="none" checked> quality only</label>
+        &nbsp; <label><input type="radio" name="costmode" value="or"> weighted by OpenRouter cost</label>
+        &nbsp; <label><input type="radio" name="costmode" value="plan"> weighted by plan estimate</label>
+      </p>
+      <p class="lede" id="plan-note" style="display:none">Cost-weighted score = 100 × quality score ÷ (1 + cost × (1 + criticals) + $0.01 per minute of wall clock), normalised to the leader. A critical bug is priced as one extra run of the same model — fixing after a cheap run is cheap, fixing after an expensive run is expensive. Plan mode uses the marginal plan estimate where one exists; runs without a plan keep their OpenRouter figure; local runs cost $0 plus time.</p>`;
+    return (
+        radios +
+        '\n      ' +
+        groups
+            .map(([v, rows]) => versionHeading(v) + scoreboardFor(rows))
+            .join('\n      ')
+    );
+}
+
+function matrixFor(rows) {
+    const head = ['Criterion', ...rows.map(short)]
         .map((h) => `<th>${h}</th>`)
         .join('\n            ');
     let dataRow = 0;
     const body = data.matrix_rows
         .map((row) => {
             if (row.type === 'group')
-                return `          <tr class="group"><th scope="row">${row.label}</th><td colspan="${runs.length}"></td></tr>`;
+                return `          <tr class="group"><th scope="row">${row.label}</th><td colspan="${rows.length}"></td></tr>`;
             const i = dataRow++;
-            const cells = runs
+            const cells = rows
                 .map((r) => '            ' + r.matrix_cells[i])
                 .join('\n');
             return `          <tr>
@@ -225,7 +285,7 @@ ${cells}
           </tr>`;
         })
         .join('\n');
-    const totals = runs
+    const totals = rows
         .map(
             (r, i) =>
                 `<td${i === 0 ? ' class="best"' : ''}>${r.score_total}</td>`
@@ -248,6 +308,11 @@ ${body}
         </tfoot>
       </table>`;
 }
+
+const matrix = () =>
+    groups
+        .map(([v, rows]) => versionHeading(v) + matrixFor(rows))
+        .join('\n      ');
 
 function costTable() {
     const heads = [
@@ -377,43 +442,45 @@ ${body}
 const SORTER =
     `<script>
 (() => {
-    const tbody = document.querySelector('#scoreboard tbody');
     const note = document.getElementById('plan-note');
+    const boards = [...document.querySelectorAll('table.scoreboard tbody')];
     const apply = () => {
         const mode = document.querySelector(
             'input[name="costmode"]:checked'
         ).value;
-        const rows = [...tbody.rows];
-        let vals = rows.map((r) => {
-            const d = r.dataset;
-            if (mode === 'none') return Number(d.base);
-            const cost = mode === 'or' ? Number(d.or) : Number(d.plan);
-            return (
-                Number(d.base) /
-                (1 +
-                    cost * (1 + Number(d.crit)) +
-                    0.01 * Number(d.wall))
-            );
-        });
-        if (mode !== 'none') {
-            const mx = Math.max(...vals);
-            vals = vals.map((v) => (100 * v) / mx);
+        for (const tbody of boards) {
+            const rows = [...tbody.rows];
+            let vals = rows.map((r) => {
+                const d = r.dataset;
+                if (mode === 'none') return Number(d.base);
+                const cost = mode === 'or' ? Number(d.or) : Number(d.plan);
+                return (
+                    Number(d.base) /
+                    (1 +
+                        cost * (1 + Number(d.crit)) +
+                        0.01 * Number(d.wall))
+                );
+            });
+            if (mode !== 'none') {
+                const mx = Math.max(...vals);
+                vals = vals.map((v) => (100 * v) / mx);
+            }
+            rows.forEach((r, i) => {
+                r.dataset.adj = vals[i];
+                r.querySelector('.scoreval').textContent = Math.round(vals[i]);
+                r.querySelector('.bar span').style.width =
+                    Math.round(vals[i]) + '%';
+            });
+            rows.sort((a, b) => Number(b.dataset.adj) - Number(a.dataset.adj));
+            rows.forEach((r, i) => {
+                tbody.appendChild(r);
+                const rank = r.querySelector('.rank');
+                rank.textContent = i + 1;
+                rank.classList.toggle('rank-1', i === 0);
+                r.querySelector('.bar').classList.toggle('gold', i === 0);
+                r.querySelector('.model').classList.toggle('best', i === 0);
+            });
         }
-        rows.forEach((r, i) => {
-            r.dataset.adj = vals[i];
-            r.querySelector('.scoreval').textContent = Math.round(vals[i]);
-            r.querySelector('.bar span').style.width =
-                Math.round(vals[i]) + '%';
-        });
-        rows.sort((a, b) => Number(b.dataset.adj) - Number(a.dataset.adj));
-        rows.forEach((r, i) => {
-            tbody.appendChild(r);
-            const rank = r.querySelector('.rank');
-            rank.textContent = i + 1;
-            rank.classList.toggle('rank-1', i === 0);
-            r.querySelector('.bar').classList.toggle('gold', i === 0);
-            r.querySelector('.model').classList.toggle('best', i === 0);
-        });
         note.style.display = mode === 'plan' ? 'block' : 'none';
     };
     document
@@ -431,7 +498,7 @@ document.querySelectorAll('table.sortable th[data-sort]').forEach((th) => {
             o.querySelector('.dir').textContent = '';
         });
         th.dataset.dir = desc ? 'desc' : 'asc';
-        th.querySelector('.dir').textContent = desc ? '\u25BC' : '\u25B2';
+        th.querySelector('.dir').textContent = desc ? '▼' : '▲';
         const tbody = table.tBodies[0];
         [...tbody.rows]
             .sort((a, b) => {
