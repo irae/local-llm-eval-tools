@@ -68,3 +68,21 @@ Kill it after the first turn. Then check `runs/<slug>-meta.json`:
 the pinned global `AGENTS.md` plus the worktree's own context files,
 `thinking_level` is `low`, and `model_info` carries the full entry with
 no `apiKey`. Delete the smoke branch and worktree afterwards.
+
+## 5. Prefill speed vs the stall watchdog (item 11)
+
+The stall watchdog aborts after 10 minutes with no events, and pi emits
+no events during prefill. On llama.cpp the runner now asks `/slots`
+first, so long prefills are safe there. `mlx_lm.server` and LM Studio
+give no busy signal: measure the time to first token of one request at
+about 80 k tokens of context on each stack. If it can pass 10 minutes,
+raise `--stall-min` for those stacks and note the value in PLAN.md.
+
+## 6. Respawn with a dangling tool call (item 12)
+
+During the smoke run (check 4), `kill -9` the `pi` process while a tool
+call is executing. The runner respawns on the same session file and
+sends "Continue from where you stopped." Confirm pi resumes a session
+whose last entry is an unanswered toolCall; if it refuses or errors,
+report back — the runner then needs to append a synthetic error tool
+result before the nudge.

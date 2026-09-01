@@ -762,7 +762,12 @@
                 level, which the sub-line now reports from the session logs.
                 Claude Code is retired as a harness (2026-09-01): no new
                 claude-code rows are made; the existing ones stay until
-                replaced.
+                replaced. A partial row's sub-line states what ended the run —
+                nudge budget, harness budget, harness crash, time budget, or a
+                stuck loop the operator closed — and how many of the eight
+                libraries were done. The wall-clock and stall budgets are
+                absolute minutes, which favours fast serving stacks; each run's
+                measured output speed is in its meta file.
             </p>
         </div>
     </section>

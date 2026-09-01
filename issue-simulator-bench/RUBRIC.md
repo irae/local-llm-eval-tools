@@ -1,6 +1,7 @@
 # Issue-13 verification battery and scoring rubric
 
-Run all checks for every new branch. Apply the rubric unchanged so scores stay
+Run all checks for every new branch — `benchmark/score.mjs` automates the
+mechanical ones and writes an evidence pack (see PLAN.md, "How to score a run"). Apply the rubric unchanged so scores stay
 comparable. Paths are relative to the repo root; `$d` is the eval worktree.
 
 ## The task

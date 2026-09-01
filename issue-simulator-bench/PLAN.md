@@ -93,7 +93,11 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
       continue the workflow from where you stopped.`Budget`--max-model`
       (default 3).
     - Nothing reads the chat. The runner also forces auto-compaction and
-      auto-retry on and records whether they took effect; `--wall-min` (default 300) is the hard stop.
+      auto-retry on and records whether they took effect; `--wall-min` (default 300) is the hard stop. Both time budgets are
+      absolute minutes and favour fast serving stacks; the runner records
+      measured output speed (`throughput` in the meta file) so the budgets can
+      be tuned from data, and the stall watchdog first asks the server whether
+      it is still processing (llama.cpp `/slots`) before aborting a turn.
     - **Config guard.** Before the first prompt the runner refuses (exit 3,
       `end_reason: bad_config`) when the model has no `contextWindow` or
       `maxTokens`, when `maxTokens` is not below `contextWindow`, when
@@ -130,7 +134,12 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
 ## How to score a run
 
 1. Run the full verification battery in `RUBRIC.md` against the branch. Never trust
-   the model's own claims.
+   the model's own claims. `node benchmark/score.mjs <branch> --session <log>
+--meta <meta> [--worktree <dir>]` computes the mechanical parts (static
+   completeness, lockfile, commit-craft facts, session habits, nudges; with a
+   worktree also prettier/eslint/trap A) and writes
+   `runs/<branch>-evidence.json`. The scorer reads the pack, judges only defect
+   severity and criteria 1, 6, 8, 9, and cites the pack in the matrix cells.
 2. Apply the rubric unchanged. If you add a criterion, re-score every prior run.
 3. Collect telemetry from the harness session log:
     - Claude Code (historical rows only): `runs/<model>-result.json` (cost,

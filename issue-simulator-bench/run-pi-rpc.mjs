@@ -115,6 +115,7 @@ let settledWaiter = null;
 let lastAssistant = null;
 let lastEventAt = Date.now();
 let exited = false;
+let outputTokensTotal = 0;
 
 // Pinned environment: no operator extensions, skills, or prompt templates.
 // The config directory itself is pinned by run-worker.sh via PI_CODING_AGENT_DIR.
@@ -178,8 +179,10 @@ function handleLine(line) {
         return;
     }
     logEvent({ t: new Date().toISOString(), ...e });
-    if (e.type === 'message_end' && e.message?.role === 'assistant')
+    if (e.type === 'message_end' && e.message?.role === 'assistant') {
         lastAssistant = e.message;
+        outputTokensTotal += e.message.usage?.output ?? 0;
+    }
     if (e.type === 'compaction_start')
         meta.compactions.push({
             at: new Date().toISOString(),
@@ -393,10 +396,37 @@ function scanContextFiles() {
     return found;
 }
 
+async function serverBusy() {
+    const baseUrl = meta.model_info?.baseUrl;
+    if (!baseUrl) return false;
+    try {
+        const root = baseUrl.replace(/\/v1\/?$/, '');
+        const r = await fetch(root + '/slots', {
+            signal: AbortSignal.timeout(3000),
+        });
+        if (!r.ok) return false;
+        const slots = await r.json();
+        return (
+            Array.isArray(slots) &&
+            slots.some((x) => x.is_processing || x.state === 1)
+        );
+    } catch {
+        return false;
+    }
+}
+
 // ---- main -------------------------------------------------------------------
 async function finish(reason) {
     meta.end_reason = reason;
     meta.end = new Date().toISOString();
+    const wallMin = (Date.now() - startedAt.getTime()) / 60_000;
+    meta.throughput = {
+        output_tokens: outputTokensTotal,
+        wall_min: Math.round(wallMin * 10) / 10,
+        output_tokens_per_min: wallMin
+            ? Math.round(outputTokensTotal / wallMin)
+            : null,
+    };
     try {
         if (!exited) {
             const st = await send({ type: 'get_session_stats' });
@@ -525,12 +555,13 @@ async function main() {
 
     const wallTimer = setTimeout(async () => {
         say('wall clock budget reached, aborting');
+        // flag first: agent_settled can arrive before the abort response
+        wallHit = true;
         try {
             await send({ type: 'abort' });
         } catch {
             // best effort; the run is ending anyway
         }
-        wallHit = true;
     }, wallMs);
     let wallHit = false;
 
@@ -538,6 +569,13 @@ async function main() {
     let stallFlag = false;
     const stallTimer = setInterval(async () => {
         if (settledWaiter && Date.now() - lastEventAt > stallMs && !exited) {
+            // A long prefill emits no events; do not abort while the server
+            // says it is still working (llama.cpp /slots; others: no signal).
+            if (await serverBusy()) {
+                lastEventAt = Date.now();
+                say('stall timer: server still processing, waiting');
+                return;
+            }
             stallFlag = true;
             say('stall detected, aborting turn');
             try {
