@@ -13,16 +13,16 @@ base commit, branch suffix, results files, and report. Never mix their rows, and
 never compare a score across the two tests; a model compares only against its own
 run of the same test.
 
-|              | Blind run                              | Guided run                                             |
-| ------------ | -------------------------------------- | ------------------------------------------------------ |
-| Question     | Can the model discover the traps?      | How far does a structured plan lift it?                |
-| Prompt       | `prompt-blind.txt` (terse)             | `prompt-guided.txt` (numbered plan, traps disclosed)   |
-| Base commit  | `182b07f`                              | `6458616` (tag `guided-v3-base`; v2.1 rows: `4679b5a`) |
-| Run branches | `<model>-issue-13`                     | `<model>-guided-issue-13`                              |
-| Worktrees    | `../mendel-bench-<model>`              | `../mendel-bench2-<model>`                             |
-| Results      | `results.json` / `results.csv`         | `results-guided.json` / `results-guided.csv`           |
-| Report       | `report.html` (`report-template.html`) | `report-guided.html` (`report-guided-template.html`)   |
-| Status       | complete (6 models, Aug 2026)          | active — all new runs go here                          |
+|              | Blind run                              | Guided run                                                          |
+| ------------ | -------------------------------------- | ------------------------------------------------------------------- |
+| Question     | Can the model discover the traps?      | How far does a structured plan lift it?                             |
+| Prompt       | `prompt-blind.txt` (terse)             | `prompt-guided.txt` (numbered plan, traps disclosed)                |
+| Base commit  | `182b07f`                              | `6458616` (tag `guided-v3-base`; v2.1 rows: `4679b5a`)              |
+| Run branches | `<model>-issue-13`                     | `<model>-guided-v3-issue-13` (v2.1 rows: `<model>-guided-issue-13`) |
+| Worktrees    | `../mendel-bench-<model>`              | `../mendel-bench2-<model>`                                          |
+| Results      | `results.json` / `results.csv`         | `results-guided.json` / `results-guided.csv`                        |
+| Report       | `report.html` (`report-template.html`) | `report-guided.html` (`report-guided-template.html`)                |
+| Status       | complete (6 models, Aug 2026)          | active — all new runs go here                                       |
 
 The guided run exists because the blind run showed the weaker (and local) models
 losing most of their points to discoverable traps. What its prompt
@@ -46,7 +46,9 @@ One result row per model per prompt version: a pre-freeze
 haiku run exists only as branch `…-p0-guided-issue-13` and in git history, not in the
 results files. Run every new model against the frozen prompt.
 Prompt versions are git tags (`guided-prompt-v2.1`, `guided-prompt-v3.0`,
-`blind-prompt-v1.0`, `blind-prompt-v1.1`). The task text itself is pinned too:
+`blind-prompt-v1.0`, `blind-prompt-v1.1`). One row per version also means one
+run branch per version: guided v3 branches carry `-guided-v3-`; the old
+`-guided-issue-13` branches are the closed v2.1 artifacts. The task text itself is pinned too:
 GitHub issue 13 is locked, and `benchmark/issue-13.md` holds the snapshot with
 its sha256 — when a run fetches the live issue, it sees exactly this text. Every row carries `prompt_version`,
 and the report renders one scoreboard and one matrix per version — never one
