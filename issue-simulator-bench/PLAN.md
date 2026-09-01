@@ -18,7 +18,7 @@ run of the same test.
 | Question     | Can the model discover the traps?      | How far does a structured plan lift it?                |
 | Prompt       | `prompt-blind.txt` (terse)             | `prompt-guided.txt` (numbered plan, traps disclosed)   |
 | Base commit  | `182b07f`                              | `23050bd` (tag `guided-v3-base`; v2.1 rows: `4679b5a`) |
-| Run branches | `<model>-issue-13`                     | `<model>-guided-issue-13`                                  |
+| Run branches | `<model>-issue-13`                     | `<model>-guided-issue-13`                              |
 | Worktrees    | `../mendel-bench-<model>`              | `../mendel-bench2-<model>`                             |
 | Results      | `results.json` / `results.csv`         | `results-guided.json` / `results-guided.csv`           |
 | Report       | `report.html` (`report-template.html`) | `report-guided.html` (`report-guided-template.html`)   |
@@ -66,16 +66,22 @@ results files. Run every new model against the frozen prompt.
       server: stream error, premature `length` (below 80 % of the model's output
       budget), no events for `--stall-min` (default 10) minutes, a dead pi process
       (respawned on the same session file). Message: `Continue from where you
-      stopped.` Budget `--max-tooling` (default 10).
+stopped.` Budget `--max-tooling` (default 10).
     - **Model nudge — scored.** The model stopped by itself (`stop`, or `length`
       at its real output budget) while TASKS.md still has `- [ ]` items or `git
-      status` is not clean. Message, always identical: `You are not done. Check
-      TASKS.md for unchecked items and \`git status\` for uncommitted work, then
-      continue the workflow from where you stopped.` Budget `--max-model`
+status` is not clean. Message, always identical: `You are not done. Check
+TASKS.md for unchecked items and \`git status\` for uncommitted work, then
+      continue the workflow from where you stopped.`Budget`--max-model`
       (default 3).
     - Nothing reads the chat. The runner also forces auto-compaction and
-      auto-retry on and records whether they took effect; `--wall-min` (default
-      300) is the hard stop.
+      auto-retry on and records whether they took effect; `--wall-min` (default 300) is the hard stop.
+    - **Config guard.** Before the first prompt the runner refuses (exit 3,
+      `end_reason: bad_config`) when the model has no `contextWindow` or
+      `maxTokens`, when `maxTokens` is not below `contextWindow`, when
+      auto-compaction did not enable, or when a local server reports a smaller
+      loaded context than pi's `contextWindow` (llama.cpp `/props`, LM Studio
+      `/api/v0/models`; mlx_lm.server cannot be probed — recorded as unverified).
+      `--allow-bad-config` starts anyway and marks the run non-comparable.
     - Outputs per run: `<slug>-meta.json` (nudges with causes, compactions,
       retries, warnings, session stats), `<slug>-session.jsonl` (raw pi session,
       home path redacted), `<slug>-session.html` (export), `<slug>-events.jsonl`

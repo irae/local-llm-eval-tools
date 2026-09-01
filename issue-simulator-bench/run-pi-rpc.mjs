@@ -91,6 +91,7 @@ const meta = {
     session_id: null,
     stats: null,
     model_info: null,
+    server_context: null,
 };
 const eventsPath = `${out}-events.jsonl`;
 writeFileSync(eventsPath, '');
@@ -278,6 +279,64 @@ function classify(settleKind) {
         : { kind: 'done', cause: 'model stopped, work complete' };
 }
 
+// ---- server context probe --------------------------------------------------
+// Local OpenAI-compatible servers expose what they really loaded:
+//   llama.cpp: GET /props -> default_generation_settings.n_ctx
+//   LM Studio: GET /api/v0/models -> [{ id, loaded_context_length }]
+// mlx_lm.server has no such endpoint: recorded as unknown (a warning, not fatal).
+async function probeServerContext(baseUrl, modelId) {
+    if (!baseUrl) return { local: false, source: 'no baseUrl' };
+    let host;
+    try {
+        host = new URL(baseUrl).hostname;
+    } catch {
+        return { local: false, source: 'bad baseUrl' };
+    }
+    const local =
+        /^(localhost|127\.|0\.0\.0\.0|\[::1\]|10\.|192\.168\.|100\.|172\.(1[6-9]|2\d|3[01])\.)/.test(
+            host
+        );
+    if (!local) return { local: false, source: 'remote provider' };
+    const root = baseUrl.replace(/\/v1\/?$/, '');
+    const get = async (path) => {
+        const ac = new AbortController();
+        const t = setTimeout(() => ac.abort(), 4000);
+        try {
+            const r = await fetch(root + path, { signal: ac.signal });
+            if (!r.ok) return null;
+            return await r.json();
+        } catch {
+            return null;
+        } finally {
+            clearTimeout(t);
+        }
+    };
+    const props = await get('/props');
+    const nctx = props?.default_generation_settings?.n_ctx;
+    if (nctx) return { local: true, source: 'llama.cpp /props', n_ctx: nctx };
+    const lms = await get('/api/v0/models');
+    const list = Array.isArray(lms) ? lms : lms?.data;
+    if (Array.isArray(list)) {
+        const m =
+            list.find((x) => x.id === modelId) ||
+            list.find((x) => x.loaded_context_length);
+        if (m?.loaded_context_length)
+            return {
+                local: true,
+                source: 'LM Studio /api/v0/models',
+                n_ctx: m.loaded_context_length,
+            };
+        return {
+            local: true,
+            source: 'LM Studio: model not loaded or no loaded_context_length',
+        };
+    }
+    return {
+        local: true,
+        source: 'no /props or /api/v0/models (mlx_lm.server?)',
+    };
+}
+
 // ---- main -------------------------------------------------------------------
 async function finish(reason) {
     meta.end_reason = reason;
@@ -330,9 +389,31 @@ async function main() {
     meta.model_info = state.data.model && {
         id: state.data.model.id,
         provider: state.data.model.provider,
+        baseUrl: state.data.model.baseUrl,
         contextWindow: state.data.model.contextWindow,
         maxTokens: state.data.model.maxTokens,
     };
+    // Sizes, not just presence: pi's contextWindow must not exceed what the server
+    // actually loaded, or compaction fires too late and the server cuts the stream.
+    const ctx = meta.model_info?.contextWindow || 0;
+    const maxOut = meta.model_info?.maxTokens || 0;
+    if (ctx && maxOut && maxOut >= ctx)
+        meta.warnings.push(
+            `maxTokens (${maxOut}) is not below contextWindow (${ctx})`
+        );
+    const server = await probeServerContext(
+        meta.model_info?.baseUrl,
+        meta.model_info?.id
+    );
+    meta.server_context = server;
+    if (server.n_ctx && ctx > server.n_ctx)
+        meta.warnings.push(
+            `contextWindow (${ctx}) exceeds the server's loaded context (${server.n_ctx} via ${server.source}) — compaction would fire too late`
+        );
+    if (server.local && !server.n_ctx)
+        meta.warnings.push(
+            `server context unknown (${server.source}); contextWindow ${ctx} is unverified`
+        );
     if (!state.data.autoCompactionEnabled)
         meta.warnings.push('auto-compaction is OFF after set_auto_compaction');
     if (!meta.model_info?.contextWindow)
@@ -346,8 +427,10 @@ async function main() {
     for (const w of meta.warnings) say(`WARNING: ${w}`);
     saveMeta();
     // A run on a misconfigured model is not comparable. Refuse before the first prompt.
-    const fatal = meta.warnings.filter((w) =>
-        /contextWindow|maxTokens|auto-compaction/.test(w)
+    const fatal = meta.warnings.filter(
+        (w) =>
+            /contextWindow|maxTokens|auto-compaction/.test(w) &&
+            !/unverified/.test(w)
     );
     if (fatal.length && !('allow-bad-config' in args)) {
         say(
