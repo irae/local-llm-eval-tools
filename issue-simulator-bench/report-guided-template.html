@@ -748,7 +748,18 @@
                 its nudge counts read n/a and its runs are, if anything, held to
                 a stricter stop rule. Runner metadata
                 (<code>runs/&lt;slug&gt;-meta.json</code>) records every nudge
-                with its cause.
+                with its cause. From the same date both harnesses also run in a
+                pinned environment: pi starts with
+                <code>--no-extensions --no-skills --no-prompt-templates</code>
+                and a benchmark-owned config directory, Claude Code starts with
+                <code>--bare</code> and a benchmark-owned config directory, and
+                both read the same frozen global instructions (<code
+                    >benchmark/agents-global.md</code
+                >
+                v1.0) and nothing else of the operator's setup. The thinking
+                level of each run is pinned on the command line and shown under
+                the model name; earlier pi runs inherited the operator's default
+                level, which the sub-line now reports from the session logs.
             </p>
         </div>
     </section>

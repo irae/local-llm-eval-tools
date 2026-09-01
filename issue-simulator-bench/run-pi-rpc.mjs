@@ -91,6 +91,10 @@ const meta = {
     session_id: null,
     stats: null,
     model_info: null,
+    thinking_level: null,
+    pi_flags: null,
+    agent_dir: null,
+    context_files: null,
     server_context: null,
 };
 const eventsPath = `${out}-events.jsonl`;
@@ -111,8 +115,12 @@ let lastAssistant = null;
 let lastEventAt = Date.now();
 let exited = false;
 
+// Pinned environment: no operator extensions, skills, or prompt templates.
+// The config directory itself is pinned by run-worker.sh via PI_CODING_AGENT_DIR.
+const PI_FLAGS = ['--no-extensions', '--no-skills', '--no-prompt-templates'];
+
 function spawnPi(sessionFile) {
-    const argv = ['--mode', 'rpc', '--model', model];
+    const argv = ['--mode', 'rpc', '--model', model, ...PI_FLAGS];
     if (thinking) argv.push('--thinking', thinking);
     if (sessionFile) argv.push('--session', sessionFile);
     say(`spawn pi ${argv.join(' ')}`);
@@ -313,7 +321,8 @@ async function probeServerContext(baseUrl, modelId) {
     };
     const props = await get('/props');
     const nctx = props?.default_generation_settings?.n_ctx;
-    if (nctx) return { local: true, source: 'llama.cpp /props', n_ctx: nctx };
+    if (nctx)
+        return { local: true, source: 'llama.cpp /props', n_ctx: nctx, props };
     const lms = await get('/api/v0/models');
     const list = Array.isArray(lms) ? lms : lms?.data;
     if (Array.isArray(list)) {
@@ -335,6 +344,25 @@ async function probeServerContext(baseUrl, modelId) {
         local: true,
         source: 'no /props or /api/v0/models (mlx_lm.server?)',
     };
+}
+
+// ---- context files ---------------------------------------------------------
+// The same paths pi scans (global agent dir, then every parent of cwd, then
+// cwd), so the record shows which instruction files reached the model.
+function scanContextFiles() {
+    const found = [];
+    const agentDir = process.env.PI_CODING_AGENT_DIR || `${home}/.pi/agent`;
+    const check = (dir) => {
+        for (const name of ['AGENTS.override.md', 'AGENTS.md', 'CLAUDE.md'])
+            if (existsSync(resolve(dir, name)))
+                found.push(redact(resolve(dir, name)));
+    };
+    if (existsSync(resolve(agentDir, 'AGENTS.md')))
+        found.push(redact(resolve(agentDir, 'AGENTS.md')));
+    const parts = cwd.split('/').filter(Boolean);
+    for (let i = 0; i <= parts.length; i++)
+        check('/' + parts.slice(0, i).join('/'));
+    return found;
 }
 
 // ---- main -------------------------------------------------------------------
@@ -386,13 +414,19 @@ async function main() {
     meta.session_file = redact(state.data.sessionFile);
     meta._session_path = state.data.sessionFile;
     meta.session_id = state.data.sessionId;
-    meta.model_info = state.data.model && {
-        id: state.data.model.id,
-        provider: state.data.model.provider,
-        baseUrl: state.data.model.baseUrl,
-        contextWindow: state.data.model.contextWindow,
-        maxTokens: state.data.model.maxTokens,
-    };
+    // The full resolved model entry (sampling, compat, thinking map) minus
+    // secrets, so every knob that shaped the run is on record.
+    meta.model_info = state.data.model && { ...state.data.model };
+    if (meta.model_info) {
+        delete meta.model_info.apiKey;
+        delete meta.model_info.headers;
+    }
+    meta.thinking_level = state.data.thinkingLevel ?? thinking;
+    meta.pi_flags = PI_FLAGS;
+    meta.agent_dir = redact(
+        process.env.PI_CODING_AGENT_DIR || `${home}/.pi/agent`
+    );
+    meta.context_files = scanContextFiles();
     // Sizes, not just presence: pi's contextWindow must not exceed what the server
     // actually loaded, or compaction fires too late and the server cuts the stream.
     const ctx = meta.model_info?.contextWindow || 0;

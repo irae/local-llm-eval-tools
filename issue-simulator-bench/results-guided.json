@@ -70,7 +70,6 @@
         "wweek": "not exposed",
         "rpw": "≈ 60"
       },
-      "matrix_total": "97.5",
       "matrix_cells": [
         "<td class=\"best\"><span class=\"pill p-good\">none</span> <b>25</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
@@ -100,7 +99,8 @@
         "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">18 %</span></td>",
         "<td>247</td>"
-      ]
+      ],
+      "thinking": null
     },
     {
       "model": "claude-haiku-4.5",
@@ -179,7 +179,6 @@
         "wweek": "not exposed",
         "rpw": "≈ 135"
       },
-      "matrix_total": "66.5",
       "matrix_cells": [
         "<td><span class=\"pill p-bad\">1 crit · stale chalk</span> <b>16</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
@@ -209,7 +208,8 @@
         "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-mid\">80 %</span></td>",
         "<td>238</td>"
-      ]
+      ],
+      "thinking": null
     },
     {
       "model": "qwen3.6-35b-a3b",
@@ -307,7 +307,6 @@
         "<td><span class=\"pill p-bad\">4 %</span></td>",
         "<td><span class=\"pill p-mid\">251</span></td>"
       ],
-      "matrix_total": "67.5",
       "cost": {
         "or_route": null,
         "or_usd": "0",
@@ -319,7 +318,8 @@
         "rate_cr": null,
         "rate_tone": null,
         "provider_label": "local"
-      }
+      },
+      "thinking": "high"
     },
     {
       "model": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
@@ -334,7 +334,7 @@
       "partial": true,
       "round": 2,
       "prompt_version": "r2.1",
-      "score_total": 69.0,
+      "score_total": 69,
       "scores": {
         "bugs": 25,
         "completion": 7.5,
@@ -413,7 +413,6 @@
         "<td><span class=\"pill p-bad\">11 %</span></td>",
         "<td><span class=\"pill p-mid\">94</span></td>"
       ],
-      "matrix_total": "70",
       "cost": {
         "or_route": null,
         "or_usd": "0",
@@ -425,7 +424,8 @@
         "rate_cr": null,
         "rate_tone": null,
         "provider_label": "local"
-      }
+      },
+      "thinking": "high"
     },
     {
       "model": "mlx-community/Qwen3.8-27B-4bit",
@@ -516,7 +516,6 @@
         "<td class=\"best\"><span class=\"pill p-good\">15 %</span></td>",
         "<td><span class=\"pill p-mid\">95</span></td>"
       ],
-      "matrix_total": "84",
       "cost": {
         "or_route": null,
         "or_usd": "0",
@@ -528,7 +527,8 @@
         "rate_cr": null,
         "rate_tone": null,
         "provider_label": "local"
-      }
+      },
+      "thinking": "low"
     }
   ],
   "matrix_rows": [

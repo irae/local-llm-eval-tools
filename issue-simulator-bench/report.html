@@ -744,7 +744,7 @@
                     >
                         <td class="rank rank-1">1</td>
                         <th scope="row" class="model best">
-                            grok-4.6<small>pi · xai</small>
+                            grok-4.6<small>pi · xai · think high</small>
                         </th>
                         <td>
                             <div class="scorewrap">
@@ -830,7 +830,9 @@
                     >
                         <td class="rank">3</td>
                         <th scope="row" class="model">
-                            gpt-5.6-luna<small>pi · openai-codex</small>
+                            gpt-5.6-luna<small
+                                >pi · openai-codex · think high</small
+                            >
                         </th>
                         <td>
                             <div class="scorewrap">
@@ -916,7 +918,7 @@
                     >
                         <td class="rank">5</td>
                         <th scope="row" class="model">
-                            kimi-k3<small>pi · fireworks</small>
+                            kimi-k3<small>pi · fireworks · think high</small>
                         </th>
                         <td>
                             <div class="scorewrap">
@@ -958,7 +960,7 @@
                         <td class="rank">6</td>
                         <th scope="row" class="model">
                             mlx-community/Qwen3.8-27B-4bit<small
-                                >pi · mlx · local</small
+                                >pi · mlx · local · think medium</small
                             >
                         </th>
                         <td>
@@ -1001,7 +1003,9 @@
                     >
                         <td class="rank">7</td>
                         <th scope="row" class="model">
-                            deepseek-v4-pro-0813<small>pi · fireworks</small>
+                            deepseek-v4-pro-0813<small
+                                >pi · fireworks · think high</small
+                            >
                         </th>
                         <td>
                             <div class="scorewrap">
@@ -1042,7 +1046,9 @@
                     >
                         <td class="rank">8</td>
                         <th scope="row" class="model">
-                            gpt-5.6-sol<small>pi · openai-codex</small>
+                            gpt-5.6-sol<small
+                                >pi · openai-codex · think high</small
+                            >
                         </th>
                         <td>
                             <div class="scorewrap">
@@ -1086,7 +1092,7 @@
                         <td class="rank">9</td>
                         <th scope="row" class="model">
                             prism-ml/Ternary-Bonsai-27B-mlx-2bit<small
-                                >pi · mlx · local</small
+                                >pi · mlx · local · think high</small
                             >
                         </th>
                         <td>
@@ -1172,7 +1178,9 @@
                     >
                         <td class="rank">11</td>
                         <th scope="row" class="model">
-                            qwen3.6-35b-a3b<small>pi · llama · local</small>
+                            qwen3.6-35b-a3b<small
+                                >pi · llama · local · think xhigh</small
+                            >
                         </th>
                         <td>
                             <div class="scorewrap">
@@ -1216,7 +1224,9 @@
                     >
                         <td class="rank">12</td>
                         <th scope="row" class="model">
-                            gemma-4-26b-a4b<small>pi · llama · local</small>
+                            gemma-4-26b-a4b<small
+                                >pi · llama · local · think high</small
+                            >
                         </th>
                         <td>
                             <div class="scorewrap">
@@ -2323,18 +2333,18 @@
                 <tfoot>
                     <tr>
                         <th scope="row">Total</th>
-                        <td class="best">88</td>
+                        <td class="best">89.5</td>
                         <td>87</td>
-                        <td>85</td>
-                        <td>82</td>
-                        <td>82</td>
-                        <td>79.5</td>
-                        <td>72</td>
-                        <td>69</td>
-                        <td>55</td>
-                        <td>50</td>
-                        <td>42</td>
-                        <td>41</td>
+                        <td>84.5</td>
+                        <td>81.5</td>
+                        <td>80.5</td>
+                        <td>80</td>
+                        <td>70.5</td>
+                        <td>65.5</td>
+                        <td>58</td>
+                        <td>49.5</td>
+                        <td>41.5</td>
+                        <td>38</td>
                     </tr>
                 </tfoot>
             </table>
@@ -2376,7 +2386,18 @@
                 its nudge counts read n/a and its runs are, if anything, held to
                 a stricter stop rule. Runner metadata
                 (<code>runs/&lt;slug&gt;-meta.json</code>) records every nudge
-                with its cause.
+                with its cause. From the same date both harnesses also run in a
+                pinned environment: pi starts with
+                <code>--no-extensions --no-skills --no-prompt-templates</code>
+                and a benchmark-owned config directory, Claude Code starts with
+                <code>--bare</code> and a benchmark-owned config directory, and
+                both read the same frozen global instructions (<code
+                    >benchmark/agents-global.md</code
+                >
+                v1.0) and nothing else of the operator's setup. The thinking
+                level of each run is pinned on the command line and shown under
+                the model name; earlier pi runs inherited the operator's default
+                level, which the sub-line now reports from the session logs.
             </p>
         </div>
     </section>

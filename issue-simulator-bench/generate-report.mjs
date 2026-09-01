@@ -21,6 +21,48 @@ if (!outputs.length)
 
 const runs = [...data.runs].sort((a, b) => b.score_total - a.score_total);
 
+// The matrix cells are prose, but their bold numbers must equal `scores`,
+// the single source of truth. Refuse to render a report that disagrees
+// with itself.
+const MATRIX_SCORE_ROWS = [
+    [/^Bugs remaining/, 'bugs'],
+    [/^Subtotal.*20/, 'completion'],
+    [/^node_modules actually/, 'node_modules'],
+    [/^Prettier/, 'lint'],
+    [/^Subtotal.*12/, 'commit_craft'],
+    [/^Right the first time/, 'first_time'],
+    [/^Full suite/, 'test_discipline'],
+    [/^Task list built/, 'task_list'],
+    [/^Truncated noisy/, 'truncation'],
+    [/^Followed house/, 'conventions'],
+];
+{
+    const dataRows = data.matrix_rows.filter((r) => r.type !== 'group');
+    const errors = [];
+    for (const r of runs) {
+        const sum = Object.values(r.scores).reduce((a, b) => a + b, 0);
+        if (Math.abs(sum - r.score_total) > 0.001)
+            errors.push(
+                `${r.model}: scores sum ${sum} != score_total ${r.score_total}`
+            );
+        dataRows.forEach((row, i) => {
+            const label = row.label.replace(/<[^>]+>/g, ' ').trim();
+            const map = MATRIX_SCORE_ROWS.find(([re]) => re.test(label));
+            if (!map) return;
+            const b = (r.matrix_cells[i] || '').match(/<b>([\d.]+)/);
+            if (!b || Number(b[1]) !== r.scores[map[1]])
+                errors.push(
+                    `${r.model}: matrix cell "${label}" says ${b ? b[1] : 'nothing'}, scores.${map[1]} is ${r.scores[map[1]]}`
+                );
+        });
+    }
+    if (errors.length) {
+        console.error('score consistency check failed:');
+        for (const e of errors) console.error('  ' + e);
+        process.exit(1);
+    }
+}
+
 const SHORT = {
     'claude-opus-5': 'opus-5',
     'claude-sonnet-5': 'sonnet-5',
@@ -59,7 +101,12 @@ const bugPoints = (r) =>
 const bugTone = (n) => (n === 0 ? 'good' : n <= 4 ? 'mid' : 'bad');
 
 const sub = (r) =>
-    [r.harness, r.provider, r.local ? 'local' : null]
+    [
+        r.harness,
+        r.provider,
+        r.local ? 'local' : null,
+        r.thinking ? `think ${r.thinking}` : null,
+    ]
         .filter(Boolean)
         .join(' · ');
 
@@ -181,7 +228,7 @@ ${cells}
     const totals = runs
         .map(
             (r, i) =>
-                `<td${i === 0 ? ' class="best"' : ''}>${r.matrix_total}</td>`
+                `<td${i === 0 ? ' class="best"' : ''}>${r.score_total}</td>`
         )
         .join('\n            ');
     return `<table class="matrix">

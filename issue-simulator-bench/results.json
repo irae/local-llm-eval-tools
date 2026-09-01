@@ -75,7 +75,6 @@
         "<td><span class=\"pill p-good\">48 %</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">188</span></td>"
       ],
-      "matrix_total": "88",
       "cost": {
         "or_route": "xAI only",
         "or_usd": "7.76",
@@ -98,7 +97,8 @@
         "w5h": "not exposed",
         "wweek": "2 %",
         "rpw": "≈ 50"
-      }
+      },
+      "thinking": "high"
     },
     {
       "model": "claude-opus-5",
@@ -173,7 +173,6 @@
         "<td><span class=\"pill p-mid\">35 %</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">151</span></td>"
       ],
-      "matrix_total": "87",
       "cost": {
         "or_route": "Anthropic",
         "or_usd": "8.45",
@@ -196,7 +195,8 @@
         "w5h": "not exposed",
         "wweek": "not exposed",
         "rpw": "≈ 41"
-      }
+      },
+      "thinking": null
     },
     {
       "model": "gpt-5.6-luna",
@@ -276,7 +276,6 @@
         "<td><span class=\"pill p-bad\">overflowed</span></td>",
         "<td><span class=\"pill p-mid\">265</span></td>"
       ],
-      "matrix_total": "85",
       "cost": {
         "or_route": "Flex",
         "or_usd": "0.42",
@@ -302,7 +301,8 @@
       },
       "notes": [
         "Mid-run human help: a 9.4-minute stall was broken by the user typing \"continue\"."
-      ]
+      ],
+      "thinking": "high"
     },
     {
       "model": "kimi-k3",
@@ -386,7 +386,6 @@
         "<td class=\"best\"><span class=\"pill p-good\">94 %</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">158</span></td>"
       ],
-      "matrix_total": "82",
       "cost": {
         "or_route": "Makora",
         "or_usd": "1.77",
@@ -398,7 +397,8 @@
         "rate_cr": "0.30",
         "rate_tone": "mid",
         "provider_label": "Fireworks"
-      }
+      },
+      "thinking": "high"
     },
     {
       "model": "claude-sonnet-5",
@@ -478,7 +478,6 @@
         "<td class=\"best\"><span class=\"pill p-good\">77 %</span></td>",
         "<td><span class=\"pill p-bad\">317</span></td>"
       ],
-      "matrix_total": "82",
       "cost": {
         "or_route": "Anthropic",
         "or_usd": "10.17",
@@ -501,7 +500,8 @@
         "w5h": "not exposed",
         "wweek": "not exposed",
         "rpw": "≈ 34"
-      }
+      },
+      "thinking": null
     },
     {
       "model": "deepseek-v4-pro-0813",
@@ -589,7 +589,6 @@
         "<td class=\"best\"><span class=\"pill p-good\">84 %</span></td>",
         "<td><span class=\"pill p-mid\">270</span></td>"
       ],
-      "matrix_total": "72",
       "cost": {
         "or_route": "DeepSeek",
         "or_usd": "0.85",
@@ -604,7 +603,8 @@
       },
       "notes": [
         "Mid-run human help: two unsolicited owner instructions scoped the legacy-package work, including the trap-B area."
-      ]
+      ],
+      "thinking": "high"
     },
     {
       "model": "claude-haiku-4.5",
@@ -688,7 +688,6 @@
         "<td><span class=\"pill p-good\">42 %</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">126</span></td>"
       ],
-      "matrix_total": "50",
       "cost": {
         "or_route": "Anthropic",
         "or_usd": "1.24",
@@ -711,7 +710,8 @@
         "w5h": "not exposed",
         "wweek": "not exposed",
         "rpw": "≈ 280"
-      }
+      },
+      "thinking": null
     },
     {
       "model": "qwen3.6-35b-a3b",
@@ -748,7 +748,7 @@
         }
       ],
       "telemetry": {
-        "wall_clock_min": 132.0,
+        "wall_clock_min": 132,
         "tokens_total": 10090000,
         "tokens_in": 134400,
         "tokens_out": 40277,
@@ -795,7 +795,6 @@
         "<td><span class=\"pill p-bad\">4 %</span></td>",
         "<td><span class=\"pill p-bad\">258 <em style=\"display:inline\">for less work</em></span></td>"
       ],
-      "matrix_total": "42",
       "cost": {
         "or_route": null,
         "or_usd": "0",
@@ -810,7 +809,8 @@
       },
       "notes": [
         "Mid-run human help: three substantive user interventions — a \"please continue\" after a 34.9-minute stall, TASKS.md coaching, and a memory-pressure instruction."
-      ]
+      ],
+      "thinking": "xhigh"
     },
     {
       "model": "gemma-4-26b-a4b",
@@ -847,7 +847,7 @@
         }
       ],
       "telemetry": {
-        "wall_clock_min": 104.0,
+        "wall_clock_min": 104,
         "tokens_total": 8150000,
         "tokens_in": 131593,
         "tokens_out": 17308,
@@ -894,7 +894,6 @@
         "<td><span class=\"pill p-good\">46 %</span></td>",
         "<td><span class=\"pill p-mid\">115 <em style=\"display:inline\">unfinished</em></span></td>"
       ],
-      "matrix_total": "41",
       "cost": {
         "or_route": null,
         "or_usd": "0",
@@ -910,7 +909,8 @@
       "notes": [
         "Mid-run human help inside the scored region: an owner instruction triggered the final commit.",
         "Provenance: in-session commit 60b93f8 (root/pipeline rimraf) is absent from the pushed branch."
-      ]
+      ],
+      "thinking": "high"
     },
     {
       "model": "gpt-5.6-sol",
@@ -998,7 +998,6 @@
         "<td><span class=\"pill p-bad\">overflowed</span></td>",
         "<td><span class=\"pill p-mid\">194</span></td>"
       ],
-      "matrix_total": "69",
       "cost": {
         "or_route": "Flex est.",
         "or_usd": "6.97",
@@ -1021,7 +1020,8 @@
         "w5h": "74 %",
         "wweek": "≈ 11 %",
         "rpw": "≈ 9"
-      }
+      },
+      "thinking": "high"
     },
     {
       "model": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
@@ -1034,7 +1034,7 @@
       "branch": "prism-ml-Ternary-Bonsai-27B-mlx-2bit-issue-13",
       "base_commit": "182b07f",
       "partial": true,
-      "score_total": 58.0,
+      "score_total": 58,
       "scores": {
         "bugs": 25,
         "completion": 7.5,
@@ -1113,7 +1113,6 @@
         "<td class=\"best\"><span class=\"pill p-good\">51 %</span></td>",
         "<td><span class=\"pill p-mid\">53, crashed twice</span></td>"
       ],
-      "matrix_total": "55",
       "cost": {
         "or_route": null,
         "or_usd": "0",
@@ -1125,7 +1124,8 @@
         "rate_cr": null,
         "rate_tone": null,
         "provider_label": "local"
-      }
+      },
+      "thinking": "high"
     },
     {
       "model": "mlx-community/Qwen3.8-27B-4bit",
@@ -1138,7 +1138,7 @@
       "branch": "mlx-community-Qwen3.8-27B-4bit-issue-13",
       "base_commit": "182b07f",
       "partial": true,
-      "score_total": 80.0,
+      "score_total": 80,
       "scores": {
         "bugs": 25,
         "completion": 8.5,
@@ -1213,7 +1213,6 @@
         "<td><span class=\"pill p-mid\">10 %</span></td>",
         "<td><span class=\"pill p-bad\">135, mid-run restart</span></td>"
       ],
-      "matrix_total": "79.5",
       "cost": {
         "or_route": null,
         "or_usd": "0",
@@ -1225,7 +1224,8 @@
         "rate_cr": null,
         "rate_tone": null,
         "provider_label": "local"
-      }
+      },
+      "thinking": "medium"
     }
   ],
   "matrix_rows": [

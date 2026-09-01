@@ -7,10 +7,10 @@ owner's decision.
 
 ## Todo
 
-- [ ] 1. One run, two totals: scoreboard and matrix disagree on 13 of 17 rows
+- [x] 1. One run, two totals: scoreboard and matrix disagree on 13 of 17 rows
 - [ ] 2. On mlx_lm.server a cut stream becomes a scored model nudge
-- [ ] 3. Thinking level and sampling are not pinned and not recorded
-- [ ] 4. Operator personalization leaks into every run
+- [x] 3. Thinking level and sampling are not pinned and not recorded
+- [x] 4. Operator personalization leaks into every run
 - [ ] 5. Subagent use is invisible in results and report
 - [ ] 6. Done-check false positives: blind base, pre-existing dirt
 - [ ] 7. Rubric text and matrix labels drift from prompt v3

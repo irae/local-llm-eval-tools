@@ -796,7 +796,7 @@
                         <td class="rank">2</td>
                         <th scope="row" class="model">
                             mlx-community/Qwen3.8-27B-4bit<small
-                                >pi · mlx · local</small
+                                >pi · mlx · local · think low</small
                             >
                         </th>
                         <td>
@@ -840,7 +840,7 @@
                         <td class="rank">3</td>
                         <th scope="row" class="model">
                             prism-ml/Ternary-Bonsai-27B-mlx-2bit<small
-                                >pi · mlx · local</small
+                                >pi · mlx · local · think high</small
                             >
                         </th>
                         <td>
@@ -926,7 +926,9 @@
                     >
                         <td class="rank">5</td>
                         <th scope="row" class="model">
-                            qwen3.6-35b-a3b<small>pi · llama · local</small>
+                            qwen3.6-35b-a3b<small
+                                >pi · llama · local · think high</small
+                            >
                         </th>
                         <td>
                             <div class="scorewrap">
@@ -1549,11 +1551,11 @@
                 <tfoot>
                     <tr>
                         <th scope="row">Total</th>
-                        <td class="best">97.5</td>
+                        <td class="best">98.5</td>
                         <td>84</td>
-                        <td>70</td>
-                        <td>66.5</td>
-                        <td>67.5</td>
+                        <td>69</td>
+                        <td>68</td>
+                        <td>65.5</td>
                     </tr>
                 </tfoot>
             </table>
@@ -1589,7 +1591,18 @@
                 its nudge counts read n/a and its runs are, if anything, held to
                 a stricter stop rule. Runner metadata
                 (<code>runs/&lt;slug&gt;-meta.json</code>) records every nudge
-                with its cause.
+                with its cause. From the same date both harnesses also run in a
+                pinned environment: pi starts with
+                <code>--no-extensions --no-skills --no-prompt-templates</code>
+                and a benchmark-owned config directory, Claude Code starts with
+                <code>--bare</code> and a benchmark-owned config directory, and
+                both read the same frozen global instructions (<code
+                    >benchmark/agents-global.md</code
+                >
+                v1.0) and nothing else of the operator's setup. The thinking
+                level of each run is pinned on the command line and shown under
+                the model name; earlier pi runs inherited the operator's default
+                level, which the sub-line now reports from the session logs.
             </p>
         </div>
     </section>

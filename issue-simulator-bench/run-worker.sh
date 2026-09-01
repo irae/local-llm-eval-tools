@@ -5,7 +5,13 @@
 #   bench:    guided (default) | blind — see PLAN.md; the two tests keep
 #             separate prompts, base commits, branch suffixes, and results files.
 #   thinking: pi thinking level (off, minimal, low, medium, high, xhigh, max);
-#             appended to the slug so one model can have one row per level.
+#             MANDATORY for pi runs (a level inherited from operator settings is
+#             not comparable); appended to the slug so one model can have one
+#             row per level.
+# Every run gets a pinned environment: a benchmark-owned config dir with the
+# frozen agents-global.md as the only global context file, no operator
+# extensions/skills/plugins/hooks, and a check that no stray AGENTS.md or
+# CLAUDE.md sits in a parent directory of the worktree.
 # pi runs go through run-pi-rpc.mjs (stateful RPC session with the fixed nudge
 # policy, see PLAN.md); never through `pi -p`.
 # Blocks until the worker finishes. Spawn several in parallel from separate shells.
@@ -35,6 +41,10 @@ case "$bench" in
         exit 1
         ;;
 esac
+if [ "$harness" = "pi" ] && [ -z "$thinking" ]; then
+    echo "abort: pi runs need an explicit thinking level (off|minimal|low|medium|high|xhigh|max)" >&2
+    exit 1
+fi
 RUNS="$BENCH_DIR/runs"
 slug="$(echo "$model" | tr '/:' '--')"
 [ -n "$thinking" ] && slug="${slug}-${thinking}"
@@ -46,6 +56,18 @@ if git -C "$REPO" show-ref --quiet "refs/heads/$branch"; then
     echo "abort: branch $branch exists" >&2
     exit 1
 fi
+
+# No stray context files above the worktree: they would layer into the run.
+dir="$(cd "$(dirname "$wt")" && pwd)"
+while [ "$dir" != "/" ]; do
+    for f in AGENTS.md AGENTS.override.md CLAUDE.md; do
+        if [ -e "$dir/$f" ]; then
+            echo "abort: $dir/$f would leak into the run; move it or run from elsewhere" >&2
+            exit 1
+        fi
+    done
+    dir="$(dirname "$dir")"
+done
 
 rm -rf "$wt"
 git -C "$REPO" worktree add -b "$branch" "$wt" "$BASE_COMMIT"
@@ -64,19 +86,43 @@ if ! node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$slug-plan-b
     exit 1
 fi
 
+# Pinned config dirs, rebuilt per run: only credentials, model config, and the
+# frozen global instructions get in. Never versioned (see .gitignore).
+build_pi_agent_dir() {
+    local d="$BENCH_DIR/.pi-agent"
+    rm -rf "$d" && mkdir -p "$d"
+    for f in models.json auth.json models-store.json; do
+        [ -e "$HOME/.pi/agent/$f" ] && cp "$HOME/.pi/agent/$f" "$d/"
+    done
+    printf '{"compaction":{"enabled":true},"retry":{"enabled":true}}\n' > "$d/settings.json"
+    cp "$BENCH_DIR/agents-global.md" "$d/AGENTS.md"
+    echo "$d"
+}
+build_claude_config_dir() {
+    local d="$BENCH_DIR/.claude-config"
+    rm -rf "$d" && mkdir -p "$d"
+    [ -e "$HOME/.claude/.credentials.json" ] && cp "$HOME/.claude/.credentials.json" "$d/"
+    cp "$BENCH_DIR/agents-global.md" "$d/CLAUDE.md"
+    echo "$d"
+}
+
 cd "$wt"
 start=$(date -u +%FT%TZ)
 case "$harness" in
     claude)
-        claude --model "$model" \
+        cfgdir="$(build_claude_config_dir)"
+        CLAUDE_CONFIG_DIR="$cfgdir" claude --model "$model" \
+            --bare \
             --dangerously-skip-permissions \
             -p "$(cat "$PROMPT")" \
             --output-format json \
             > "$RUNS/$slug-result.json" 2> "$RUNS/$slug-stderr.log"
         ;;
     pi)
+        agentdir="$(build_pi_agent_dir)"
+        PI_CODING_AGENT_DIR="$agentdir" \
         node "$BENCH_DIR/run-pi-rpc.mjs" --model "$model" --prompt "$PROMPT" \
-            --out "$RUNS/$slug" --cwd "$wt" ${thinking:+--thinking "$thinking"} \
+            --out "$RUNS/$slug" --cwd "$wt" --thinking "$thinking" \
             2> "$RUNS/$slug-runner.log"
         ;;
     *)
@@ -88,6 +134,6 @@ end=$(date -u +%FT%TZ)
 node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$slug-plan-after.json" > /dev/null \
     || echo "warning: plan probe after the run failed; record the plan share by hand" >&2
 pkill -f "$wt" 2>/dev/null || true
-printf '{"model":"%s","harness":"%s","bench":"%s","thinking":"%s","plan_provider":"%s","branch":"%s","base_commit":"%s","start":"%s","end":"%s"}\n' \
+printf '{"model":"%s","harness":"%s","bench":"%s","thinking":"%s","plan_provider":"%s","branch":"%s","base_commit":"%s","start":"%s","end":"%s","pinned_env":"agents-global v1.0"}\n' \
     "$model" "$harness" "$bench" "$thinking" "$plan_provider" "$branch" "$(git -C "$REPO" rev-parse --short "$BASE_COMMIT")" "$start" "$end" > "$RUNS/$slug-worker.json"
 echo "$slug: done" >&2

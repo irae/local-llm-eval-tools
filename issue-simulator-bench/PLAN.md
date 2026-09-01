@@ -51,9 +51,12 @@ results files. Run every new model against the frozen prompt.
    auto-compaction cannot trigger at the right point and `length` stops cannot be
    classified. For OpenAI-compatible servers that end streams without
    `finish_reason` (mlx_lm.server did), set `compat.supportsFinishReason: false`.
-2. Run `./run-worker.sh <model> [harness] [bench] [thinking]` for one model. The
+2. Run `./run-worker.sh <model> [harness] [bench] <thinking>` for one model. The
    default harness is `pi`; use `claude` for Claude Code. The default bench is
-   `guided`; pass `blind` only to extend the closed blind table. Each worker:
+   `guided`; pass `blind` only to extend the closed blind table. The thinking
+   level is mandatory for pi runs — a level inherited from operator settings is
+   not comparable and earlier runs silently ran at the operator's default.
+   Each worker:
     - Creates a sibling worktree at the bench's base commit.
     - Creates the bench's run branch for the model.
     - Runs a real `pnpm install` in the worktree.
@@ -90,6 +93,23 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
     - Same base commit for all models of the same bench.
     - Real `pnpm install` before the run starts.
     - No human input during a run. If a run is cut short, mark it as partial.
+    - **Pinned environment.** No operator personalization reaches a run.
+      `run-worker.sh` builds a fresh config directory per run: for pi
+      (`benchmark/.pi-agent`, via `PI_CODING_AGENT_DIR`) it holds only the
+      model config, the auth files, a minimal settings.json, and
+      `agents-global.md` as the global `AGENTS.md`; the runner also passes
+      `--no-extensions --no-skills --no-prompt-templates`. For Claude Code
+      (`benchmark/.claude-config`, via `CLAUDE_CONFIG_DIR`, with `--bare`) it
+      holds only the credentials and `agents-global.md` as the global
+      `CLAUDE.md`. The worker refuses to start when a parent directory of the
+      worktree carries an `AGENTS.md`, `AGENTS.override.md`, or `CLAUDE.md`.
+      The pi runner records the flags, the config dir, and every context file
+      found on pi's search path in `<slug>-meta.json`.
+    - **Pinned thinking level and sampling.** The thinking level comes from the
+      command line, never from settings, and lands in the results row
+      (`thinking`). The pi runner stores the full resolved model entry
+      (sampling, compat, thinking map; secrets stripped) in
+      `<slug>-meta.json`, plus the llama.cpp `/props` body where available.
 
 ## How to score a run
 
@@ -211,6 +231,7 @@ One object per run in a top-level `runs` array:
     "serving": null,
     "branch": "grok-4.6-issue-13",
     "base_commit": "182b07f",
+    "thinking": "high",
     "partial": false,
     "score_total": 88,
     "scores": {
@@ -251,7 +272,10 @@ One object per run in a top-level `runs` array:
 
 For local models, `local` is true and `serving` names the stack (`llama-server`,
 `lmstudio`). `harness_guessed` is true when the harness comes from the pi provider
-config, not from a run record. `results.csv` is the same data flattened: one row per
+config, not from a run record. `thinking` is the pinned thinking level (`null`
+for Claude Code runs and where no record exists). The per-criterion `scores` are
+the single source of truth for the total: `generate-report.mjs` refuses to render
+when a matrix cell's bold number or `score_total` disagrees with them. `results.csv` is the same data flattened: one row per
 run, `scores.*` and `telemetry.*` as prefixed columns.
 
 ## Redaction
