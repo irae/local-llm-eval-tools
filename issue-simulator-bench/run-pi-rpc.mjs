@@ -24,7 +24,12 @@
 // export to <out>-session.html.
 
 import { spawn, execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync, appendFileSync } from 'node:fs';
+import {
+    readFileSync,
+    writeFileSync,
+    existsSync,
+    appendFileSync,
+} from 'node:fs';
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
 
@@ -65,7 +70,14 @@ const meta = {
     thinking,
     cwd: redact(cwd),
     prompt_file: redact(resolve(promptFile)),
-    policy: { max_tooling: maxTooling, max_model: maxModel, stall_min: stallMs / 60_000, wall_min: wallMs / 60_000, tooling_msg: TOOLING_MSG, model_msg: MODEL_MSG },
+    policy: {
+        max_tooling: maxTooling,
+        max_model: maxModel,
+        stall_min: stallMs / 60_000,
+        wall_min: wallMs / 60_000,
+        tooling_msg: TOOLING_MSG,
+        model_msg: MODEL_MSG,
+    },
     start: startedAt.toISOString(),
     end: null,
     end_reason: null,
@@ -82,8 +94,10 @@ const meta = {
 const eventsPath = `${out}-events.jsonl`;
 writeFileSync(eventsPath, '');
 const logEvent = (e) => appendFileSync(eventsPath, JSON.stringify(e) + '\n');
-const say = (m) => console.error(`[run-pi-rpc ${new Date().toISOString()}] ${m}`);
-const saveMeta = () => writeFileSync(`${out}-meta.json`, JSON.stringify(meta, null, 2) + '\n');
+const say = (m) =>
+    console.error(`[run-pi-rpc ${new Date().toISOString()}] ${m}`);
+const saveMeta = () =>
+    writeFileSync(`${out}-meta.json`, JSON.stringify(meta, null, 2) + '\n');
 
 // ---- pi process -----------------------------------------------------------
 let pi = null;
@@ -153,12 +167,31 @@ function handleLine(line) {
         return;
     }
     logEvent({ t: new Date().toISOString(), ...e });
-    if (e.type === 'message_end' && e.message?.role === 'assistant') lastAssistant = e.message;
-    if (e.type === 'compaction_start') meta.compactions.push({ at: new Date().toISOString(), reason: e.reason });
-    if (e.type === 'auto_retry_start') meta.retries.push({ at: new Date().toISOString(), attempt: e.attempt, error: e.errorMessage });
-    if (e.type === 'extension_ui_request' && ['select', 'confirm', 'input', 'editor'].includes(e.method)) {
+    if (e.type === 'message_end' && e.message?.role === 'assistant')
+        lastAssistant = e.message;
+    if (e.type === 'compaction_start')
+        meta.compactions.push({
+            at: new Date().toISOString(),
+            reason: e.reason,
+        });
+    if (e.type === 'auto_retry_start')
+        meta.retries.push({
+            at: new Date().toISOString(),
+            attempt: e.attempt,
+            error: e.errorMessage,
+        });
+    if (
+        e.type === 'extension_ui_request' &&
+        ['select', 'confirm', 'input', 'editor'].includes(e.method)
+    ) {
         // Headless: dismiss any dialog an extension opens. Recorded, never answered by a person.
-        pi.stdin.write(JSON.stringify({ type: 'extension_ui_response', id: e.id, cancelled: true }) + '\n');
+        pi.stdin.write(
+            JSON.stringify({
+                type: 'extension_ui_response',
+                id: e.id,
+                cancelled: true,
+            }) + '\n'
+        );
         meta.warnings.push(`extension dialog dismissed: ${e.method}`);
     }
     if (e.type === 'agent_settled' && settledWaiter) {
@@ -168,7 +201,8 @@ function handleLine(line) {
     }
 }
 
-const waitSettled = () => new Promise((resolve) => (settledWaiter = { resolve }));
+const waitSettled = () =>
+    new Promise((resolve) => (settledWaiter = { resolve }));
 
 async function turn(message) {
     lastAssistant = null;
@@ -182,10 +216,14 @@ async function turn(message) {
 function unfinishedWork() {
     const reasons = [];
     const tasks = resolve(cwd, 'TASKS.md');
-    if (existsSync(tasks) && /- \[ \]/.test(readFileSync(tasks, 'utf8'))) reasons.push('TASKS.md has unchecked items');
+    if (existsSync(tasks) && /- \[ \]/.test(readFileSync(tasks, 'utf8')))
+        reasons.push('TASKS.md has unchecked items');
     try {
         // untracked files count too: test-first creates files that must be committed
-        const st = execFileSync('git', ['status', '--porcelain'], { cwd, encoding: 'utf8' }).trim();
+        const st = execFileSync('git', ['status', '--porcelain'], {
+            cwd,
+            encoding: 'utf8',
+        }).trim();
         if (st) reasons.push('uncommitted or untracked changes');
     } catch (e) {
         reasons.push(`git status failed: ${e.message}`);
@@ -196,26 +234,47 @@ function unfinishedWork() {
 // ---- classify a settled turn ---------------------------------------------
 // returns { kind: 'done' | 'tooling' | 'model', cause }
 function classify(settleKind) {
-    if (settleKind === 'exited') return { kind: 'tooling', cause: 'pi process exited' };
-    if (settleKind === 'stall') return { kind: 'tooling', cause: `no events for ${stallMs / 60_000} min, turn aborted` };
+    if (settleKind === 'exited')
+        return { kind: 'tooling', cause: 'pi process exited' };
+    if (settleKind === 'stall')
+        return {
+            kind: 'tooling',
+            cause: `no events for ${stallMs / 60_000} min, turn aborted`,
+        };
     const sr = lastAssistant?.stopReason;
-    if (sr === 'error') return { kind: 'tooling', cause: `stream error: ${(lastAssistant.errorMessage || '').slice(0, 200)}` };
+    if (sr === 'error')
+        return {
+            kind: 'tooling',
+            cause: `stream error: ${(lastAssistant.errorMessage || '').slice(0, 200)}`,
+        };
     if (sr === 'aborted') return { kind: 'tooling', cause: 'turn aborted' };
-    if (sr === 'toolUse') return { kind: 'tooling', cause: 'settled with a tool call pending' };
+    if (sr === 'toolUse')
+        return { kind: 'tooling', cause: 'settled with a tool call pending' };
     if (sr === 'length') {
         const outTok = lastAssistant?.usage?.output ?? 0;
         const budget = meta.model_info?.maxTokens ?? 0;
         if (budget && outTok >= 0.8 * budget) {
             const why = unfinishedWork();
             return why.length
-                ? { kind: 'model', cause: `output budget hit (${outTok}/${budget}); ${why.join(', ')}` }
-                : { kind: 'done', cause: `output budget hit but nothing left to do` };
+                ? {
+                      kind: 'model',
+                      cause: `output budget hit (${outTok}/${budget}); ${why.join(', ')}`,
+                  }
+                : {
+                      kind: 'done',
+                      cause: `output budget hit but nothing left to do`,
+                  };
         }
-        return { kind: 'tooling', cause: `premature length stop (${outTok} output tokens, budget ${budget || '?'})` };
+        return {
+            kind: 'tooling',
+            cause: `premature length stop (${outTok} output tokens, budget ${budget || '?'})`,
+        };
     }
     // 'stop' or unknown: the model says it is done
     const why = unfinishedWork();
-    return why.length ? { kind: 'model', cause: why.join(', ') } : { kind: 'done', cause: 'model stopped, work complete' };
+    return why.length
+        ? { kind: 'model', cause: why.join(', ') }
+        : { kind: 'done', cause: 'model stopped, work complete' };
 }
 
 // ---- main -------------------------------------------------------------------
@@ -225,9 +284,17 @@ async function finish(reason) {
     try {
         if (!exited) {
             const st = await send({ type: 'get_session_stats' });
-            if (st.success) meta.stats = { ...st.data, sessionFile: redact(st.data.sessionFile) };
-            const ex = await send({ type: 'export_html', outputPath: resolve(`${out}-session.html`) });
-            if (!ex.success) meta.warnings.push(`export_html failed: ${ex.error}`);
+            if (st.success)
+                meta.stats = {
+                    ...st.data,
+                    sessionFile: redact(st.data.sessionFile),
+                };
+            const ex = await send({
+                type: 'export_html',
+                outputPath: resolve(`${out}-session.html`),
+            });
+            if (!ex.success)
+                meta.warnings.push(`export_html failed: ${ex.error}`);
         }
     } catch (e) {
         meta.warnings.push(`finish: ${e.message}`);
@@ -238,11 +305,15 @@ async function finish(reason) {
     }
     delete meta._session_path;
     saveMeta();
-    say(`done: ${reason} — tooling nudges ${meta.nudges.tooling.length}, model nudges ${meta.nudges.model.length}`);
+    say(
+        `done: ${reason} — tooling nudges ${meta.nudges.tooling.length}, model nudges ${meta.nudges.model.length}`
+    );
     try {
         pi?.stdin.end();
         setTimeout(() => pi?.kill('SIGTERM'), 3000).unref();
-    } catch {}
+    } catch {
+        // best effort; the run is ending anyway
+    }
 }
 
 async function main() {
@@ -261,9 +332,16 @@ async function main() {
         contextWindow: state.data.model.contextWindow,
         maxTokens: state.data.model.maxTokens,
     };
-    if (!state.data.autoCompactionEnabled) meta.warnings.push('auto-compaction is OFF after set_auto_compaction');
-    if (!meta.model_info?.contextWindow) meta.warnings.push('model has no contextWindow — auto-compaction cannot trigger correctly');
-    if (!meta.model_info?.maxTokens) meta.warnings.push('model has no maxTokens — length stops cannot be classified');
+    if (!state.data.autoCompactionEnabled)
+        meta.warnings.push('auto-compaction is OFF after set_auto_compaction');
+    if (!meta.model_info?.contextWindow)
+        meta.warnings.push(
+            'model has no contextWindow — auto-compaction cannot trigger correctly'
+        );
+    if (!meta.model_info?.maxTokens)
+        meta.warnings.push(
+            'model has no maxTokens — length stops cannot be classified'
+        );
     for (const w of meta.warnings) say(`WARNING: ${w}`);
     saveMeta();
 
@@ -271,7 +349,9 @@ async function main() {
         say('wall clock budget reached, aborting');
         try {
             await send({ type: 'abort' });
-        } catch {}
+        } catch {
+            // best effort; the run is ending anyway
+        }
         wallHit = true;
     }, wallMs);
     let wallHit = false;
@@ -284,7 +364,9 @@ async function main() {
             say('stall detected, aborting turn');
             try {
                 await send({ type: 'abort' });
-            } catch {}
+            } catch {
+                // best effort; the run is ending anyway
+            }
         }
     }, 15_000);
 
@@ -303,13 +385,19 @@ async function main() {
             await finish('complete');
             break;
         }
-        const entry = { at: new Date().toISOString(), cause: c.cause, stop_reason: lastAssistant?.stopReason ?? null };
+        // A nudge is recorded only when it is actually sent; the budget check comes first.
+        const entry = {
+            at: new Date().toISOString(),
+            cause: c.cause,
+            stop_reason: lastAssistant?.stopReason ?? null,
+        };
         if (c.kind === 'tooling') {
-            meta.nudges.tooling.push(entry);
-            if (meta.nudges.tooling.length > maxTooling) {
+            if (meta.nudges.tooling.length >= maxTooling) {
+                meta.unsent_nudge = { kind: 'tooling', ...entry };
                 await finish('tooling_budget_exhausted');
                 break;
             }
+            meta.nudges.tooling.push(entry);
             if (settleKind === 'exited') {
                 meta.respawns++;
                 spawnPi(meta._session_path);
@@ -318,11 +406,12 @@ async function main() {
             }
             message = TOOLING_MSG;
         } else {
-            meta.nudges.model.push(entry);
-            if (meta.nudges.model.length > maxModel) {
+            if (meta.nudges.model.length >= maxModel) {
+                meta.unsent_nudge = { kind: 'model', ...entry };
                 await finish('model_budget_exhausted');
                 break;
             }
+            meta.nudges.model.push(entry);
             message = MODEL_MSG;
         }
         saveMeta();
