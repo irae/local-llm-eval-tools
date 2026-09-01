@@ -9,7 +9,8 @@
 // Without --worktree it computes everything git and the logs can answer:
 // static completeness, lockfile shrink, commit craft facts, root devDeps,
 // TASKS.md leak, session-log habits (truncation share, --no-verify,
-// git add -A, full-suite cadence), nudge counts. With --worktree it also
+// git add -A, full-suite cadence), nudge counts. Session logs may be pi
+// (`toolCall`/`bash`) or Claude Code (`tool_use`/`Bash`) transcripts. With --worktree it also
 // runs the runtime checks (prettier, eslint, trap A repro, tap suites) in
 // that worktree. The pack is evidence, not a verdict: every number sits next
 // to the raw lines it came from.
@@ -188,7 +189,7 @@ const evidence = {
 if (args.session && existsSync(args.session)) {
     const cmds = [];
     for (const line of readFileSync(args.session, 'utf8').split('\n')) {
-        if (!line.includes('toolCall')) continue;
+        if (!line.includes('toolCall') && !line.includes('tool_use')) continue;
         let e;
         try {
             e = JSON.parse(line);
@@ -196,13 +197,16 @@ if (args.session && existsSync(args.session)) {
             continue;
         }
         const blocks = e.message?.content || [];
-        for (const b of blocks)
+        for (const b of blocks) {
             if (
                 b.type === 'toolCall' &&
                 b.name === 'bash' &&
                 b.arguments?.command
             )
                 cmds.push(b.arguments.command);
+            if (b.type === 'tool_use' && b.name === 'Bash' && b.input?.command)
+                cmds.push(b.input.command);
+        }
     }
     const noisy = cmds.filter((c) =>
         /\b(pnpm|npm|npx|tap|node|git (log|diff|show)|eslint|prettier)\b/.test(
