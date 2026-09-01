@@ -328,8 +328,6 @@ true` before the send.
 - Respawn after a dead pi resumes the session with a possibly dangling
   `toolCall` (no result). Verify pi tolerates it; otherwise append a
   synthetic error tool result before the nudge.
-- `run-worker.sh`: `probe-plan.mjs none` must exit 0 or local runs abort
-  before they start — confirm.
 - `generate-report.mjs --guided` with a stray argument writes a stray
   file (handoff notes it). Validate arguments.
 - Matrix row "Compactions" has no `type` field (all others say `row`).
