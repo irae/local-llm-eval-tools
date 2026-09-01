@@ -9,4 +9,3 @@ runs/*
 !runs/*-plan-before.json
 !runs/*-plan-after.json
 .pi-agent/
-.claude-config/

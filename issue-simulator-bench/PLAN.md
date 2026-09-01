@@ -56,7 +56,9 @@ results files. Run every new model against the frozen prompt.
    under either setting (an empty `stop` and a `stop` at the output budget are
    never charged as model nudges by themselves).
 2. Run `./run-worker.sh <model> [harness] [bench] <thinking>` for one model. The
-   default harness is `pi`; use `claude` for Claude Code. The default bench is
+   only harness is `pi` — Claude Code was retired as a harness on 2026-09-01
+   (its rows stay in the results until replaced; a Claude model would run
+   through pi on metered tokens or an OpenRouter route). The default bench is
    `guided`; pass `blind` only to extend the closed blind table. The thinking
    level is mandatory for pi runs — a level inherited from operator settings is
    not comparable and earlier runs silently ran at the operator's default.
@@ -121,8 +123,8 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
    the model's own claims.
 2. Apply the rubric unchanged. If you add a criterion, re-score every prior run.
 3. Collect telemetry from the harness session log:
-    - Claude Code: `runs/<model>-result.json` (cost, usage, session id) and the
-      session transcript under `~/.claude/projects/`.
+    - Claude Code (historical rows only): `runs/<model>-result.json` (cost,
+      usage, session id) and the session transcript under `~/.claude/projects/`.
     - pi: `runs/<slug>-meta.json` and `runs/<slug>-session.jsonl` written by
       `run-pi-rpc.mjs`. Copy the nudge counts into `telemetry.nudges_tooling` and
       `telemetry.nudges_model`.
@@ -178,7 +180,8 @@ provider. Known mappings:
 - Branches run in this repo before this branch existed used the **pi** harness.
 - Local models in pi map through `~/.pi/agent/models.json`: provider `llama` is
   llama-server (llama.cpp), provider `lmstudio` is LM Studio.
-- Runs from `spawn-claude-workers.sh` are **claude-code**.
+- **claude-code** rows are historical: that harness was retired on 2026-09-01
+  (they came from a deleted `spawn-claude-workers.sh`).
 
 When the harness is not recorded, guess from the pi provider config and mark the guess.
 

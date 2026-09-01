@@ -1,7 +1,8 @@
 #!/bin/bash
 # Bootstraps one worktree and runs one worker on the issue-13 task.
 # Usage: ./run-worker.sh <model> [harness] [bench] [thinking]
-#   harness:  pi (default) | claude
+#   harness:  pi (the only harness; claude was retired 2026-09-01 — existing
+#             claude-code rows stay in the results until replaced)
 #   bench:    guided (default) | blind — see PLAN.md; the two tests keep
 #             separate prompts, base commits, branch suffixes, and results files.
 #   thinking: pi thinking level (off, minimal, low, medium, high, xhigh, max);
@@ -76,7 +77,6 @@ echo "$slug: worktree ready at $wt, starting $harness" >&2
 
 # Plan accounting: probe the subscription windows before and after (see PLAN.md).
 case "$harness:$model" in
-    claude:*) plan_provider=anthropic ;;
     pi:openai-codex/*) plan_provider=openai-codex ;;
     pi:xai/*) plan_provider=xai ;;
     *) plan_provider=none ;;
@@ -86,7 +86,7 @@ if ! node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$slug-plan-b
     exit 1
 fi
 
-# Pinned config dirs, rebuilt per run: only credentials, model config, and the
+# Pinned config dir, rebuilt per run: only credentials, model config, and the
 # frozen global instructions get in. Never versioned (see .gitignore).
 build_pi_agent_dir() {
     local d="$BENCH_DIR/.pi-agent"
@@ -98,25 +98,13 @@ build_pi_agent_dir() {
     cp "$BENCH_DIR/agents-global.md" "$d/AGENTS.md"
     echo "$d"
 }
-build_claude_config_dir() {
-    local d="$BENCH_DIR/.claude-config"
-    rm -rf "$d" && mkdir -p "$d"
-    [ -e "$HOME/.claude/.credentials.json" ] && cp "$HOME/.claude/.credentials.json" "$d/"
-    cp "$BENCH_DIR/agents-global.md" "$d/CLAUDE.md"
-    echo "$d"
-}
 
 cd "$wt"
 start=$(date -u +%FT%TZ)
 case "$harness" in
     claude)
-        cfgdir="$(build_claude_config_dir)"
-        CLAUDE_CONFIG_DIR="$cfgdir" claude --model "$model" \
-            --bare \
-            --dangerously-skip-permissions \
-            -p "$(cat "$PROMPT")" \
-            --output-format json \
-            > "$RUNS/$slug-result.json" 2> "$RUNS/$slug-stderr.log"
+        echo "abort: the claude harness is retired (2026-09-01); run models through pi" >&2
+        exit 1
         ;;
     pi)
         agentdir="$(build_pi_agent_dir)"

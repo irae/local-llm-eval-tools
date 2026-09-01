@@ -41,28 +41,7 @@ With `mlx_lm.server` running and the Qwen3.8 entry configured:
    Map" and `thinkingFormat`), and re-check. Until this passes, "low"
    and "medium" rows for mlx-served models are not distinct.
 
-## 3. Does Claude Code log in from the pinned config dir? (item 4)
-
-`run-worker.sh` now runs Claude Code with `--bare` and
-`CLAUDE_CONFIG_DIR=benchmark/.claude-config` (it copies
-`~/.claude/.credentials.json` in). On macOS the OAuth token may live in
-the Keychain instead of that file:
-
-```bash
-cd ~/code/mendel/benchmark && rm -rf .claude-config && mkdir .claude-config
-[ -e ~/.claude/.credentials.json ] && cp ~/.claude/.credentials.json .claude-config/
-cp agents-global.md .claude-config/CLAUDE.md
-CLAUDE_CONFIG_DIR="$PWD/.claude-config" claude --bare -p 'reply with exactly: ok'
-```
-
-- Prints `ok`: done.
-- Auth error: fix `build_claude_config_dir` in `run-worker.sh` so the
-  pinned dir still authenticates (for example `claude setup-token` into
-  the pinned dir, or another documented credential path). Keep the
-  isolation: the pinned dir must not read `~/.claude/CLAUDE.md`,
-  plugins, or hooks.
-
-## 4. Does the parent-directory scan pass? (item 4)
+## 3. Does the parent-directory scan pass? (item 4)
 
 `run-worker.sh` refuses to start when a parent directory of the
 worktree holds `AGENTS.md`, `AGENTS.override.md`, or `CLAUDE.md`.
@@ -75,7 +54,7 @@ ls ~/code/AGENTS.md ~/code/CLAUDE.md ~/AGENTS.md ~/CLAUDE.md 2>/dev/null
 If any exists, move it away for benchmark runs (the abort message names
 the file). This is intended behavior, not a bug.
 
-## 5. Smoke the pinned pi environment (items 2-4 together)
+## 4. Smoke the pinned pi environment (items 2-4 together)
 
 One short unscored run:
 

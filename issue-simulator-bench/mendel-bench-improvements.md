@@ -12,6 +12,7 @@ owner's decision.
 - [x] 3. Thinking level and sampling are not pinned and not recorded
 - [x] 4. Operator personalization leaks into every run
 - [x] 5. Subagent use is invisible in results and report (resolved: no action)
+- [x] Extra: Claude Code retired as a harness (2026-09-01); pi is the only harness
 - [ ] 6. Done-check false positives: blind base, pre-existing dirt
 - [ ] 7. Rubric text and matrix labels drift from prompt v3
 - [ ] 8. Prompt-version bookkeeping is incomplete
@@ -21,156 +22,6 @@ owner's decision.
 - [ ] 12. Small runner bugs
 - [ ] 13. The task text is fetched live from GitHub
 - [ ] 14. Evidence gaps: footnotes, not re-runs
-
-## 1. One run, two totals
-
-**Evidence.** In both results files `score_total` (= sum of `scores`) and
-`matrix_total` differ for most rows. The scoreboard ranks by
-`score_total`; the matrix footer prints `matrix_total`. A reader sees two
-numbers for one run on one page.
-
-| File                | Model           | `scores` sum | `score_total` | `matrix_total` |
-| ------------------- | --------------- | -----------: | ------------: | -------------: |
-| results.json        | grok-4.6        |         89.5 |          89.5 |             88 |
-| results.json        | gpt-5.6-sol     |         65.5 |          65.5 |             69 |
-| results.json        | gemma-4-26b-a4b |           38 |            38 |             41 |
-| results.json        | Bonsai-27B      |           58 |            58 |             55 |
-| results-guided.json | claude-sonnet-5 |         98.5 |          98.5 |           97.5 |
-| results-guided.json | qwen3.6-35b-a3b |         65.5 |          65.5 |           67.5 |
-
-13 of 17 rows differ. Only opus (blind) and Qwen3.8 (guided) agree.
-
-**Cause.** `matrix_cells` and `matrix_total` are free-text HTML written by
-hand at scoring time. `scores` was re-scored on 2026-08-31; the matrix
-cells were not regenerated from it.
-
-**Fix.** One source of truth. `scores` is the truth. Remove
-`matrix_total` from the results files; `generate-report.mjs` computes the
-footer from `scores`. Add a check in `generate-report.mjs` that fails when
-a matrix cell's bold number (the per-criterion score in the cell) does not
-match `scores.<criterion>`. Re-derive the mismatched cells from the
-2026-08-31 re-score notes (commit log and report prose already list the
-deltas). Item 10 removes the hand-written cells for good.
-
-## 2. On mlx_lm.server a cut stream becomes a scored model nudge
-
-**Evidence.** PLAN.md step 1 and the handoff tell the operator to set
-`compat.supportsFinishReason: false` on the mlx provider. The pi docs
-(`docs/models.md`, `supportsFinishReason`): "When `false`, pi infers
-`stop` or `toolUse` when the stream ends." In `run-pi-rpc.mjs` a `stop`
-goes straight to `unfinishedWork()`; if TASKS.md has open items the nudge
-is a **model** nudge, −2 points. The 80 % `length` branch can never fire
-for that provider because pi never reports `length`. Result: every server
-cut on mlx (the "biggest single fairness problem" of the last runs) is
-charged to the model.
-
-The flag also hides real errors. The "Stream ended without
-finish_reason" message came from the tool-parser crash, not from normal
-completions. With the flag on, a crashed stream is an inferred `stop`
-(possibly scored), not an `error` (free).
-
-**Fix.**
-
-1. Do not set `supportsFinishReason: false` for mlx unless a normal
-   completion is shown to omit `finish_reason`. Mac check (one curl):
-   stream a short chat completion from `mlx_lm.server` and look at the
-   last chunk. If `finish_reason` is present, drop the flag from PLAN.md
-   and the handoff.
-2. Make `classify()` robust for either setting: treat `stop` with
-   `usage.output >= 0.8 × maxTokens` as `length`; treat `stop` with zero
-   output tokens and no text as a tooling stop; record `usage.output` and
-   `stopReason` on every nudge entry (the stop reason is there, the token
-   count is not).
-3. Record `compat` of the model in `meta.model_info` so the scorer can see
-   which classification path was active.
-
-## 3. Thinking level and sampling are not pinned and not recorded
-
-**Evidence.** `qwen3.6-35b-a3b-guided-issue-13-session.jsonl` line 3:
-`"thinkingLevel":"high"`. No `--thinking` was passed; pi took the level
-from the operator's settings or the model default. The results row does
-not carry it. The Qwen3.8 rows carry the level only in the slug
-(`-low`). Nothing records `temperature`, `samplingParams`,
-`thinkingFormat`, or `compat` of the models.json entry, nor the serving
-command (quantization, KV settings, `--parallel`). For mlx_lm.server it is
-not verified that pi's `reasoning_effort` reaches the model at all; if
-the server ignores it, "low" and "medium" rows differ in name only.
-
-**Fix.**
-
-1. `run-worker.sh`: `thinking` becomes mandatory for pi runs (no default
-   from the operator's settings). The runner refuses to start when
-   `--thinking` is absent, the same way it refuses a missing
-   `contextWindow`.
-2. `run-pi-rpc.mjs`: after `get_state`, copy the resolved model entry
-   (minus `apiKey`/headers) into `meta.model_info`, plus the thinking
-   level from state. For llama.cpp also store the `/props` body (it
-   carries the generation settings and the loaded model path).
-3. Results row: add `thinking` and `sampling` (object) fields; the report
-   sub-line shows the level next to the harness. Back-fill the five guided
-   rows from the session logs (`thinking_level_change`) where possible.
-4. Mac check: with `mlx_lm.server` running, send one request through pi
-   at `low` and one at `medium` and diff the server-side request log (or
-   the `chat_template_kwargs`) to confirm the level reaches the model. If
-   it does not, the models.json entry needs `thinkingFormat:
-"qwen-chat-template"` (or the mlx equivalent) before the next Qwen row.
-
-## 4. Operator personalization leaks into every run
-
-**Evidence.** pi loads at startup (`docs/usage.md`, "Context Files"):
-`~/.pi/agent/AGENTS.md`, `AGENTS.md`/`CLAUDE.md` from every parent
-directory of the worktree, plus user extensions, skills, and prompt
-templates from `~/.pi/agent/`. The runner already handles
-`extension_ui_request`, which proves extensions load. Claude Code loads
-`~/.claude/CLAUDE.md`, user plugins, hooks, and skills (this box has the
-superpowers plugin with TDD and planning skills; the Mac's set is
-unknown). None of this is recorded per run, and it differs per box and
-per day. The session log has no record of the system prompt or of the
-context files that were loaded.
-
-**Fix.**
-
-1. pi: run with `--no-extensions --no-skills --no-prompt-templates` and
-   `PI_CODING_AGENT_DIR` pointing to a benchmark-owned directory that
-   holds only `models.json`, `auth.json`, and a minimal `settings.json`
-   (compaction and retry on). Keep repo context files (`--no-context-files`
-   would drop the repo's AGENTS.md, which is part of the task).
-2. Claude Code: run with `--bare` (skips hooks, LSP, plugins) and a
-   `CLAUDE_CONFIG_DIR` (or `--setting-sources project`) that excludes the
-   user CLAUDE.md. Verify on the Mac that `--bare` keeps OAuth login.
-3. Both: the worktree's parent directories must hold no `AGENTS.md` or
-   `CLAUDE.md`. `run-worker.sh` checks and refuses.
-4. Record in `meta` the list of context files pi loaded (available via
-   the RPC `get_state`/system-prompt if exposed; otherwise a one-line
-   scan of the same paths pi scans) and the Claude Code settings sources.
-5. State the rule in PLAN.md "Rules that apply to every run" and in the
-   report's "Harnesses" section.
-
-## 5. Subagent use is invisible
-
-**Resolution (2026-09-01, no action).** pi does not bundle subagents (its
-docs list them as intentionally not included; the subagent is an example
-extension) and benchmark runs now start with `--no-extensions`, so a pi
-run cannot spawn one. Claude Code subagents run on the parent's model
-(the sonnet-5 guided run's `modelUsage` lists only `claude-sonnet-5`)
-and bill to the same plan. The Harnesses section already discloses the
-harness difference.
-
-**Evidence.** `runs/claude-sonnet-5-result.json` (guided, the top row at
-98.5): `num_turns: 5`, `subagent_stats.spawned: 1`
-(`general-purpose`), 54 k output tokens. The main agent delegated the
-whole task to one subagent. `runs/claude-haiku-4-5-20251001-result.json`:
-`num_turns: 239`, no subagent. The results row and the report do not say
-this. pi has no subagents, so a Claude Code row may be a two-agent
-system scored as one model.
-
-**Fix.** Do not forbid it (it is part of the harness, and the report
-already separates harnesses). Disclose it: copy `subagent_stats` into
-`telemetry.subagents` for Claude rows (0 for pi), show it in the matrix
-"Context economy" group, and add one sentence to "Harnesses". State in
-PLAN.md whether telemetry for such rows (assistant messages, tool calls,
-truncation share) covers the subagent transcript too, and how it was
-collected.
 
 ## 6. Done-check false positives
 
@@ -360,9 +211,164 @@ issue has comments, record whether any model read them.
 only; Qwen3.8-low's last commit has no session record; gemma's in-session
 commit `60b93f8` is missing from its branch.
 
-**Fix.** No re-runs (the rows are closed). Import the three Claude
-transcripts into `runs/` (redacted) — a Mac copy task. Add a `notes`
+**Fix.** No re-runs (the rows are closed). The Claude harness is retired
+and its rows will be replaced by pi runs, so the transcript import is
+optional history, not a requirement. Add a `notes`
 field per row and a footnote in the report: "one commit without a
 session record" and "one in-session commit not on the branch". Both are
 already in RUBRIC.md "Scorer discipline" item 6; the report should say it
 where the row is.
+
+---
+
+# Addressed (moved below the open items)
+
+## 1. One run, two totals
+
+**Evidence.** In both results files `score_total` (= sum of `scores`) and
+`matrix_total` differ for most rows. The scoreboard ranks by
+`score_total`; the matrix footer prints `matrix_total`. A reader sees two
+numbers for one run on one page.
+
+| File                | Model           | `scores` sum | `score_total` | `matrix_total` |
+| ------------------- | --------------- | -----------: | ------------: | -------------: |
+| results.json        | grok-4.6        |         89.5 |          89.5 |             88 |
+| results.json        | gpt-5.6-sol     |         65.5 |          65.5 |             69 |
+| results.json        | gemma-4-26b-a4b |           38 |            38 |             41 |
+| results.json        | Bonsai-27B      |           58 |            58 |             55 |
+| results-guided.json | claude-sonnet-5 |         98.5 |          98.5 |           97.5 |
+| results-guided.json | qwen3.6-35b-a3b |         65.5 |          65.5 |           67.5 |
+
+13 of 17 rows differ. Only opus (blind) and Qwen3.8 (guided) agree.
+
+**Cause.** `matrix_cells` and `matrix_total` are free-text HTML written by
+hand at scoring time. `scores` was re-scored on 2026-08-31; the matrix
+cells were not regenerated from it.
+
+**Fix.** One source of truth. `scores` is the truth. Remove
+`matrix_total` from the results files; `generate-report.mjs` computes the
+footer from `scores`. Add a check in `generate-report.mjs` that fails when
+a matrix cell's bold number (the per-criterion score in the cell) does not
+match `scores.<criterion>`. Re-derive the mismatched cells from the
+2026-08-31 re-score notes (commit log and report prose already list the
+deltas). Item 10 removes the hand-written cells for good.
+
+## 2. On mlx_lm.server a cut stream becomes a scored model nudge
+
+**Evidence.** PLAN.md step 1 and the handoff tell the operator to set
+`compat.supportsFinishReason: false` on the mlx provider. The pi docs
+(`docs/models.md`, `supportsFinishReason`): "When `false`, pi infers
+`stop` or `toolUse` when the stream ends." In `run-pi-rpc.mjs` a `stop`
+goes straight to `unfinishedWork()`; if TASKS.md has open items the nudge
+is a **model** nudge, −2 points. The 80 % `length` branch can never fire
+for that provider because pi never reports `length`. Result: every server
+cut on mlx (the "biggest single fairness problem" of the last runs) is
+charged to the model.
+
+The flag also hides real errors. The "Stream ended without
+finish_reason" message came from the tool-parser crash, not from normal
+completions. With the flag on, a crashed stream is an inferred `stop`
+(possibly scored), not an `error` (free).
+
+**Fix.**
+
+1. Do not set `supportsFinishReason: false` for mlx unless a normal
+   completion is shown to omit `finish_reason`. Mac check (one curl):
+   stream a short chat completion from `mlx_lm.server` and look at the
+   last chunk. If `finish_reason` is present, drop the flag from PLAN.md
+   and the handoff.
+2. Make `classify()` robust for either setting: treat `stop` with
+   `usage.output >= 0.8 × maxTokens` as `length`; treat `stop` with zero
+   output tokens and no text as a tooling stop; record `usage.output` and
+   `stopReason` on every nudge entry (the stop reason is there, the token
+   count is not).
+3. Record `compat` of the model in `meta.model_info` so the scorer can see
+   which classification path was active.
+
+## 3. Thinking level and sampling are not pinned and not recorded
+
+**Evidence.** `qwen3.6-35b-a3b-guided-issue-13-session.jsonl` line 3:
+`"thinkingLevel":"high"`. No `--thinking` was passed; pi took the level
+from the operator's settings or the model default. The results row does
+not carry it. The Qwen3.8 rows carry the level only in the slug
+(`-low`). Nothing records `temperature`, `samplingParams`,
+`thinkingFormat`, or `compat` of the models.json entry, nor the serving
+command (quantization, KV settings, `--parallel`). For mlx_lm.server it is
+not verified that pi's `reasoning_effort` reaches the model at all; if
+the server ignores it, "low" and "medium" rows differ in name only.
+
+**Fix.**
+
+1. `run-worker.sh`: `thinking` becomes mandatory for pi runs (no default
+   from the operator's settings). The runner refuses to start when
+   `--thinking` is absent, the same way it refuses a missing
+   `contextWindow`.
+2. `run-pi-rpc.mjs`: after `get_state`, copy the resolved model entry
+   (minus `apiKey`/headers) into `meta.model_info`, plus the thinking
+   level from state. For llama.cpp also store the `/props` body (it
+   carries the generation settings and the loaded model path).
+3. Results row: add `thinking` and `sampling` (object) fields; the report
+   sub-line shows the level next to the harness. Back-fill the five guided
+   rows from the session logs (`thinking_level_change`) where possible.
+4. Mac check: with `mlx_lm.server` running, send one request through pi
+   at `low` and one at `medium` and diff the server-side request log (or
+   the `chat_template_kwargs`) to confirm the level reaches the model. If
+   it does not, the models.json entry needs `thinkingFormat:
+"qwen-chat-template"` (or the mlx equivalent) before the next Qwen row.
+
+## 4. Operator personalization leaks into every run
+
+**Evidence.** pi loads at startup (`docs/usage.md`, "Context Files"):
+`~/.pi/agent/AGENTS.md`, `AGENTS.md`/`CLAUDE.md` from every parent
+directory of the worktree, plus user extensions, skills, and prompt
+templates from `~/.pi/agent/`. The runner already handles
+`extension_ui_request`, which proves extensions load. Claude Code loads
+`~/.claude/CLAUDE.md`, user plugins, hooks, and skills (this box has the
+superpowers plugin with TDD and planning skills; the Mac's set is
+unknown). None of this is recorded per run, and it differs per box and
+per day. The session log has no record of the system prompt or of the
+context files that were loaded.
+
+**Fix.**
+
+1. pi: run with `--no-extensions --no-skills --no-prompt-templates` and
+   `PI_CODING_AGENT_DIR` pointing to a benchmark-owned directory that
+   holds only `models.json`, `auth.json`, and a minimal `settings.json`
+   (compaction and retry on). Keep repo context files (`--no-context-files`
+   would drop the repo's AGENTS.md, which is part of the task).
+2. Claude Code: run with `--bare` (skips hooks, LSP, plugins) and a
+   `CLAUDE_CONFIG_DIR` (or `--setting-sources project`) that excludes the
+   user CLAUDE.md. Verify on the Mac that `--bare` keeps OAuth login.
+3. Both: the worktree's parent directories must hold no `AGENTS.md` or
+   `CLAUDE.md`. `run-worker.sh` checks and refuses.
+4. Record in `meta` the list of context files pi loaded (available via
+   the RPC `get_state`/system-prompt if exposed; otherwise a one-line
+   scan of the same paths pi scans) and the Claude Code settings sources.
+5. State the rule in PLAN.md "Rules that apply to every run" and in the
+   report's "Harnesses" section.
+
+## 5. Subagent use is invisible
+
+**Resolution (2026-09-01, no action).** pi does not bundle subagents (its
+docs list them as intentionally not included; the subagent is an example
+extension) and benchmark runs now start with `--no-extensions`, so a pi
+run cannot spawn one. Claude Code subagents run on the parent's model
+(the sonnet-5 guided run's `modelUsage` lists only `claude-sonnet-5`)
+and bill to the same plan. The Harnesses section already discloses the
+harness difference.
+
+**Evidence.** `runs/claude-sonnet-5-result.json` (guided, the top row at
+98.5): `num_turns: 5`, `subagent_stats.spawned: 1`
+(`general-purpose`), 54 k output tokens. The main agent delegated the
+whole task to one subagent. `runs/claude-haiku-4-5-20251001-result.json`:
+`num_turns: 239`, no subagent. The results row and the report do not say
+this. pi has no subagents, so a Claude Code row may be a two-agent
+system scored as one model.
+
+**Fix.** Do not forbid it (it is part of the harness, and the report
+already separates harnesses). Disclose it: copy `subagent_stats` into
+`telemetry.subagents` for Claude rows (0 for pi), show it in the matrix
+"Context economy" group, and add one sentence to "Harnesses". State in
+PLAN.md whether telemetry for such rows (assistant messages, tool calls,
+truncation share) covers the subagent transcript too, and how it was
+collected.
