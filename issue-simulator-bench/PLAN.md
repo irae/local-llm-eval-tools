@@ -46,7 +46,9 @@ One result row per model per prompt version: a pre-freeze
 haiku run exists only as branch `…-p0-guided-issue-13` and in git history, not in the
 results files. Run every new model against the frozen prompt.
 Prompt versions are git tags (`guided-prompt-v2.1`, `guided-prompt-v3.0`,
-`blind-prompt-v1.0`, `blind-prompt-v1.1`). Every row carries `prompt_version`,
+`blind-prompt-v1.0`, `blind-prompt-v1.1`). The task text itself is pinned too:
+GitHub issue 13 is locked, and `benchmark/issue-13.md` holds the snapshot with
+its sha256 — when a run fetches the live issue, it sees exactly this text. Every row carries `prompt_version`,
 and the report renders one scoreboard and one matrix per version — never one
 table across versions.
 
