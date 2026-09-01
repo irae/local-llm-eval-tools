@@ -61,9 +61,8 @@ table across versions.
    `contextWindow` (the server's real context) and `maxTokens`; without them
    auto-compaction cannot trigger at the right point and `length` stops cannot be
    classified. Do NOT set `compat.supportsFinishReason: false` unless a normal
-   completion from that server is shown to omit `finish_reason` (see
-   `MAC-CHECKS.md` while it exists): the flag makes pi infer `stop` for every
-   ended stream, which hides real errors. The runner classifies stops fairly
+   completion from that server is shown to omit `finish_reason`: the flag
+   makes pi infer `stop` for every ended stream, which hides real errors. The runner classifies stops fairly
    under either setting (an empty `stop` and a `stop` at the output budget are
    never charged as model nudges by themselves).
 2. Run `./run-worker.sh <model> [harness] [bench] <thinking>` for one model. The
@@ -148,6 +147,9 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
 3. Collect telemetry from the harness session log:
     - Claude Code (historical rows only): `runs/<model>-result.json` (cost,
       usage, session id) and the session transcript under `~/.claude/projects/`.
+      The three blind transcripts are copied to `runs/<branch>-session-N.jsonl`
+      and listed in `runs/SESSIONS.md`; `score.mjs` reads both the pi and the
+      Claude Code transcript formats.
     - pi: `runs/<slug>-meta.json` and `runs/<slug>-session.jsonl` written by
       `run-pi-rpc.mjs`. Copy the nudge counts into `telemetry.nudges_tooling` and
       `telemetry.nudges_model`.
@@ -160,6 +162,30 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
       compare both against `telemetry`. Do not trust the directory name alone —
       runs made before the bench worktrees existed sit under
       `~/.pi/agent/sessions/--Users-irae-code-mendel--/`, next to unrelated work.
+
+## Open checks before the next scored run
+
+Checked on the Mac on 2026-09-01 without a model server running:
+
+- The mlx provider in `~/.pi/agent/models.json` does not set
+  `compat.supportsFinishReason: false`. Keep it that way unless a streamed
+  completion from `mlx_lm.server` is shown to omit `finish_reason`.
+- The mlx Qwen3.8 entry maps `low`/`medium`/`xhigh` through
+  `chatTemplateKwargs.reasoning_effort`. Not yet confirmed at the server: run
+  one throwaway turn at `low` and one at `medium` and compare the two
+  requests. Until then, low and medium rows for mlx-served models are not
+  known to be distinct.
+- No `AGENTS.md`, `AGENTS.override.md`, or `CLAUDE.md` sits in `~/code/` or
+  `~/`, so the parent-directory scan passes.
+- Still to do with a model loaded: one short unscored `run-worker.sh` smoke
+  run (check `warnings`, `pi_flags`, `agent_dir`, `context_files`,
+  `thinking_level`, `model_info` in its meta file); the time to first token
+  at about 80 k tokens of context on `mlx_lm.server` and LM Studio (raise
+  `--stall-min` for those stacks if it can pass 10 minutes); and a `kill -9`
+  of `pi` during a tool call, to confirm pi resumes a session whose last entry
+  is an unanswered tool call. pi 0.84.3 tracks pending tool calls only in
+  memory, so if the resume fails the runner must append a synthetic error tool
+  result before the nudge.
 
 ## Plan accounting
 
