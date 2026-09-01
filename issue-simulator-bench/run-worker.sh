@@ -52,6 +52,18 @@ git -C "$REPO" worktree add -b "$branch" "$wt" "$BASE_COMMIT"
 (cd "$wt" && pnpm install > "$RUNS/$slug-install.log" 2>&1)
 echo "$slug: worktree ready at $wt, starting $harness" >&2
 
+# Plan accounting: probe the subscription windows before and after (see PLAN.md).
+case "$harness:$model" in
+    claude:*) plan_provider=anthropic ;;
+    pi:openai-codex/*) plan_provider=openai-codex ;;
+    pi:xai/*) plan_provider=xai ;;
+    *) plan_provider=none ;;
+esac
+if ! node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$slug-plan-before.json" > /dev/null; then
+    echo "abort: plan probe failed for $plan_provider — no baseline, the run would not be accountable" >&2
+    exit 1
+fi
+
 cd "$wt"
 start=$(date -u +%FT%TZ)
 case "$harness" in
@@ -73,7 +85,9 @@ case "$harness" in
         ;;
 esac
 end=$(date -u +%FT%TZ)
+node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$slug-plan-after.json" > /dev/null \
+    || echo "warning: plan probe after the run failed; record the plan share by hand" >&2
 pkill -f "$wt" 2>/dev/null || true
-printf '{"model":"%s","harness":"%s","bench":"%s","thinking":"%s","branch":"%s","base_commit":"%s","start":"%s","end":"%s"}\n' \
-    "$model" "$harness" "$bench" "$thinking" "$branch" "$(git -C "$REPO" rev-parse --short "$BASE_COMMIT")" "$start" "$end" > "$RUNS/$slug-worker.json"
+printf '{"model":"%s","harness":"%s","bench":"%s","thinking":"%s","plan_provider":"%s","branch":"%s","base_commit":"%s","start":"%s","end":"%s"}\n' \
+    "$model" "$harness" "$bench" "$thinking" "$plan_provider" "$branch" "$(git -C "$REPO" rev-parse --short "$BASE_COMMIT")" "$start" "$end" > "$RUNS/$slug-worker.json"
 echo "$slug: done" >&2

@@ -112,6 +112,40 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
       runs made before the bench worktrees existed sit under
       `~/.pi/agent/sessions/--Users-irae-code-mendel--/`, next to unrelated work.
 
+## Plan accounting
+
+Runs on a flat subscription (Claude Max for Claude Code, ChatGPT Plus/Pro for pi's
+`openai-codex/*` models, X/SuperGrok for pi's `xai/*` models) are costed by the
+share of the plan's rate-limit windows they consume, measured, not estimated:
+
+1. `run-worker.sh` calls `probe-plan.mjs <provider>` **before and after** the run
+   and keeps both readings (`runs/<slug>-plan-before.json`, `-plan-after.json`).
+   A failed probe before the run aborts it: without a baseline the run is not
+   accountable.
+2. **Isolation rule.** While a plan run is in flight, nothing else may draw on
+   that plan — not the coordinator agent, not a browser session. Drive the
+   benchmark from a different vendor's tool (a Claude run coordinated from Codex,
+   a Codex run coordinated from Claude). The two probes make contamination
+   visible; they cannot prevent it.
+3. Start plan runs at a low reading of the 5 h window (`used_percent` well under
+   50 %) so the run cannot hit the ceiling and stall mid-way.
+4. Share and cost: `Δ5h = after.five_hour − before.five_hour` and
+   `Δ7d = after.seven_day − before.seven_day` (percentage points, the windows do
+   not reset inside a run shorter than 5 h — if one did, `reset_at` shows it and
+   the run gets `w5h: reset during run`). The plan table shows `w5h`/`wweek` as
+   these deltas and prices the run as `marginal = Δ7d % × monthly price × 7 / 30`.
+5. What each provider exposes:
+    - **anthropic** (Claude Code): `api.anthropic.com/api/oauth/usage` with the
+      Claude Code OAuth token — `five_hour` and `seven_day` utilization. pi's own
+      Anthropic login is _not_ on the plan (it bills extra usage per token), so
+      pi+anthropic rows are metered, never plan.
+    - **openai-codex**: `chatgpt.com/backend-api/wham/usage` with pi's Codex
+      token — `plan_type`, `primary_window` (5 h) and `secondary_window` (7 d)
+      `used_percent`.
+    - **xai**: no usage endpoint accepts the OAuth token. Grok plan rows keep
+      `w5h`/`wweek` as `not exposed` and are priced from their metered/OpenRouter
+      token figure only.
+
 ## Harness attribution
 
 Each result row records the model and, as a sub-line, the harness — not only the

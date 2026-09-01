@@ -6,3 +6,5 @@ runs/*
 !runs/*-meta.json
 !runs/*-worker.json
 !runs/*-session.html
+!runs/*-plan-before.json
+!runs/*-plan-after.json
