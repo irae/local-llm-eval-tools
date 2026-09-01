@@ -3,7 +3,7 @@
 //
 //   node run-pi-rpc.mjs --model <id> --prompt <file> --out <prefix> [--cwd <dir>]
 //        [--thinking <level>] [--max-tooling 10] [--max-model 3]
-//        [--stall-min 10] [--wall-min 300]
+//        [--stall-min 10] [--wall-min 300] [--allow-bad-config]
 //
 // Why: `pi -p` exits on the first `length`/`error` stop, which is a harness
 // limitation, not a model failure. A person in the TUI would type "continue".
@@ -41,7 +41,8 @@ const MODEL_MSG =
 const args = {};
 for (let i = 2; i < process.argv.length; i++) {
     const a = process.argv[i];
-    if (a.startsWith('--')) args[a.slice(2)] = process.argv[++i];
+    if (a === '--allow-bad-config') args['allow-bad-config'] = true;
+    else if (a.startsWith('--')) args[a.slice(2)] = process.argv[++i];
 }
 const need = (k) => {
     if (!args[k]) {
@@ -344,6 +345,24 @@ async function main() {
         );
     for (const w of meta.warnings) say(`WARNING: ${w}`);
     saveMeta();
+    // A run on a misconfigured model is not comparable. Refuse before the first prompt.
+    const fatal = meta.warnings.filter((w) =>
+        /contextWindow|maxTokens|auto-compaction/.test(w)
+    );
+    if (fatal.length && !('allow-bad-config' in args)) {
+        say(
+            `refusing to start: ${fatal.join('; ')} — fix ~/.pi/agent/models.json (or pass --allow-bad-config to record the run as non-comparable)`
+        );
+        meta.end_reason = 'bad_config';
+        meta.end = new Date().toISOString();
+        saveMeta();
+        pi.stdin.end();
+        process.exit(3);
+    }
+    if ('allow-bad-config' in args && fatal.length)
+        meta.warnings.push(
+            'started with --allow-bad-config: this run is not comparable'
+        );
 
     const wallTimer = setTimeout(async () => {
         say('wall clock budget reached, aborting');

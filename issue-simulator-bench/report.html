@@ -2352,6 +2352,32 @@
                 final in-session commit (60b93f8) is absent from the pushed
                 branch.
             </p>
+            <h2>Harnesses</h2>
+            <p class="lede">
+                Two harnesses appear in this table and they are not run the same
+                way. <b>pi</b> runs (from 2026-09-01) go through
+                <code>benchmark/run-pi-rpc.mjs</code>: one
+                <code>pi --mode rpc</code> session for the whole run,
+                auto-compaction and auto-retry forced on, and a fixed nudge
+                policy that never reads the chat — a
+                <em>tooling nudge</em> (stream error, premature length stop,
+                stall, dead process) is free; a <em>model nudge</em> (the model
+                stopped with TASKS.md unchecked or a dirty tree) is the same
+                sentence every time and costs 2 points on "right the first
+                time". The runner refuses to start on a model without a truthful
+                context window and output budget. pi runs before that date used
+                <code>pi -p</code>, which exits on the first length or error
+                stop; those were relaunched fresh in the same worktree and are
+                marked partial where that cut them short.
+                <b>Claude Code</b> runs use
+                <code>claude -p --output-format json</code> with permissions
+                skipped: Claude's own compaction and retry, no nudges of either
+                kind (a max-output stop ends the run with no second chance), so
+                its nudge counts read n/a and its runs are, if anything, held to
+                a stricter stop rule. Runner metadata
+                (<code>runs/&lt;slug&gt;-meta.json</code>) records every nudge
+                with its cause.
+            </p>
         </div>
     </section>
 

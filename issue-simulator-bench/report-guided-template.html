@@ -681,7 +681,10 @@
         </p>
         <div class="runmeta">
             <span><b>Base</b> 4679b5a master</span>
-            <span><b>Branches</b> <code>&lt;model&gt;-guided-issue-13</code></span>
+            <span
+                ><b>Branches</b>
+                <code>&lt;model&gt;-guided-issue-13</code></span
+            >
             <span><b>Libraries</b> 8</span>
             <span><b>Prompt</b> <code>prompt-guided.txt</code></span>
             <span><b>Rubric</b> unchanged</span>
@@ -720,6 +723,32 @@
                 appears in either session file. The commit content is consistent
                 with the run and is scored as part of it, but its harness record
                 is missing.
+            </p>
+            <h2>Harnesses</h2>
+            <p class="lede">
+                Two harnesses appear in this table and they are not run the same
+                way. <b>pi</b> runs (from 2026-09-01) go through
+                <code>benchmark/run-pi-rpc.mjs</code>: one
+                <code>pi --mode rpc</code> session for the whole run,
+                auto-compaction and auto-retry forced on, and a fixed nudge
+                policy that never reads the chat — a
+                <em>tooling nudge</em> (stream error, premature length stop,
+                stall, dead process) is free; a <em>model nudge</em> (the model
+                stopped with TASKS.md unchecked or a dirty tree) is the same
+                sentence every time and costs 2 points on "right the first
+                time". The runner refuses to start on a model without a truthful
+                context window and output budget. pi runs before that date used
+                <code>pi -p</code>, which exits on the first length or error
+                stop; those were relaunched fresh in the same worktree and are
+                marked partial where that cut them short.
+                <b>Claude Code</b> runs use
+                <code>claude -p --output-format json</code> with permissions
+                skipped: Claude's own compaction and retry, no nudges of either
+                kind (a max-output stop ends the run with no second chance), so
+                its nudge counts read n/a and its runs are, if anything, held to
+                a stricter stop rule. Runner metadata
+                (<code>runs/&lt;slug&gt;-meta.json</code>) records every nudge
+                with its cause.
             </p>
         </div>
     </section>
@@ -864,10 +893,10 @@
                 <h3>Run-to-run variance is visible</h3>
                 <p>
                     A pre-freeze haiku run (branch
-                    <code>…-p0-guided-issue-13</code>, kept in git history) scored
-                    79 by dropping a different set of instructions than the
-                    scored run. Which steps get skipped changes between runs —
-                    one guided run per model is a data point, not a verdict.
+                    <code>…-p0-guided-issue-13</code>, kept in git history)
+                    scored 79 by dropping a different set of instructions than
+                    the scored run. Which steps get skipped changes between runs
+                    — one guided run per model is a data point, not a verdict.
                 </p>
             </div>
         </div>
