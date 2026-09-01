@@ -105,7 +105,12 @@ regressions:
 From the harness session log collect: cost, assistant messages, tool calls, tool
 errors, compactions, tokens (input, output, cacheRead, cacheWrite), peak context,
 duration, commit count, failed commits, share of shell commands piped to
-`tail`/`head`, `--no-verify` and `git add -A` use, TASKS.md handling.
+`tail`/`head`, `--no-verify` and `git add -A` use, TASKS.md handling. For pi runs
+made with `run-pi-rpc.mjs`, also the nudge counts from `<slug>-meta.json`:
+**tooling nudges are never scored** (harness and server failures are not the
+model's); **each model nudge costs 2 points on criterion 6**, floor 0 — the model
+declared itself done with work visibly left. A run that ends on
+`model_budget_exhausted` or `tooling_budget_exhausted` is partial.
 
 ### Commit-craft inspection
 

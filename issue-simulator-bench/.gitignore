@@ -3,3 +3,6 @@ runs/*
 !runs/*-session-1.jsonl
 !runs/*-session-2.jsonl
 !runs/SESSIONS.md
+!runs/*-meta.json
+!runs/*-worker.json
+!runs/*-session.html

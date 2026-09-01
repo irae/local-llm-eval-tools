@@ -45,24 +45,45 @@ results files. Run every new model against the frozen prompt.
 
 ## How to run a new model
 
-1. Make sure the harness for the model is installed and authenticated.
-2. Run `./run-worker.sh <model> [harness] [bench]` for one model. The default
-   harness is `pi`; use `claude` for Claude Code (subscription pressure can force
-   the choice). The default bench is `guided`; pass `blind` only to extend the
-   closed blind table. `./spawn-claude-workers.sh <model ...>` runs several Claude
-   workers in parallel. Each worker:
+1. Make sure the harness for the model is installed and authenticated. For local
+   models in pi, `~/.pi/agent/models.json` must give the model a truthful
+   `contextWindow` (the server's real context) and `maxTokens`; without them
+   auto-compaction cannot trigger at the right point and `length` stops cannot be
+   classified. For OpenAI-compatible servers that end streams without
+   `finish_reason` (mlx_lm.server did), set `compat.supportsFinishReason: false`.
+2. Run `./run-worker.sh <model> [harness] [bench] [thinking]` for one model. The
+   default harness is `pi`; use `claude` for Claude Code. The default bench is
+   `guided`; pass `blind` only to extend the closed blind table. Each worker:
     - Creates a sibling worktree at the bench's base commit.
     - Creates the bench's run branch for the model.
     - Runs a real `pnpm install` in the worktree.
-    - Spawns `claude -p` with the bench's prompt and writes results to `runs/`
-      (not versioned, except the session logs listed in `runs/SESSIONS.md`).
-3. For other harnesses (pi, codex), start the harness in a worktree prepared the
-   same way, paste the bench's prompt verbatim, and let it run to completion
-   without help.
+    - Starts the harness with the bench's prompt and writes its outputs to `runs/`.
+3. **pi runs go through `run-pi-rpc.mjs`, never `pi -p`.** `pi -p` exits on the
+   first `length` or `error` stop — a harness limitation a TUI user would simply
+   type "continue" past. The runner keeps one `pi --mode rpc` session alive (same
+   context throughout) and applies one fixed policy to every model:
+    - **Tooling nudge — never scored.** The stop came from the harness or the
+      server: stream error, premature `length` (below 80 % of the model's output
+      budget), no events for `--stall-min` (default 10) minutes, a dead pi process
+      (respawned on the same session file). Message: `Continue from where you
+      stopped.` Budget `--max-tooling` (default 10).
+    - **Model nudge — scored.** The model stopped by itself (`stop`, or `length`
+      at its real output budget) while TASKS.md still has `- [ ]` items or `git
+      status` is not clean. Message, always identical: `You are not done. Check
+      TASKS.md for unchecked items and \`git status\` for uncommitted work, then
+      continue the workflow from where you stopped.` Budget `--max-model`
+      (default 3).
+    - Nothing reads the chat. The runner also forces auto-compaction and
+      auto-retry on and records whether they took effect; `--wall-min` (default
+      300) is the hard stop.
+    - Outputs per run: `<slug>-meta.json` (nudges with causes, compactions,
+      retries, warnings, session stats), `<slug>-session.jsonl` (raw pi session,
+      home path redacted), `<slug>-session.html` (export), `<slug>-events.jsonl`
+      and `<slug>-runner.log` (not versioned).
 4. Rules that apply to every run:
     - Same base commit for all models of the same bench.
     - Real `pnpm install` before the run starts.
-    - No mid-run human help. If a run is cut short, mark it as partial.
+    - No human input during a run. If a run is cut short, mark it as partial.
 
 ## How to score a run
 
@@ -72,7 +93,9 @@ results files. Run every new model against the frozen prompt.
 3. Collect telemetry from the harness session log:
     - Claude Code: `runs/<model>-result.json` (cost, usage, session id) and the
       session transcript under `~/.claude/projects/`.
-    - pi: session JSONL under `~/.pi/agent/sessions/`; use the `analyze-sessions` skill.
+    - pi: `runs/<slug>-meta.json` and `runs/<slug>-session.jsonl` written by
+      `run-pi-rpc.mjs`. Copy the nudge counts into `telemetry.nudges_tooling` and
+      `telemetry.nudges_model`.
       After scoring, copy the log to `runs/<branch>-session.jsonl`, redact it (see
       "Redaction"), and list it in `runs/SESSIONS.md`. `runs/` is otherwise not
       versioned; the `.gitignore` allows the session logs and that index only.
@@ -177,7 +200,9 @@ One object per run in a top-level `runs` array:
         "tool_errors": 16,
         "commits": 17,
         "failed_commits": 1,
-        "truncation_pct": 6
+        "truncation_pct": 6,
+        "nudges_tooling": 0,
+        "nudges_model": 0
     },
     "cost_usd": 7.76,
     "cost_basis": "metered|plan|local"
