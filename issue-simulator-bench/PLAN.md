@@ -49,8 +49,12 @@ results files. Run every new model against the frozen prompt.
    models in pi, `~/.pi/agent/models.json` must give the model a truthful
    `contextWindow` (the server's real context) and `maxTokens`; without them
    auto-compaction cannot trigger at the right point and `length` stops cannot be
-   classified. For OpenAI-compatible servers that end streams without
-   `finish_reason` (mlx_lm.server did), set `compat.supportsFinishReason: false`.
+   classified. Do NOT set `compat.supportsFinishReason: false` unless a normal
+   completion from that server is shown to omit `finish_reason` (see
+   `MAC-CHECKS.md` while it exists): the flag makes pi infer `stop` for every
+   ended stream, which hides real errors. The runner classifies stops fairly
+   under either setting (an empty `stop` and a `stop` at the output budget are
+   never charged as model nudges by themselves).
 2. Run `./run-worker.sh <model> [harness] [bench] <thinking>` for one model. The
    default harness is `pi`; use `claude` for Claude Code. The default bench is
    `guided`; pass `blind` only to extend the closed blind table. The thinking

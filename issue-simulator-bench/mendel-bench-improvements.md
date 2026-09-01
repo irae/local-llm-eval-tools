@@ -8,7 +8,7 @@ owner's decision.
 ## Todo
 
 - [x] 1. One run, two totals: scoreboard and matrix disagree on 13 of 17 rows
-- [ ] 2. On mlx_lm.server a cut stream becomes a scored model nudge
+- [x] 2. On mlx_lm.server a cut stream becomes a scored model nudge
 - [x] 3. Thinking level and sampling are not pinned and not recorded
 - [x] 4. Operator personalization leaks into every run
 - [ ] 5. Subagent use is invisible in results and report

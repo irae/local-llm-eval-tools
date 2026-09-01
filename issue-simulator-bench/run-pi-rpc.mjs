@@ -260,32 +260,38 @@ function classify(settleKind) {
     if (sr === 'aborted') return { kind: 'tooling', cause: 'turn aborted' };
     if (sr === 'toolUse')
         return { kind: 'tooling', cause: 'settled with a tool call pending' };
-    if (sr === 'length') {
-        const outTok = lastAssistant?.usage?.output ?? 0;
-        const budget = meta.model_info?.maxTokens ?? 0;
-        if (budget && outTok >= 0.8 * budget) {
-            const why = unfinishedWork();
-            return why.length
-                ? {
-                      kind: 'model',
-                      cause: `output budget hit (${outTok}/${budget}); ${why.join(', ')}`,
-                  }
-                : {
-                      kind: 'done',
-                      cause: `output budget hit but nothing left to do`,
-                  };
-        }
+    const outTok = lastAssistant?.usage?.output ?? 0;
+    const budget = meta.model_info?.maxTokens ?? 0;
+    const atBudget = budget && outTok >= 0.8 * budget;
+    if (sr === 'length' && !atBudget)
         return {
             kind: 'tooling',
             cause: `premature length stop (${outTok} output tokens, budget ${budget || '?'})`,
         };
-    }
-    // 'stop' or unknown: the model says it is done
+    // A server that omits finish_reason makes pi infer `stop` when the stream
+    // ends (compat.supportsFinishReason: false). Two guards keep that fair:
+    // an empty `stop` is a cut stream, not a decision; a `stop` at the output
+    // budget is a length stop under another name.
+    if (sr === 'stop' && outTok === 0 && !hasText(lastAssistant))
+        return {
+            kind: 'tooling',
+            cause: 'empty stop — stream ended with no output (inferred finish_reason?)',
+        };
+    // length at budget, real `stop`, or unknown: the model's own stop
     const why = unfinishedWork();
+    const label =
+        sr === 'length' || (sr === 'stop' && atBudget)
+            ? `output budget hit (${outTok}/${budget}${sr === 'stop' ? ', reported as stop' : ''})`
+            : 'model stopped';
     return why.length
-        ? { kind: 'model', cause: why.join(', ') }
-        : { kind: 'done', cause: 'model stopped, work complete' };
+        ? { kind: 'model', cause: `${label}; ${why.join(', ')}` }
+        : { kind: 'done', cause: `${label}, work complete` };
 }
+
+const hasText = (m) =>
+    (m?.content || []).some(
+        (b) => b.type === 'text' && b.text && b.text.trim()
+    );
 
 // ---- server context probe --------------------------------------------------
 // Local OpenAI-compatible servers expose what they really loaded:
@@ -526,6 +532,8 @@ async function main() {
             at: new Date().toISOString(),
             cause: c.cause,
             stop_reason: lastAssistant?.stopReason ?? null,
+            output_tokens: lastAssistant?.usage?.output ?? null,
+            output_budget: meta.model_info?.maxTokens ?? null,
         };
         if (c.kind === 'tooling') {
             if (meta.nudges.tooling.length >= maxTooling) {
