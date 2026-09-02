@@ -27,7 +27,7 @@ deletes the debug manifest one line after the code prints its path.
 
 Also, on the blind and v2.1 bases only: `packages/mendel-deps/test/fixtures/js/es5/foo/browser.js:2`
 contains `require('glob')` as parser fixture data. Leaving it is correct. The v3 guided
-base (`guided-v3-base`) has that fixture requiring `debug` instead, so no exception applies.
+base (tag `benchmark-guided-base`) has that fixture requiring `debug` instead, so no exception applies.
 
 ## Verification battery
 

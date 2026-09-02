@@ -26,13 +26,13 @@ BENCH_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$BENCH_DIR/.." && pwd)"
 case "$bench" in
     guided)
-        BASE_COMMIT=guided-v3-base
+        BASE_COMMIT=benchmark-guided-base
         PROMPT="$BENCH_DIR/prompt-guided.txt"
         suffix="-guided-v3-issue-13"
         wtprefix="mendel-bench-guided-"
         ;;
     blind)
-        BASE_COMMIT=182b07f
+        BASE_COMMIT=benchmark-blind-base
         PROMPT="$BENCH_DIR/prompt-blind.txt"
         suffix="-issue-13"
         wtprefix="mendel-bench-"

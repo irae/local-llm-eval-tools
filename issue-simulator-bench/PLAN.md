@@ -17,7 +17,7 @@ run of the same test.
 | ------------ | -------------------------------------- | ------------------------------------------------------------------- |
 | Question     | Can the model discover the traps?      | How far does a structured plan lift it?                             |
 | Prompt       | `prompt-blind.txt` (terse)             | `prompt-guided.txt` (numbered plan, traps disclosed)                |
-| Base commit  | `182b07f`                              | `6458616` (tag `guided-v3-base`; v2.1 rows: `4679b5a`)              |
+| Base commit  | tag `benchmark-blind-base`             | tag `benchmark-guided-base` (v2.1 rows: an older, closed base)      |
 | Run branches | `<model>-issue-13`                     | `<model>-guided-v3-issue-13` (v2.1 rows: `<model>-guided-issue-13`) |
 | Worktrees    | `../mendel-bench-<model>`              | `../mendel-bench2-<model>`                                          |
 | Results      | `results.json` / `results.csv`         | `results-guided.json` / `results-guided.csv`                        |
@@ -48,13 +48,21 @@ a blind row, so each pair shows the lift. The two rows of a pair can
 land at different times; an unpaired row is allowed until its partner
 runs.
 
-The guided base commit `4679b5a` is `182b07f` plus one fix master needed anyway:
-the root declares `mendel-pipeline` as a workspace devDependency, so the hoisted
-`node_modules/.bin/mendel` link resolves and the full-example karma test runs on a
-fresh install instead of dying with `mendel: command not found`.
+Each bench starts from a moving tag on `master` history: `benchmark-blind-base`
+and `benchmark-guided-base`. The tags carry no version; when the owner moves a
+base, all later runs of that bench start from the new position, and every result
+row records the resolved commit in `base_commit`. The guided base sits above the
+blind base and includes fixes the blind base must not see — the blind test
+measures trap discovery, so its base hides them. Above the blind tag sit: the
+root `mendel-pipeline` declaration (so the hoisted `mendel` bin resolves and the
+full-example karma test runs on a fresh install), the AGENTS.md legacy-packages
+note, the fixture change away from `glob`, and the lint patch that accepts
+`node:`-prefixed core modules. Both bases include the tap crash fix, so parallel
+test runs no longer SIGSEGV under either bench.
 
-The guided prompt is now v3.0 (base `guided-v3-base`); the blind prompt is v1.1.
-The five v2.1 guided rows (base `4679b5a`) are a closed set — do not add to them.
+The guided prompt is now v3.0 (base: tag `benchmark-guided-base`); the blind
+prompt is v1.1.
+The five v2.1 guided rows are a closed set on an older base — do not add to them.
 One result row per model per prompt version: a pre-freeze
 haiku run exists only as branch `…-p0-guided-issue-13` and in git history, not in the
 results files. Run every new model against the frozen prompt.
@@ -299,7 +307,7 @@ One object per run in a top-level `runs` array:
     "local": false,
     "serving": null,
     "branch": "grok-4.6-issue-13",
-    "base_commit": "182b07f",
+    "base_commit": "<sha the bench's base tag pointed to at run time>",
     "thinking": "high",
     "prompt_version": "v1.0",
     "partial": false,
@@ -364,8 +372,12 @@ This branch can go to a public remote. Before each commit:
 
 ## Cleanup
 
-Worker worktrees must be siblings (`../mendel-<name>`) or live under `/tmp/`. Never
-nest them inside the repo — the filesystem watchers break. Test runs can leave
+The mendel main worktree stays with the coordinator on `master`; benchmark
+coordination happens in the `../mendel-benchmark` worktree, and each run gets its
+own worker worktree. Worker worktrees must be siblings (`../mendel-<name>`) or live
+under `/tmp/`. Never nest them inside the repo — the filesystem watchers break.
+Remove every worker worktree when its run is scored; never reuse an old worktree —
+gitignored artifacts stay behind in it. Test runs can leave
 mendel processes behind; kill them before you remove the worktree:
 
 ```bash
