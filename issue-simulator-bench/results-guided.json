@@ -60,7 +60,7 @@
         "provider_label": "Claude plan"
       },
       "plan": {
-        "marginal": "≈ $0.38 est.",
+        "marginal": "\u2248 $0.38 est.",
         "marginal_tone": null,
         "plan": "Claude Max 5x $100/mo",
         "alloc": "$100",
@@ -68,7 +68,7 @@
         "week": "$23.08",
         "w5h": "not exposed",
         "wweek": "not exposed",
-        "rpw": "≈ 60"
+        "rpw": "\u2248 60"
       },
       "matrix_cells": [
         "<td class=\"best\"><span class=\"pill p-good\">none</span> <b>25</b></td>",
@@ -79,9 +79,9 @@
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
         "<td class=\"best\"><b>20</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">real installs ×8</span> <b>8</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">−96 lines</span></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">clean · self-run</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs \u00d78</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">\u221296 lines</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 self-run</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">18 / 18</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">one each</span></td>",
@@ -171,7 +171,7 @@
         "provider_label": "Claude plan"
       },
       "plan": {
-        "marginal": "≈ $0.17 est.",
+        "marginal": "\u2248 $0.17 est.",
         "marginal_tone": null,
         "plan": "Claude Max 5x $100/mo",
         "alloc": "$100",
@@ -179,20 +179,20 @@
         "week": "$23.08",
         "w5h": "not exposed",
         "wweek": "not exposed",
-        "rpw": "≈ 135"
+        "rpw": "\u2248 135"
       },
       "matrix_cells": [
-        "<td><span class=\"pill p-bad\">1 crit · stale chalk</span> <b>16</b></td>",
+        "<td><span class=\"pill p-bad\">1 crit \u00b7 stale chalk</span> <b>16</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">pass</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">SYNC OK</span></td>",
-        "<td><span class=\"pill p-mid\">7½ / 8</span></td>",
-        "<td><span class=\"pill p-bad\">chalk ×2 left</span></td>",
+        "<td><span class=\"pill p-mid\">7\u00bd / 8</span></td>",
+        "<td><span class=\"pill p-bad\">chalk \u00d72 left</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
         "<td><b>12</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">real installs ×11</span> <b>8</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">−96 lines</span></td>",
-        "<td><span class=\"pill p-bad\">eslint ×2 · prettier clean · never ran</span> <b>1</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs \u00d711</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">\u221296 lines</span></td>",
+        "<td><span class=\"pill p-bad\">eslint \u00d72 \u00b7 prettier clean \u00b7 never ran</span> <b>1</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
         "<td><span class=\"pill p-mid\">1 fix commit</span></td>",
         "<td><span class=\"pill p-bad\">3 multi-package</span></td>",
@@ -202,7 +202,7 @@
         "<td><b>7</b></td>",
         "<td><span class=\"pill p-mid\">1 repair</span> <b>6</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
-        "<td><span class=\"pill p-mid\">4 full runs · 4 libs untested pre-commit</span> <b>8</b></td>",
+        "<td><span class=\"pill p-mid\">4 full runs \u00b7 4 libs untested pre-commit</span> <b>8</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">textbook, checked per commit</span> <b>4</b></td>",
         "<td><span class=\"pill p-mid\">40 %</span> <b>2</b></td>",
         "<td><span class=\"pill p-mid\">stale requires</span> <b>4</b></td>",
@@ -248,11 +248,11 @@
         },
         {
           "severity": "medium",
-          "summary": "cli-printer.js's top-level print() method calls colorize() unconditionally; only the nested _print() method checks this._enableColor, so enableColor:false still emits ANSI codes — the exact chalk trap the guided prompt disclosed, only half-fixed (confirmed by capturing print() output with and without enableColor:false, both contain escape codes)"
+          "summary": "cli-printer.js's top-level print() method calls colorize() unconditionally; only the nested _print() method checks this._enableColor, so enableColor:false still emits ANSI codes \u2014 the exact chalk trap the guided prompt disclosed, only half-fixed (confirmed by capturing print() output with and without enableColor:false, both contain escape codes)"
         },
         {
           "severity": "minor",
-          "summary": "all 8 commits used --no-verify, against the guided prompt's explicit rule, with no hook failure in the session log to explain it — a systematic bypass, not a reaction to a broken hook"
+          "summary": "all 8 commits used --no-verify, against the guided prompt's explicit rule, with no hook failure in the session log to explain it \u2014 a systematic bypass, not a reaction to a broken hook"
         },
         {
           "severity": "minor",
@@ -282,7 +282,7 @@
       "cost_usd": 0,
       "cost_basis": "local",
       "matrix_cells": [
-        "<td><span class=\"pill p-bad\">1 crit · 1 med</span> <b>10</b></td>",
+        "<td><span class=\"pill p-bad\">1 crit \u00b7 1 med</span> <b>10</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">ran 23x, pass</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">SYNC OK</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
@@ -290,14 +290,14 @@
         "<td class=\"best\"><span class=\"pill p-good\">all gone</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
         "<td class=\"best\"><b>20</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">real installs ×9</span> <b>8</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">−96 lines</span></td>",
-        "<td><span class=\"pill p-bad\">eslint 1 err · prettier 2 files · never ran</span> <b>0</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs \u00d79</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">\u221296 lines</span></td>",
+        "<td><span class=\"pill p-bad\">eslint 1 err \u00b7 prettier 2 files \u00b7 never ran</span> <b>0</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
         "<td><span class=\"pill p-bad\">5 multi-package</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">both dropped</span></td>",
-        "<td><span class=\"pill p-bad\">bypassed ×8</span></td>",
+        "<td><span class=\"pill p-bad\">bypassed \u00d78</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">untracked</span></td>",
         "<td><b>4.5</b></td>",
         "<td><span class=\"pill p-mid\">bug slipped through</span> <b>5</b></td>",
@@ -398,8 +398,8 @@
         "<td><span class=\"pill p-bad\">5 left</span></td>",
         "<td><span class=\"pill p-mid\">not reached</span></td>",
         "<td><b>7.5</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">real installs ×3</span> <b>8</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">−23 lines</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs \u00d73</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">\u221223 lines</span></td>",
         "<td><span class=\"pill p-mid\">clean diff, never ran itself</span> <b>2</b></td>",
         "<td><span class=\"pill p-mid\">not reached</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
@@ -503,8 +503,8 @@
         "<td><span class=\"pill p-bad\">4 left, rimraf partial</span></td>",
         "<td><span class=\"pill p-bad\">missed mendel-requirify</span></td>",
         "<td><b>9.5</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">real installs ×6</span> <b>8</b></td>",
-        "<td class=\"best\"><span class=\"pill p-good\">−37 lines</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real installs \u00d76</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">\u221237 lines</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean, ran itself</span> <b>5</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">avoided</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">all chore</span></td>",
@@ -539,6 +539,105 @@
       "thinking": "low",
       "end_reason": "harness_crash",
       "libraries_done": 6
+    },
+    {
+      "model": "mlx-community/Qwen3.8-27B-4bit",
+      "model_id": "mlx-community/Qwen3.8-27B-4bit",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "mlx",
+      "local": true,
+      "serving": "mlx_lm.server",
+      "branch": "mlx-community-Qwen3.8-27B-4bit-low-guided-v3-issue-13",
+      "base_commit": "guided-v3-base",
+      "partial": true,
+      "round": 2,
+      "prompt_version": "v3.0",
+      "score_total": 34,
+      "scores": {
+        "bugs": 25,
+        "completion": 0,
+        "node_modules": 0,
+        "lint": 0,
+        "commit_craft": 0,
+        "first_time": 8,
+        "test_discipline": 0,
+        "conventions": 0,
+        "task_list": 1,
+        "truncation": 0
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "mlx_lm.server's generation thread crashed three times (Metal OOM dead-thread trap) during this run, on top of 10 tooling nudges over 4h21m; the model made zero commits and no library was touched. Harness/server instability, not a model-authored defect \u2014 see benchmarks/bench7/state.md in the sibling repo for the crash log."
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 261.3,
+        "tokens_total": 1254260,
+        "tokens_in": 754439,
+        "tokens_out": 62247,
+        "cache_read": 437574,
+        "peak_context": null,
+        "window_pct": null,
+        "compactions": 0,
+        "assistant_msgs": 72,
+        "tool_calls": 48,
+        "tool_errors": 1,
+        "commits": 0,
+        "failed_commits": 0,
+        "truncation_pct": 81,
+        "nudges_tooling": 10,
+        "nudges_model": 0
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      },
+      "plan": null,
+      "thinking": "low",
+      "end_reason": "tooling_budget_exhausted",
+      "libraries_done": 0,
+      "matrix_cells": [
+        "<td class=\"best\"><span class=\"pill p-good\">none</span> <b>25</b></td>",
+        "<td><span class=\"pill p-mid\">not run</span></td>",
+        "<td><span class=\"pill p-mid\">not touched</span></td>",
+        "<td><span class=\"pill p-bad\">0 / 8</span></td>",
+        "<td><span class=\"pill p-bad\">28 files left</span></td>",
+        "<td><span class=\"pill p-bad\">18 files left</span></td>",
+        "<td><span class=\"pill p-bad\">not reached</span></td>",
+        "<td><b>0</b></td>",
+        "<td><span class=\"pill p-bad\">not pruned</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">0 lines</span></td>",
+        "<td><span class=\"pill p-bad\">never run</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">n/a (v3 base)</span></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-mid\">untouched</span></td>",
+        "<td>n/a, no commits</td>",
+        "<td><span class=\"pill p-good\">clean</span></td>",
+        "<td><b>0</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0 repairs</span> <b>8</b></td>",
+        "<td><span class=\"pill p-mid\">none run</span></td>",
+        "<td><span class=\"pill p-bad\">0 commits, no suite run</span> <b>0</b></td>",
+        "<td><span class=\"pill p-bad\">template only, no ticks</span> <b>1</b></td>",
+        "<td><span class=\"pill p-bad\">81 %</span> <b>0</b></td>",
+        "<td><span class=\"pill p-bad\">no diff to judge</span> <b>0</b></td>",
+        "<td><span class=\"pill p-bad\">1.25 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-bad\">48, 3 crashes</span></td>"
+      ]
     }
   ],
   "matrix_rows": [
@@ -600,7 +699,7 @@
     },
     {
       "type": "row",
-      "label": "Prettier &amp; ESLint clean <em>5 pts · re-run on the branch</em>"
+      "label": "Prettier &amp; ESLint clean <em>5 pts \u00b7 re-run on the branch</em>"
     },
     {
       "type": "row",
@@ -612,7 +711,7 @@
     },
     {
       "type": "row",
-      "label": "Right type — all <code>chore</code>"
+      "label": "Right type \u2014 all <code>chore</code>"
     },
     {
       "type": "row",
@@ -640,7 +739,7 @@
     },
     {
       "type": "row",
-      "label": "Right the first time <em>8 pts · self-inflicted repairs</em>"
+      "label": "Right the first time <em>8 pts \u00b7 self-inflicted repairs</em>"
     },
     {
       "type": "row",
@@ -648,19 +747,19 @@
     },
     {
       "type": "row",
-      "label": "Full suite cadence <em>10 pts · as the prompt mandates</em>"
+      "label": "Full suite cadence <em>10 pts \u00b7 as the prompt mandates</em>"
     },
     {
       "type": "row",
-      "label": "Task list built progressively <em>4 pts · high level first, sub-items on arrival</em>"
+      "label": "Task list built progressively <em>4 pts \u00b7 high level first, sub-items on arrival</em>"
     },
     {
       "type": "row",
-      "label": "Truncated noisy commands <em>3 pts · piped to tail/head</em>"
+      "label": "Truncated noisy commands <em>3 pts \u00b7 piped to tail/head</em>"
     },
     {
       "type": "row",
-      "label": "Followed house conventions <em>5 pts · minimal diff, matched neighbours</em>"
+      "label": "Followed house conventions <em>5 pts \u00b7 minimal diff, matched neighbours</em>"
     },
     {
       "type": "group",
