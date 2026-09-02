@@ -16,7 +16,7 @@
 # pi runs go through run-pi-rpc.mjs (stateful RPC session with the fixed nudge
 # policy, see PLAN.md); never through `pi -p`.
 # Blocks until the worker finishes. Spawn several in parallel from separate
-# shells; parallel runs are safe only for metered providers (a plan-provider
+# shells; at most one run per plan provider at a time (a plan-provider
 # run needs a quiet account — see PLAN.md "Plan accounting").
 set -euo pipefail
 
