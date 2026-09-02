@@ -232,6 +232,7 @@ const pairs = blindVersions.flatMap((b) =>
         label: `blind ${b} / guided ${g}`,
     }))
 );
+if (pairs.length) pairs[0].label = 'latest / latest';
 
 function nav() {
     const options = pairs
