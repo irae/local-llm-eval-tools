@@ -1652,6 +1652,108 @@
       }
     },
     {
+      "model": "claude-haiku-4.5",
+      "model_id": "anthropic/claude-haiku-4-5",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "anthropic",
+      "local": false,
+      "serving": null,
+      "branch": "anthropic-claude-haiku-4-5-high-issue-13",
+      "base_commit": "2652ed6",
+      "thinking": "high",
+      "prompt_version": "v1.1",
+      "partial": false,
+      "end_reason": "complete",
+      "libraries_done": 6,
+      "score_total": 34,
+      "scores": {
+        "bugs": 7,
+        "completion": 8,
+        "node_modules": 0,
+        "lint": 3,
+        "commit_craft": 1,
+        "first_time": 5,
+        "test_discipline": 5,
+        "conventions": 3,
+        "task_list": 0,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "packages/mendel-development/apply-extra-options.js: fs.promises.glob() returns an AsyncIterator, not a Promise; a naive .then() swap throws TypeError at runtime (trap A hit)"
+        },
+        {
+          "severity": "critical",
+          "summary": "root package.json still declares both rimraf and tmp as devDependencies; neither was ever removed (no pnpm remove, no lockfile change at all)"
+        },
+        {
+          "severity": "medium",
+          "summary": "legacy-packages/mendel-requirify still requires rimraf in two test files and declares it in package.json; the reference was never found or fixed (trap B missed)"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 10.2,
+        "tokens_total": 7890445,
+        "tokens_in": 774,
+        "tokens_out": 27621,
+        "cache_read": 7757732,
+        "peak_context": 100615,
+        "window_pct": 50,
+        "compactions": 0,
+        "assistant_msgs": 135,
+        "tool_calls": 134,
+        "tool_errors": 9,
+        "commits": 8,
+        "failed_commits": 0,
+        "truncation_pct": 70,
+        "nudges_tooling": 0,
+        "nudges_model": 0
+      },
+      "cost_usd": 1.05,
+      "cost_basis": "metered",
+      "matrix_cells": [
+        "<td><span class=\"pill p-bad\">TypeError + root deps never removed</span> <b>7</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">674/674, 1 skip (no unit test covers trap A's file)</span></td>",
+        "<td><span class=\"pill p-bad\">THREW: TypeError glob(...).then is not a function</span></td>",
+        "<td><span class=\"pill p-bad\">6 / 8 (glob broken, mendel-requirify untouched)</span></td>",
+        "<td><span class=\"pill p-bad\">rimraf ×2 left in mendel-requirify tests</span></td>",
+        "<td><span class=\"pill p-bad\">rimraf, tmp still in root package.json</span></td>",
+        "<td><span class=\"pill p-bad\">not found, not fixed</span></td>",
+        "<td><b>8</b></td>",
+        "<td><span class=\"pill p-bad\">no pnpm install, lockfile unchanged</span> <b>0</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">88/-94 lines</span></td>",
+        "<td><span class=\"pill p-mid\">clean · hooks only, not self-run</span> <b>3</b></td>",
+        "<td><span class=\"pill p-bad\">10× git add -A</span></td>",
+        "<td><span class=\"pill p-bad\">0/8 chore (fix)</span></td>",
+        "<td><span class=\"pill p-bad\">never created</span></td>",
+        "<td><span class=\"pill p-bad\">rimraf, tmp still declared</span></td>",
+        "<td>0 hook fails</td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td><span class=\"pill p-bad\"><b>1</b></span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0 nudges</span> <b>5</b></td>",
+        "<td><span class=\"pill p-mid\">2 full-suite runs, no visible narrow per-package runs</span></td>",
+        "<td><span class=\"pill p-mid\">2 / 8</span> <b>5</b></td>",
+        "<td><span class=\"pill p-bad\">no TASKS.md ever created</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">70 %</span> <b>2</b></td>",
+        "<td><span class=\"pill p-mid\">5 multi-package commits</span> <b>3</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">7.9 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
+        "<td><span class=\"pill p-mid\">93 %</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">134</span></td>"
+      ],
+      "cost": {
+        "or_route": "n/a",
+        "or_usd": "1.05",
+        "paid_basis": "metered",
+        "paid_usd": "1.05",
+        "vendor_usd": "1.05",
+        "rate_tone": "mid",
+        "provider_label": "Anthropic"
+      }
+    },
+    {
       "model": "deepseek-v4-pro-0813",
       "model_id": "accounts/fireworks/models/deepseek-v4-pro-0813",
       "harness": "pi",
