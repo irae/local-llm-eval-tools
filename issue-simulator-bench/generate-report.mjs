@@ -22,6 +22,9 @@ const templateFile = guided
     ? 'report-guided-template.html'
     : 'report-template.html';
 const data = JSON.parse(readFileSync(join(dir, resultsFile), 'utf8'));
+const otherData = JSON.parse(
+    readFileSync(join(dir, guided ? 'results.json' : 'results-guided.json'), 'utf8')
+);
 const template = readFileSync(join(dir, templateFile), 'utf8');
 const outputs = args;
 if (!outputs.length)
@@ -85,18 +88,51 @@ const MATRIX_SCORE_ROWS = [
     }
 }
 
+const DISPLAY = {
+    'claude-opus-5': 'Claude Opus 5',
+    'claude-sonnet-5': 'Claude Sonnet 5',
+    'claude-haiku-4.5': 'Claude Haiku 4.5',
+    'Claude Haiku 4.5': 'Claude Haiku 4.5',
+    'Claude Sonnet 4.5': 'Claude Sonnet 4.5',
+    'gpt-5.6-luna': 'GPT-5.6 Luna',
+    'gpt-5.6-sol': 'GPT-5.6 Sol',
+    'grok-4.6': 'Grok 4.6',
+    'kimi-k3': 'Kimi K3',
+    'deepseek-v4-pro-0813': 'DeepSeek V4 Pro (0813)',
+    'deepseek-v4-flash-0731': 'DeepSeek V4 Flash (0731)',
+    'glm-5p3-flash': 'GLM 5.3 Flash',
+    'qwen3.6-35b-a3b': 'Qwen3.6 35B-A3B',
+    'gemma-4-26b-a4b': 'Gemma 4 26B-A4B',
+    'mlx-community/Qwen3.8-27B-4bit': 'Qwen3.8 27B (MLX 4-bit)',
+    'Qwen3.8-27B (mlx, low)': 'Qwen3.8 27B (MLX 4-bit, low reasoning)',
+    'prism-ml/Ternary-Bonsai-27B-mlx-2bit': 'Ternary Bonsai 27B (MLX 2-bit)',
+    'Ternary-Bonsai-27B (mlx, low)':
+        'Ternary Bonsai 27B (MLX 2-bit, low reasoning)',
+};
+const display = (r) => DISPLAY[r.model] || r.model;
+
 const SHORT = {
     'claude-opus-5': 'opus-5',
     'claude-sonnet-5': 'sonnet-5',
     'claude-haiku-4.5': 'haiku-4.5',
+    'Claude Haiku 4.5': 'haiku-4.5',
+    'Claude Sonnet 4.5': 'sonnet-4.5',
     'gpt-5.6-luna': 'luna',
     'gpt-5.6-sol': 'sol',
+    'grok-4.6': 'grok',
+    'kimi-k3': 'kimi',
     'deepseek-v4-pro-0813': 'deepseek',
+    'deepseek-v4-flash-0731': 'ds-flash',
+    'glm-5p3-flash': 'glm-flash',
     'qwen3.6-35b-a3b': 'qwen',
     'gemma-4-26b-a4b': 'gemma',
+    'mlx-community/Qwen3.8-27B-4bit': 'qwen3.8',
+    'Qwen3.8-27B (mlx, low)': 'qwen3.8-low',
+    'prism-ml/Ternary-Bonsai-27B-mlx-2bit': 'bonsai',
+    'Ternary-Bonsai-27B (mlx, low)': 'bonsai-low',
 };
 const short = (r) =>
-    (SHORT[r.model] || r.model) + (r.partial ? ' (partial)' : '');
+    (SHORT[r.model] || display(r)) + (r.partial ? ' (partial)' : '');
 
 const END_REASON = {
     complete: null, // not shown; completeness is the default
@@ -180,9 +216,37 @@ const sortHead = (labels, sortableFrom, sortableTo, initial) =>
         .join('\n            ');
 
 const versionHeading = (v) =>
-    groups.length > 1
-        ? `<h3 class="lede">Prompt ${v === 'unversioned' ? 'version not recorded' : v}</h3>\n      `
-        : '';
+    `<h3 class="lede">Prompt ${v === 'unversioned' ? 'version not recorded' : v}</h3>\n      `;
+const versionSection = (v, inner) =>
+    `<div class="vsec" data-v="${v}">${versionHeading(v)}${inner}</div>`;
+
+const versionsOf = (d) =>
+    [...new Set(d.runs.map((r) => r.prompt_version || 'unversioned'))].sort(
+        (a, b) => b.localeCompare(a, undefined, { numeric: true })
+    );
+const blindVersions = versionsOf(guided ? otherData : data);
+const guidedVersions = versionsOf(guided ? data : otherData);
+const pairs = blindVersions.flatMap((b) =>
+    guidedVersions.map((g) => ({
+        id: `${b}_${g}`,
+        label: `blind ${b} / guided ${g}`,
+    }))
+);
+
+function nav() {
+    const options = pairs
+        .map(
+            (p, i) =>
+                `<option value="${p.id}"${i === 0 ? ' selected' : ''}>${p.label}</option>`
+        )
+        .join('');
+    const link = guided
+        ? '<a id="crosslink" data-base="report.html" href="report.html">← Blind report</a>'
+        : '<a id="crosslink" data-base="report-guided.html" href="report-guided.html">Guided report →</a>';
+    return `<p class="lede" id="report-nav">${link}
+        &nbsp;·&nbsp; <label>Prompt versions:
+        <select id="pairsel" data-own="${guided ? 'guided' : 'blind'}">${options}</select></label></p>`;
+}
 
 function scoreboardFor(rows) {
     const heads = [
@@ -212,21 +276,25 @@ function scoreboardFor(rows) {
             const paid = r.cost.paid_usd
                 ? `paid ${r.cost.paid_basis === 'metered' ? '' : '≈'}$${r.cost.paid_usd}`
                 : 'paid ≈$?.??';
-            const orMain = r.local ? pill('good', '$0') : `$${r.cost.or_usd}`;
+            const orNum = Number(r.cost.or_usd);
+            const orMain = r.local
+                ? pill('good', '$0')
+                : Number.isFinite(orNum)
+                  ? `$${r.cost.or_usd}`
+                  : '—';
             const cost = `${orMain}${smallBlock(paid)}`;
             const bp = bugPoints(r);
             const winTone = t.window_pct > 90 ? 'bad' : null;
             const crit = r.defects.filter(
                 (d) => d.severity === 'critical'
             ).length;
-            const planUsd = r.plan
-                ? numVal(r.plan.marginal)
-                : Number(r.cost.or_usd);
-            const attrs = ` data-base="${r.score_total}" data-or="${r.cost.or_usd}" data-plan="${planUsd}" data-crit="${crit}" data-wall="${Math.round(t.wall_clock_min)}"`;
+            const planUsd = r.plan ? numVal(r.plan.marginal) : orNum;
+            const fin = (v) => (Number.isFinite(v) ? v : '');
+            const attrs = ` data-base="${r.score_total}" data-or="${fin(orNum)}" data-plan="${fin(planUsd)}" data-crit="${crit}" data-wall="${Math.round(t.wall_clock_min)}"`;
             const detail = partialDetail(r);
             return `          <tr${attrs}>
             <td class="rank${i === 0 ? ' rank-1' : ''}">${i + 1}</td>
-            <th scope="row" class="model${i === 0 ? ' best' : ''}">${r.model}<small>${sub(r)}</small>${detail ? smallBlock(detail) : ''}</th>
+            <th scope="row" class="model${i === 0 ? ' best' : ''}">${display(r)}<small>${sub(r)}</small>${detail ? smallBlock(detail) : ''}</th>
             <td>${gauge}</td>
             <td class="num">${cost}</td>
             <td class="num${best(isTop('wall_clock_min', t.wall_clock_min))}">${Math.round(t.wall_clock_min)} min</td>
@@ -261,7 +329,7 @@ function scoreboard() {
         radios +
         '\n      ' +
         groups
-            .map(([v, rows]) => versionHeading(v) + scoreboardFor(rows))
+            .map(([v, rows]) => versionSection(v, scoreboardFor(rows)))
             .join('\n      ')
     );
 }
@@ -311,7 +379,7 @@ ${body}
 
 const matrix = () =>
     groups
-        .map(([v, rows]) => versionHeading(v) + matrixFor(rows))
+        .map(([v, rows]) => versionSection(v, matrixFor(rows)))
         .join('\n      ');
 
 function costTable() {
@@ -355,7 +423,7 @@ function costTable() {
                 )
                 .join('\n');
             return `          <tr>
-            <th scope="row" class="model">${r.model}</th>
+            <th scope="row" class="model">${display(r)}</th>
 ${cells}
           </tr>`;
         })
@@ -422,7 +490,7 @@ function planTable() {
                 )
                 .join('\n');
             return `          <tr>
-            <th scope="row" class="model">${r.model}</th>
+            <th scope="row" class="model">${display(r)}</th>
 ${cells}
           </tr>`;
         })
@@ -453,25 +521,32 @@ const SORTER =
             let vals = rows.map((r) => {
                 const d = r.dataset;
                 if (mode === 'none') return Number(d.base);
-                const cost = mode === 'or' ? Number(d.or) : Number(d.plan);
+                const raw = mode === 'or' ? d.or : d.plan;
+                if (raw === '') return NaN;
                 return (
                     Number(d.base) /
                     (1 +
-                        cost * (1 + Number(d.crit)) +
+                        Number(raw) * (1 + Number(d.crit)) +
                         0.01 * Number(d.wall))
                 );
             });
             if (mode !== 'none') {
-                const mx = Math.max(...vals);
+                const mx = Math.max(...vals.filter(Number.isFinite));
                 vals = vals.map((v) => (100 * v) / mx);
             }
             rows.forEach((r, i) => {
-                r.dataset.adj = vals[i];
-                r.querySelector('.scoreval').textContent = Math.round(vals[i]);
-                r.querySelector('.bar span').style.width =
-                    Math.round(vals[i]) + '%';
+                const ok = Number.isFinite(vals[i]);
+                r.dataset.adj = ok ? vals[i] : '';
+                r.querySelector('.scoreval').textContent = ok
+                    ? Math.round(vals[i])
+                    : '—';
+                r.querySelector('.bar span').style.width = ok
+                    ? Math.round(vals[i]) + '%'
+                    : '0%';
             });
-            rows.sort((a, b) => Number(b.dataset.adj) - Number(a.dataset.adj));
+            const adj = (r) =>
+                r.dataset.adj === '' ? -Infinity : Number(r.dataset.adj);
+            rows.sort((a, b) => adj(b) - adj(a));
             rows.forEach((r, i) => {
                 tbody.appendChild(r);
                 const rank = r.querySelector('.rank');
@@ -486,6 +561,29 @@ const SORTER =
     document
         .querySelectorAll('input[name="costmode"]')
         .forEach((el) => el.addEventListener('change', apply));
+})();
+(() => {
+    const sel = document.getElementById('pairsel');
+    if (!sel) return;
+    const link = document.getElementById('crosslink');
+    const own = sel.dataset.own;
+    const fromHash = (location.hash.match(/pair=([^&]+)/) || [])[1];
+    if (fromHash && [...sel.options].some((o) => o.value === fromHash))
+        sel.value = fromHash;
+    const apply = () => {
+        const [b, g] = sel.value.split('_');
+        const v = own === 'guided' ? g : b;
+        document
+            .querySelectorAll('.vsec')
+            .forEach((d) => (d.hidden = d.dataset.v !== v));
+        link.href = link.dataset.base + '#pair=' + sel.value;
+        if (location.hash) location.hash = 'pair=' + sel.value;
+    };
+    sel.addEventListener('change', () => {
+        location.hash = 'pair=' + sel.value;
+        apply();
+    });
+    apply();
 })();
 document.querySelectorAll('table.sortable th[data-sort]').forEach((th) => {
     th.style.cursor = 'pointer';
@@ -513,6 +611,7 @@ document.querySelectorAll('table.sortable th[data-sort]').forEach((th) => {
 
 let html =
     template
+        .replace('{{NAV}}', nav())
         .replace('{{SCOREBOARD}}', scoreboard())
         .replace('{{MATRIX}}', matrix())
         .replace('{{COST}}', costTable())
