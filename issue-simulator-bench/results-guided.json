@@ -827,6 +827,104 @@
       "thinking": "high",
       "end_reason": "complete",
       "libraries_done": 8
+    },
+    {
+      "model": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
+      "model_id": "prism-ml/Ternary-Bonsai-27B-mlx-2bit",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "mlx",
+      "local": true,
+      "serving": "mlx_lm.server",
+      "branch": "prism-ml-Ternary-Bonsai-27B-mlx-2bit-low-guided-v3-issue-13",
+      "base_commit": "86935f4",
+      "partial": true,
+      "prompt_version": "v3.0",
+      "config_note": "run-worker.sh was invoked with --thinking low, but the session log's only thinking_level_change event records \"high\" \u2014 the flag was not honored. Scored and reported as the observed level.",
+      "score_total": 59,
+      "scores": {
+        "bugs": 25,
+        "completion": 2,
+        "node_modules": 0,
+        "lint": 0,
+        "commit_craft": 8,
+        "first_time": 8,
+        "test_discipline": 8,
+        "conventions": 4,
+        "task_list": 2,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "minor",
+          "summary": "spent a large share of the run looping on a self-authored typo'd worktree path (missing \"27B-mlx-\" segment), repeating the same failing ls command many times before the wall-clock hard stop"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 300.0,
+        "tokens_total": 3618689,
+        "tokens_in": 2138409,
+        "tokens_out": 17616,
+        "cache_read": 1462664,
+        "peak_context": 45850,
+        "window_pct": null,
+        "compactions": 0,
+        "assistant_msgs": 128,
+        "tool_calls": 122,
+        "tool_errors": null,
+        "commits": 1,
+        "failed_commits": 0,
+        "truncation_pct": 61,
+        "nudges_tooling": 2,
+        "nudges_model": 0
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      },
+      "thinking": "high",
+      "end_reason": "wall_clock",
+      "libraries_done": 1,
+      "matrix_cells": [
+        "<td><span class=\"pill p-mid\">no bugs in the 1 landed commit</span> <b>25</b></td>",
+        "<td><span class=\"pill p-mid\">not run</span></td>",
+        "<td><span class=\"pill p-mid\">not touched</span></td>",
+        "<td><span class=\"pill p-bad\">1 / 8 (uuid only)</span></td>",
+        "<td><span class=\"pill p-bad\">27 files left</span></td>",
+        "<td><span class=\"pill p-bad\">16 files left</span></td>",
+        "<td><span class=\"pill p-bad\">not reached</span></td>",
+        "<td><b>2</b></td>",
+        "<td><span class=\"pill p-bad\">not pruned</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">0 lines</span></td>",
+        "<td><span class=\"pill p-bad\">prettier warn (mendel-config/legacy)</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">n/a (v3 base)</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">all chore</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">1 of 1, on its own package</span></td>",
+        "<td><span class=\"pill p-mid\">rimraf, tmp still declared (untouched libs)</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no --no-verify, no add -A</span></td>",
+        "<td><span class=\"pill p-bad\">TASKS.md leaked into the commit</span></td>",
+        "<td><b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0 repairs</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">per-package tap runs</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">3 full-suite runs before the 1 commit</span> <b>8</b></td>",
+        "<td><span class=\"pill p-mid\">only item 1 got sub-items, ticked</span> <b>2</b></td>",
+        "<td><span class=\"pill p-mid\">61 %</span> <b>2</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">minimal diff on the one library touched</span> <b>4</b></td>",
+        "<td><span class=\"pill p-bad\">3.6 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-bad\">122, path-typo loop</span></td>"
+      ]
     }
   ],
   "matrix_rows": [
@@ -971,5 +1069,7 @@
       "label": "Tool calls to finish"
     }
   ],
-  "prompt_versions": ["v2.1"]
+  "prompt_versions": [
+    "v2.1"
+  ]
 }
