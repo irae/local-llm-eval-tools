@@ -48,7 +48,7 @@ if [ "$harness" = "pi" ] && [ -z "$thinking" ]; then
     echo "abort: pi runs need an explicit thinking level (off|minimal|low|medium|high|xhigh|max)" >&2
     exit 1
 fi
-RUNS="$BENCH_DIR/runs"
+RUNS="$REPO/scratchpad/benchmark/runs"
 slug="$(echo "$model" | tr '/:' '--')"
 [ -n "$thinking" ] && slug="${slug}-${thinking}"
 branch="${slug}${suffix}"
@@ -89,10 +89,10 @@ if ! node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$fslug-plan-
     exit 1
 fi
 
-# Pinned config dir, rebuilt per run: only credentials, model config, and the
-# frozen global instructions get in. Never versioned (see .gitignore).
+# Pinned config dir, rebuilt per run under scratchpad/ (never versioned):
+# only credentials, model config, and the frozen global instructions get in.
 build_pi_agent_dir() {
-    local d="$BENCH_DIR/.pi-agent-$fslug"
+    local d="$REPO/scratchpad/benchmark/.pi-agent-$fslug"
     rm -rf "$d" && mkdir -p "$d"
     for f in models.json auth.json models-store.json; do
         [ -e "$HOME/.pi/agent/$f" ] && cp "$HOME/.pi/agent/$f" "$d/"
@@ -125,7 +125,7 @@ end=$(date -u +%FT%TZ)
 node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$fslug-plan-after.json" > /dev/null \
     || echo "warning: plan probe after the run failed; record the plan share by hand" >&2
 pkill -f "$wt" 2>/dev/null || true
-rm -rf "$BENCH_DIR/.pi-agent-$fslug"
+rm -rf "$REPO/scratchpad/benchmark/.pi-agent-$fslug"
 printf '{"model":"%s","harness":"%s","bench":"%s","thinking":"%s","plan_provider":"%s","branch":"%s","base_commit":"%s","start":"%s","end":"%s","pinned_env":"agents-global v1.0"}\n' \
     "$model" "$harness" "$bench" "$thinking" "$plan_provider" "$branch" "$(git -C "$REPO" rev-parse --short "$BASE_COMMIT")" "$start" "$end" > "$RUNS/$fslug-worker.json"
 echo "$slug: done" >&2

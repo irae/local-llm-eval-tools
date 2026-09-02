@@ -16,7 +16,7 @@
 // to the raw lines it came from.
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -299,7 +299,10 @@ catch (e) { console.log('THREW:', e.constructor.name, e.message); }
         'no --worktree given — run prettier/eslint/trap A/tap there per RUBRIC.md';
 }
 
-const out = args.out || join(dir, 'runs', `${branch}-evidence.json`);
+const out =
+    args.out ||
+    join(dir, '..', 'scratchpad', 'benchmark', 'runs', `${branch}-evidence.json`);
+mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, JSON.stringify(evidence, null, 2) + '\n');
 const sc = evidence.static_completeness;
 console.log(

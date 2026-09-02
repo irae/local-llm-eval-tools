@@ -97,7 +97,8 @@ table across versions.
     - Creates a sibling worktree at the bench's base commit.
     - Creates the bench's run branch for the model.
     - Runs a real `pnpm install` in the worktree.
-    - Starts the harness with the bench's prompt and writes its outputs to `runs/`.
+    - Starts the harness with the bench's prompt and writes its transient
+      outputs to `scratchpad/benchmark/runs/` (gitignored).
 3. **pi runs go through `run-pi-rpc.mjs`, never `pi -p`.** `pi -p` exits on the
    first `length` or `error` stop — a harness limitation a TUI user would simply
    type "continue" past. The runner keeps one `pi --mode rpc` session alive (same
@@ -165,7 +166,7 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
 --meta <meta> [--worktree <dir>]` computes the mechanical parts (static
    completeness, lockfile, commit-craft facts, session habits, nudges; with a
    worktree also prettier/eslint/trap A) and writes
-   `runs/<branch>-evidence.json`. The scorer reads the pack, judges only defect
+   `scratchpad/benchmark/runs/<branch>-evidence.json`. The scorer reads the pack, judges only defect
    severity and criteria 1, 6, 8, 9, and cites the pack in the matrix cells.
 2. Apply the rubric unchanged. If you add a criterion, re-score every prior run.
 3. Collect telemetry from the harness session log:
@@ -174,12 +175,16 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
       The three blind transcripts are copied to `runs/<branch>-session-N.jsonl`
       and listed in `runs/SESSIONS.md`; `score.mjs` reads both the pi and the
       Claude Code transcript formats.
-    - pi: `runs/<slug>-meta.json` and `runs/<slug>-session.jsonl` written by
+    - pi: `scratchpad/benchmark/runs/<slug>-meta.json` and
+      `…/<slug>-session.jsonl` written by
       `run-pi-rpc.mjs`. Copy the nudge counts into `telemetry.nudges_tooling` and
       `telemetry.nudges_model`.
-      After scoring, copy the log to `runs/<branch>-session.jsonl`, redact it (see
-      "Redaction"), and list it in `runs/SESSIONS.md`. `runs/` is otherwise not
-      versioned; the `.gitignore` allows the session logs and that index only.
+      After scoring, copy the log to `benchmark/runs/<branch>-session.jsonl`,
+      redact it (see "Redaction"), and list it in `runs/SESSIONS.md`.
+      `benchmark/runs/` holds ONLY committed artifacts (redacted session
+      logs, historical metas, `SESSIONS.md`); every transient run output
+      lives in `scratchpad/benchmark/runs/`, which is gitignored — `git
+      status` stays clean between runs.
       To find the log of an older run, match a candidate session against the row:
       each pi assistant message carries its own `model` and `usage`, so count the
       assistant messages of the run's model, count the `toolCall` blocks, and
@@ -218,7 +223,7 @@ Runs on a flat subscription (Claude Max for Claude Code, ChatGPT Plus/Pro for pi
 share of the plan's rate-limit windows they consume, measured, not estimated:
 
 1. `run-worker.sh` calls `probe-plan.mjs <provider>` **before and after** the run
-   and keeps both readings (`runs/<slug>-plan-before.json`, `-plan-after.json`).
+   and keeps both readings (`scratchpad/benchmark/runs/<slug>-plan-before.json`, `-plan-after.json`).
    A failed probe before the run aborts it: without a baseline the run is not
    accountable.
 2. **Isolation rule.** While a plan run is in flight, nothing else may draw on

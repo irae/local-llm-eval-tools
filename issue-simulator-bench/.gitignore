@@ -1,11 +1,6 @@
 runs/*
-!runs/*-session.jsonl
+!runs/*-issue-13-session.jsonl
+!runs/*-issue-13-meta.json
 !runs/*-session-1.jsonl
 !runs/*-session-2.jsonl
 !runs/SESSIONS.md
-!runs/*-meta.json
-!runs/*-worker.json
-!runs/*-session.html
-!runs/*-plan-before.json
-!runs/*-plan-after.json
-.pi-agent*/
