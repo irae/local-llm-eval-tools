@@ -821,13 +821,56 @@
                         <td class="num"><span class="pill p-mid">1</span></td>
                     </tr>
                     <tr
+                        data-base="79"
+                        data-or="2.10"
+                        data-plan="2.1"
+                        data-crit="1"
+                        data-wall="93"
+                    >
+                        <td class="rank">3</td>
+                        <th scope="row" class="model">
+                            deepseek-v4-pro-0813<small
+                                >pi · fireworks · think high</small
+                            >
+                        </th>
+                        <td>
+                            <div class="scorewrap">
+                                <span class="scoreval">79</span>
+                                <div class="bar">
+                                    <span style="width: 79%"></span>
+                                </div>
+                            </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >Fireworks</small
+                            >
+                        </td>
+                        <td class="num">
+                            $2.10<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid $3.33</small
+                            >
+                        </td>
+                        <td class="num">93 min</td>
+                        <td class="num">19.2 M</td>
+                        <td class="num">182 k</td>
+                        <td class="num">18 %</td>
+                        <td class="num">18</td>
+                        <td class="num"><span class="pill p-bad">5</span></td>
+                    </tr>
+                    <tr
                         data-base="67.5"
                         data-or="0"
                         data-plan="0"
                         data-crit="0"
                         data-wall="85"
                     >
-                        <td class="rank">3</td>
+                        <td class="rank">4</td>
                         <th scope="row" class="model">
                             Qwen3.8-27B (mlx, low)<small
                                 >pi · mlx · local · think low</small
@@ -1451,13 +1494,14 @@
                         <th>Criterion</th>
                         <th>kimi-k3</th>
                         <th>deepseek-v4-flash-0731</th>
+                        <th>deepseek</th>
                         <th>Qwen3.8-27B (mlx, low) (partial)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr class="group">
                         <th scope="row">Correctness</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1468,6 +1512,10 @@
                         </td>
                         <td class="best">
                             <span class="pill p-good">clean</span> <b>25</b>
+                        </td>
+                        <td>
+                            <span class="pill p-bad">TypeError thrown</span>
+                            <b>16</b>
                         </td>
                         <td class="best">
                             <span class="pill p-good">none</span> <b>25</b>
@@ -1485,6 +1533,11 @@
                         <td class="best">
                             <span class="pill p-good">260/260</span>
                         </td>
+                        <td>
+                            <span class="pill p-good"
+                                >41/41, 260/260 standalone</span
+                            >
+                        </td>
                         <td><span class="pill p-mid">not run</span></td>
                     </tr>
                     <tr>
@@ -1498,11 +1551,14 @@
                         <td class="best">
                             <span class="pill p-good">SYNC OK</span>
                         </td>
+                        <td>
+                            <span class="pill p-bad">THREW: TypeError</span>
+                        </td>
                         <td><span class="pill p-mid">not touched</span></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Task completion</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1514,12 +1570,14 @@
                         <td class="best">
                             <span class="pill p-good">8 / 8</span>
                         </td>
+                        <td><span class="pill p-good">8 / 8</span></td>
                         <td><span class="pill p-bad">1 / 8</span></td>
                     </tr>
                     <tr>
                         <th scope="row">No code still requires it</th>
                         <td><span class="pill p-mid">rimraf ×2 left</span></td>
                         <td><span class="pill p-mid">rimraf ×2 left</span></td>
+                        <td><span class="pill p-mid">rimraf x2 left</span></td>
                         <td><span class="pill p-bad">7 files left</span></td>
                     </tr>
                     <tr>
@@ -1531,6 +1589,11 @@
                         </td>
                         <td>
                             <span class="pill p-mid">rimraf + tmp left</span>
+                        </td>
+                        <td>
+                            <span class="pill p-mid"
+                                >rimraf left (mendel-requirify)</span
+                            >
                         </td>
                         <td><span class="pill p-bad">17 files left</span></td>
                     </tr>
@@ -1545,17 +1608,19 @@
                         <td>
                             <span class="pill p-bad">found, not fixed</span>
                         </td>
+                        <td><span class="pill p-bad">not found</span></td>
                         <td><span class="pill p-bad">missed</span></td>
                     </tr>
                     <tr>
                         <th scope="row">Subtotal <em>20 pts</em></th>
                         <td><b>16</b></td>
                         <td><b>13</b></td>
+                        <td><b>15</b></td>
                         <td><b>2.5</b></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Dependency hygiene</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1566,6 +1631,10 @@
                             <b>8</b>
                         </td>
                         <td class="best">
+                            <span class="pill p-good">real install</span>
+                            <b>8</b>
+                        </td>
+                        <td>
                             <span class="pill p-good">real install</span>
                             <b>8</b>
                         </td>
@@ -1583,11 +1652,12 @@
                         <td class="best">
                             <span class="pill p-good">93 lines</span>
                         </td>
+                        <td><span class="pill p-good">96 lines</span></td>
                         <td><span class="pill p-mid">0 lines</span></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Static checks</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1600,6 +1670,10 @@
                         </td>
                         <td class="best">
                             <span class="pill p-good">clean · ran 1×</span>
+                            <b>5</b>
+                        </td>
+                        <td>
+                            <span class="pill p-good">clean · ran itself</span>
                             <b>5</b>
                         </td>
                         <td class="best">
@@ -1617,11 +1691,12 @@
                         <td class="best">
                             <span class="pill p-good">no violation</span>
                         </td>
+                        <td><span class="pill p-good">no violation</span></td>
                         <td><span class="pill p-mid">n/a</span></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Commit craft</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">Right type — all <code>chore</code></th>
@@ -1630,6 +1705,9 @@
                         </td>
                         <td>
                             <span class="pill p-bad">fix/test, not chore</span>
+                        </td>
+                        <td>
+                            <span class="pill p-bad">refactor, not chore</span>
                         </td>
                         <td><span class="pill p-good">chore</span></td>
                     </tr>
@@ -1641,6 +1719,7 @@
                         <td class="best">
                             <span class="pill p-good">yes</span>
                         </td>
+                        <td><span class="pill p-good">yes</span></td>
                         <td><span class="pill p-good">1 package</span></td>
                     </tr>
                     <tr>
@@ -1652,6 +1731,7 @@
                             <span class="pill p-good">root clean</span>
                         </td>
                         <td><span class="pill p-bad">tmp left</span></td>
+                        <td><span class="pill p-good">removed</span></td>
                         <td><span class="pill p-mid">untouched</span></td>
                     </tr>
                     <tr>
@@ -1660,6 +1740,7 @@
                         </th>
                         <td>0 hook fails</td>
                         <td>0 hook fails</td>
+                        <td><span class="pill p-good">0 hook fails</span></td>
                         <td>0 hook fails</td>
                     </tr>
                     <tr>
@@ -1671,16 +1752,18 @@
                             <span class="pill p-good">clean</span>
                         </td>
                         <td><span class="pill p-good">clean</span></td>
+                        <td><span class="pill p-good">clean</span></td>
                     </tr>
                     <tr>
                         <th scope="row">Subtotal <em>12 pts</em></th>
                         <td><b>12</b></td>
                         <td><b>8</b></td>
+                        <td><b>8</b></td>
                         <td><b>12</b></td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Working method</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1693,6 +1776,9 @@
                         <td>
                             <span class="pill p-mid">1 model nudge</span>
                             <b>6</b>
+                        </td>
+                        <td>
+                            <span class="pill p-good">no repairs</span> <b>8</b>
                         </td>
                         <td class="best">
                             <span class="pill p-good">0 repairs</span> <b>8</b>
@@ -1712,6 +1798,9 @@
                                 >per-package tap runs</span
                             >
                         </td>
+                        <td>
+                            <span class="pill p-good">per-package runs</span>
+                        </td>
                         <td><span class="pill p-mid">none run</span></td>
                     </tr>
                     <tr>
@@ -1724,6 +1813,10 @@
                         </td>
                         <td class="best">
                             <span class="pill p-good">4 / 14</span> <b>9</b>
+                        </td>
+                        <td>
+                            <span class="pill p-good">4 / 18 commits</span>
+                            <b>9</b>
                         </td>
                         <td>
                             <span class="pill p-good"
@@ -1756,6 +1849,13 @@
                         </td>
                         <td>
                             <span class="pill p-mid"
+                                >full tree upfront, per-package sub-items,
+                                ticked</span
+                            >
+                            <b>3</b>
+                        </td>
+                        <td>
+                            <span class="pill p-mid"
                                 >full tree upfront, live ticks</span
                             >
                             <b>3</b>
@@ -1768,6 +1868,7 @@
                         </th>
                         <td><span class="pill p-mid">63 %</span> <b>2</b></td>
                         <td><span class="pill p-mid">60 %</span> <b>2</b></td>
+                        <td><span class="pill p-mid">49 %</span> <b>2</b></td>
                         <td><span class="pill p-bad">57 %</span> <b>1</b></td>
                     </tr>
                     <tr>
@@ -1781,13 +1882,14 @@
                         <td class="best">
                             <span class="pill p-good">tight</span> <b>5</b>
                         </td>
+                        <td><span class="pill p-good">tight</span> <b>5</b></td>
                         <td class="best">
                             <span class="pill p-good">tight</span> <b>5</b>
                         </td>
                     </tr>
                     <tr class="group">
                         <th scope="row">Context economy</th>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                     <tr>
                         <th scope="row">
@@ -1798,6 +1900,7 @@
                             <span class="pill p-good">4.7 M</span>
                         </td>
                         <td><span class="pill p-mid">17.9 M</span></td>
+                        <td><span class="pill p-mid">19.2 M</span></td>
                         <td class="best">
                             <span class="pill p-good">610 K</span>
                         </td>
@@ -1808,6 +1911,7 @@
                         </th>
                         <td class="best"><span class="pill p-good">0</span></td>
                         <td class="best"><span class="pill p-good">0</span></td>
+                        <td><span class="pill p-mid">1</span></td>
                         <td class="best"><span class="pill p-good">0</span></td>
                     </tr>
                     <tr>
@@ -1816,6 +1920,7 @@
                             <span class="pill p-good">94 %</span>
                         </td>
                         <td><span class="pill p-mid">30 %</span></td>
+                        <td><span class="pill p-good">82 % left</span></td>
                         <td><span class="pill p-bad">12 %</span></td>
                     </tr>
                     <tr>
@@ -1826,6 +1931,7 @@
                         <td class="best">
                             <span class="pill p-good">170</span>
                         </td>
+                        <td><span class="pill p-good">292</span></td>
                         <td class="best">
                             <span class="pill p-good">29</span>
                         </td>
@@ -1836,6 +1942,7 @@
                         <th scope="row">Total</th>
                         <td class="best">93.5</td>
                         <td>84.5</td>
+                        <td>79</td>
                         <td>67.5</td>
                     </tr>
                 </tfoot>
@@ -3248,6 +3355,44 @@
                             <span class="pill p-mid">0.3</span>
                         </td>
                         <td class="num" data-v="98">98.0 %</td>
+                        <td class="num" data-v="-1">Fireworks</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">deepseek-v4-pro-0813</th>
+                        <td class="num" data-v="4">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(DeepSeek V4 Pro)</em
+                            >
+                            $2.10
+                        </td>
+                        <td class="num" data-v="3.33">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(metered)</em
+                            >
+                            $3.33
+                        </td>
+                        <td class="num" data-v="344">344 k</td>
+                        <td class="num" data-v="522">522 k</td>
+                        <td class="num" data-v="18.3">18.3 M</td>
+                        <td class="num" data-v="3.33">$3.33</td>
+                        <td class="num" data-v="1.32">1.32</td>
+                        <td class="num" data-v="3.96">3.96</td>
+                        <td class="num" data-v="0.044">
+                            <span class="pill p-mid">0.044</span>
+                        </td>
+                        <td class="num" data-v="95.5">95.5 %</td>
                         <td class="num" data-v="-1">Fireworks</td>
                     </tr>
                     <tr>
