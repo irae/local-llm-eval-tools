@@ -35,6 +35,19 @@ and keeps only the pitfalls the workflow does not cover (rimraf `force`, the
 legacy failure baseline) — traps A, B, and C are no longer named. Either way its
 scores measure instruction-following more than trap discovery.
 
+### Which models run which test
+
+Blind is the default for strong API models. Their blind scores are high
+already; a guided run would add cost, not information. The guided test
+answers a different question: can a local or weak model do the work when
+the prompt gives it more instruction? Guided rows therefore come from
+all local models, plus a small set of API reference points: one strong
+model as the ceiling (gpt-5.6-luna) and one or two cheap models (for
+example deepseek-v4-flash). Every model that gets a guided row also gets
+a blind row, so each pair shows the lift. The two rows of a pair can
+land at different times; an unpaired row is allowed until its partner
+runs.
+
 The guided base commit `4679b5a` is `182b07f` plus one fix master needed anyway:
 the root declares `mendel-pipeline` as a workspace devDependency, so the hoisted
 `node_modules/.bin/mendel` link resolves and the full-example karma test runs on a
