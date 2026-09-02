@@ -1950,6 +1950,100 @@
         "<td><span class=\"pill p-mid\">13 %</span></td>",
         "<td><span class=\"pill p-mid\">135</span></td>"
       ]
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "model_id": "gpt-5.6-sol",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "openai-codex",
+      "local": false,
+      "serving": null,
+      "branch": "gpt-5.6-sol-high-issue-13",
+      "base_commit": "2652ed6",
+      "thinking": "high",
+      "prompt_version": "v1.1",
+      "partial": false,
+      "end_reason": "complete",
+      "libraries_done": 8,
+      "score_total": 92.0,
+      "scores": {
+        "bugs": 19,
+        "completion": 20,
+        "node_modules": 8,
+        "lint": 5,
+        "commit_craft": 12,
+        "first_time": 8,
+        "test_discipline": 10,
+        "conventions": 5,
+        "task_list": 2.5,
+        "truncation": 2.5
+      },
+      "defects": [
+        {
+          "severity": "medium",
+          "summary": "validate-manifest.js exit hook deletes the debug manifest right after printing its path (trap C)"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 24.4,
+        "tokens_total": 19618382,
+        "tokens_in": 355002,
+        "tokens_out": 23956,
+        "cache_read": 19239424,
+        "peak_context": 249510,
+        "window_pct": 92,
+        "compactions": 0,
+        "assistant_msgs": 147,
+        "tool_calls": 189,
+        "tool_errors": 13,
+        "commits": 18,
+        "failed_commits": 0,
+        "truncation_pct": 21,
+        "nudges_tooling": 0,
+        "nudges_model": 0
+      },
+      "cost_usd": 12.11,
+      "cost_basis": "metered",
+      "matrix_cells": [
+        "<td><span class=\"pill p-mid\">exit-hook regression</span> <b>19</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">674/674 (1 skip, no failures)</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">SYNC OK</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">fixed</span></td>",
+        "<td class=\"best\"><b>20</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real install</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">-96/+0 lines</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean \u00b7 self-run</span> <b>5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no violation</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">18/18 chore</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">yes</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">removed</span></td>",
+        "<td>0 hook fails</td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td class=\"best\"><b>12</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0 nudges</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">per-package tap runs</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">7 / 18</span> <b>10</b></td>",
+        "<td><span class=\"pill p-mid\">full tree upfront, per-package sub-items, ticked</span> <b>2.5</b></td>",
+        "<td><span class=\"pill p-mid\">21 %</span> <b>2.5</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">tight</span> <b>5</b></td>",
+        "<td><span class=\"pill p-mid\">19.6 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
+        "<td><span class=\"pill p-mid\">8 %</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">189</span></td>"
+      ],
+      "cost": {
+        "or_route": "n/a",
+        "or_usd": "12.11",
+        "paid_basis": "metered",
+        "paid_usd": "12.11",
+        "vendor_usd": "12.11",
+        "rate_tone": "high",
+        "provider_label": "OpenAI (Codex)"
+      }
     }
   ],
   "matrix_rows": [
@@ -2095,6 +2189,8 @@
     }
   ],
   "bench": "blind",
-  "prompt_versions": ["v1.0"],
+  "prompt_versions": [
+    "v1.0"
+  ],
   "prompt": "prompt-blind.txt"
 }
