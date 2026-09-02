@@ -594,7 +594,7 @@
         "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
         "<td class=\"best\"><b>20</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">real install</span> <b>8</b></td>",
-        "<td><span class=\"pill p-mid\">+199/−106 lines</span></td>",
+        "<td><span class=\"pill p-mid\">+199/\u2212106 lines</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">clean, self-checked 2x</span> <b>5</b></td>",
         "<td><span class=\"pill p-mid\">retired (v3 base)</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">all chore</span></td>",
@@ -948,7 +948,7 @@
       "defects": [
         {
           "severity": "critical",
-          "summary": "packages/mendel-development/apply-extra-options.js calls fs.promises.glob(i).then(...) — fs.promises.glob() returns an AsyncIterator, not a Promise; throws TypeError: glob(...).then is not a function (trap A)"
+          "summary": "packages/mendel-development/apply-extra-options.js calls fs.promises.glob(i).then(...) \u2014 fs.promises.glob() returns an AsyncIterator, not a Promise; throws TypeError: glob(...).then is not a function (trap A)"
         }
       ],
       "telemetry": {
@@ -1009,6 +1009,100 @@
         "provider_label": "Anthropic"
       },
       "cost_usd": 1.73,
+      "cost_basis": "metered",
+      "thinking": "high",
+      "end_reason": "complete",
+      "libraries_done": 8
+    },
+    {
+      "model": "claude-sonnet-4.5",
+      "model_id": "anthropic/claude-sonnet-4-5",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "anthropic",
+      "local": false,
+      "serving": null,
+      "branch": "anthropic-claude-sonnet-4-5-high-guided-v3-issue-13",
+      "base_commit": "86935f4",
+      "partial": false,
+      "prompt_version": "v3.0",
+      "score_total": 88,
+      "scores": {
+        "bugs": 16,
+        "completion": 20,
+        "node_modules": 8,
+        "lint": 5,
+        "commit_craft": 12,
+        "first_time": 8,
+        "test_discipline": 7,
+        "conventions": 5,
+        "task_list": 4,
+        "truncation": 3
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "packages/mendel-development/apply-extra-options.js calls fs.promises.glob(...).then(...) at three call sites; fs.promises.glob() returns an AsyncIterator, not a Promise; throws TypeError: glob(...).then is not a function (trap A)"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 32.2,
+        "tokens_total": 10295145,
+        "tokens_in": 1236,
+        "tokens_out": 34146,
+        "cache_read": 10166029,
+        "peak_context": 93054,
+        "window_pct": 9,
+        "compactions": 0,
+        "assistant_msgs": 210,
+        "tool_calls": 240,
+        "tool_errors": 16,
+        "commits": 16,
+        "failed_commits": 0,
+        "truncation_pct": 72,
+        "nudges_tooling": 0,
+        "nudges_model": 0
+      },
+      "matrix_cells": [
+        "<td><span class=\"pill p-bad\">trap A: TypeError</span> <b>16</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">674/674, 1 skip</span></td>",
+        "<td><span class=\"pill p-bad\">THREW: TypeError</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">none left</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
+        "<td class=\"best\"><b>20</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">real remove, verified</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">+123/\u2212101 lines</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean, self-checked</span> <b>5</b></td>",
+        "<td><span class=\"pill p-mid\">retired (v3 base)</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">all chore</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no multi-package</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">removed</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no --no-verify, no add -A</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td class=\"best\"><b>12</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0 nudges</span> <b>8</b></td>",
+        "<td><span class=\"pill p-mid\">per-package tap runs</span></td>",
+        "<td><span class=\"pill p-mid\">12 runs / 16 commits</span> <b>7</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">per-file, ticked per commit</span> <b>4</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">72 % (deliberate tail-N)</span> <b>3</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">tight</span> <b>5</b></td>",
+        "<td><span class=\"pill p-mid\">10.3 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
+        "<td><span class=\"pill p-mid\">16 tool errors</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">240</span></td>"
+      ],
+      "cost": {
+        "or_route": "n/a",
+        "or_usd": "3.92",
+        "paid_basis": "metered",
+        "paid_usd": "3.92",
+        "vendor_usd": "3.92",
+        "rate_tone": "mid",
+        "provider_label": "Anthropic"
+      },
+      "cost_usd": 3.92,
       "cost_basis": "metered",
       "thinking": "high",
       "end_reason": "complete",
@@ -1157,5 +1251,7 @@
       "label": "Tool calls to finish"
     }
   ],
-  "prompt_versions": ["v2.1"]
+  "prompt_versions": [
+    "v2.1"
+  ]
 }
