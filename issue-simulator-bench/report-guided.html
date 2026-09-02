@@ -724,6 +724,75 @@
             exists; runs without a plan keep their OpenRouter figure; local runs
             cost $0 plus time.
         </p>
+        <h3 class="lede">Prompt v3.0</h3>
+        <div class="scroller">
+            <table class="scoreboard">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Model</th>
+                        <th>Score</th>
+                        <th>Cost</th>
+                        <th class="num">Wall</th>
+                        <th class="num">Tokens</th>
+                        <th class="num">Peak ctx</th>
+                        <th class="num">Window</th>
+                        <th class="num">Commits</th>
+                        <th class="num">Bugs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        data-base="97"
+                        data-or="2.10"
+                        data-plan="2.1"
+                        data-crit="0"
+                        data-wall="249"
+                    >
+                        <td class="rank rank-1">1</td>
+                        <th scope="row" class="model best">
+                            deepseek-v4-flash-0731<small
+                                >pi · fireworks · think high</small
+                            >
+                        </th>
+                        <td>
+                            <div class="scorewrap">
+                                <span class="scoreval">97</span>
+                                <div class="bar gold">
+                                    <span style="width: 97%"></span>
+                                </div>
+                            </div>
+                            <small
+                                style="
+                                    display: block;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    margin-top: 3px;
+                                "
+                                >Fireworks</small
+                            >
+                        </td>
+                        <td class="num">
+                            $2.10<small
+                                style="display: block; color: var(--ink-faint)"
+                                >paid $2.47</small
+                            >
+                        </td>
+                        <td class="num best">249 min</td>
+                        <td class="num best">68.1 M</td>
+                        <td class="num best">973 k</td>
+                        <td class="num">
+                            <span class="pill p-bad">97 %</span>
+                        </td>
+                        <td class="num">16</td>
+                        <td class="num best">
+                            <span class="pill p-good">0</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h3 class="lede">Prompt v2.1</h3>
         <div class="scroller">
             <table class="scoreboard">
                 <thead>
@@ -987,6 +1056,276 @@
             best cell in each row is highlighted.
         </p>
         <div class="scroller">
+            <h3 class="lede">Prompt v3.0</h3>
+            <table class="matrix">
+                <thead>
+                    <tr>
+                        <th>Criterion</th>
+                        <th>deepseek-v4-flash-0731</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="group">
+                        <th scope="row">Correctness</th>
+                        <td colspan="1"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Bugs remaining <em>weighted, 25 pts</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good">clean</span> <b>25</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Unit tests still green <em>per package</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good">710/709, lerna ok</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Runtime smoke test
+                            <em>ignore/exclude/external globs</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good">SYNC OK</span>
+                        </td>
+                    </tr>
+                    <tr class="group">
+                        <th scope="row">Task completion</th>
+                        <td colspan="1"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            All 8 libraries done <em>20 pts (shared)</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good">8 / 8</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">No code still requires it</th>
+                        <td class="best">
+                            <span class="pill p-good">none left</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Gone from every package.json</th>
+                        <td class="best">
+                            <span class="pill p-good">clean</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Found the reference the issue missed
+                            <em>legacy-packages/mendel-requirify</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good">found + fixed</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Subtotal <em>20 pts</em></th>
+                        <td class="best"><b>20</b></td>
+                    </tr>
+                    <tr class="group">
+                        <th scope="row">Dependency hygiene</th>
+                        <td colspan="1"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            node_modules actually pruned <em>8 pts</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good">real install</span>
+                            <b>8</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Lockfile pruned <em>lines removed</em>
+                        </th>
+                        <td><span class="pill p-mid">+134/−133 lines</span></td>
+                    </tr>
+                    <tr class="group">
+                        <th scope="row">Static checks</th>
+                        <td colspan="1"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Prettier &amp; ESLint clean
+                            <em>5 pts · re-run on the branch</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good"
+                                >clean, self-checked 14x</span
+                            >
+                            <b>5</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Handled the <code>node:</code> ESLint trap
+                            <em>v2.1 rows; retired on the v3 base</em>
+                        </th>
+                        <td>
+                            <span class="pill p-mid">retired (v3 base)</span>
+                        </td>
+                    </tr>
+                    <tr class="group">
+                        <th scope="row">Commit craft</th>
+                        <td colspan="1"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Right type — all <code>chore</code></th>
+                        <td class="best">
+                            <span class="pill p-good">all chore</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">One commit per package</th>
+                        <td class="best">
+                            <span class="pill p-good">no multi-package</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Root devDeps placement
+                            <em>rimraf + tmp, unused at root</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good">removed</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Commit hooks <em>failures / bypasses</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good"
+                                >no --no-verify, no add -A</span
+                            >
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">TASKS.md kept out of git</th>
+                        <td class="best">
+                            <span class="pill p-good">clean</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Subtotal <em>12 pts</em></th>
+                        <td class="best"><b>12</b></td>
+                    </tr>
+                    <tr class="group">
+                        <th scope="row">Working method</th>
+                        <td colspan="1"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Right the first time
+                            <em>8 pts · self-inflicted repairs</em>
+                        </th>
+                        <td>
+                            <span class="pill p-mid">1 model nudge</span>
+                            <b>6</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Narrow tests per package <em>as instructed</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good"
+                                >per-package tap runs</span
+                            >
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Full suite cadence
+                            <em>10 pts · as the prompt mandates</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good"
+                                >37 runs / 17 commits</span
+                            >
+                            <b>10</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Task list built progressively
+                            <em
+                                >4 pts · high level first, sub-items on
+                                arrival</em
+                            >
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good"
+                                >per-file, ticked per commit</span
+                            >
+                            <b>4</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Truncated noisy commands
+                            <em>3 pts · piped to tail/head</em>
+                        </th>
+                        <td class="best">
+                            <span class="pill p-good">75 %</span> <b>3</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Followed house conventions
+                            <em>5 pts · minimal diff, matched neighbours</em>
+                        </th>
+                        <td>
+                            <span class="pill p-mid"
+                                >extensive but disciplined</span
+                            >
+                            <b>4</b>
+                        </td>
+                    </tr>
+                    <tr class="group">
+                        <th scope="row">Context economy</th>
+                        <td colspan="1"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Tokens burned
+                            <em>all requests, compaction included</em>
+                        </th>
+                        <td><span class="pill p-mid">68.1 M</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            Compactions <em>context rebuilds mid-run</em>
+                        </th>
+                        <td class="best"><span class="pill p-good">1</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Headroom left in the window</th>
+                        <td><span class="pill p-bad">3 % left</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Tool calls to finish</th>
+                        <td><span class="pill p-mid">378</span></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row">Total</th>
+                        <td class="best">97</td>
+                    </tr>
+                </tfoot>
+            </table>
+            <h3 class="lede">Prompt v2.1</h3>
             <table class="matrix">
                 <thead>
                     <tr>
@@ -1752,6 +2091,46 @@
                         </td>
                         <td class="num" data-v="99.7">99.7 %</td>
                         <td class="num" data-v="-1">Claude plan</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="model">
+                            deepseek-v4-flash-0731
+                        </th>
+                        <td class="num" data-v="2.1">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(Makora)</em
+                            >
+                            $2.10
+                        </td>
+                        <td class="num" data-v="2.47">
+                            <em
+                                style="
+                                    display: inline;
+                                    color: var(--ink-faint);
+                                    font-size: 11px;
+                                    font-style: normal;
+                                "
+                                >(metered)</em
+                            >
+                            $2.47
+                        </td>
+                        <td class="num" data-v="1980">1980 k</td>
+                        <td class="num" data-v="1358">1358 k</td>
+                        <td class="num" data-v="64.8">64.8 M</td>
+                        <td class="num" data-v="2.47">$2.47</td>
+                        <td class="num" data-v="0.14">0.14</td>
+                        <td class="num" data-v="0.28">0.28</td>
+                        <td class="num" data-v="0.028">
+                            <span class="pill p-mid">0.028</span>
+                        </td>
+                        <td class="num" data-v="95.1">95.1 %</td>
+                        <td class="num" data-v="-1">Fireworks</td>
                     </tr>
                 </tbody>
             </table>
