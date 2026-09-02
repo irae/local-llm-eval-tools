@@ -641,7 +641,7 @@
       "local": true,
       "serving": "mlx_lm.server",
       "branch": "mlx-community-Qwen3.8-27B-4bit-low-guided-v3-issue-13",
-      "base_commit": "guided-v3-base",
+      "base_commit": "6458616",
       "partial": true,
       "round": 2,
       "prompt_version": "v3.0",
