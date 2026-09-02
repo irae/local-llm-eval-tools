@@ -129,7 +129,10 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
       loaded context than pi's `contextWindow` (llama.cpp `/props`, LM Studio
       `/api/v0/models`; mlx_lm.server cannot be probed — recorded as unverified).
       `--allow-bad-config` starts anyway and marks the run non-comparable.
-    - Outputs per run: `<slug>-meta.json` (nudges with causes, compactions,
+    - Outputs per run, where `<slug>` is
+      `<model>-<thinking>-<bench>` (the bench suffix keeps a model's
+      blind and guided raw files apart, and lets two workers run in
+      parallel without collisions): `<slug>-meta.json` (nudges with causes, compactions,
       retries, warnings, session stats), `<slug>-session.jsonl` (raw pi session,
       home path redacted), `<slug>-session.html` (export), `<slug>-events.jsonl`
       and `<slug>-runner.log` (not versioned).

@@ -8,4 +8,4 @@ runs/*
 !runs/*-session.html
 !runs/*-plan-before.json
 !runs/*-plan-after.json
-.pi-agent/
+.pi-agent*/

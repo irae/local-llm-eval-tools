@@ -15,7 +15,9 @@
 # CLAUDE.md sits in a parent directory of the worktree.
 # pi runs go through run-pi-rpc.mjs (stateful RPC session with the fixed nudge
 # policy, see PLAN.md); never through `pi -p`.
-# Blocks until the worker finishes. Spawn several in parallel from separate shells.
+# Blocks until the worker finishes. Spawn several in parallel from separate
+# shells; parallel runs are safe only for metered providers (a plan-provider
+# run needs a quiet account — see PLAN.md "Plan accounting").
 set -euo pipefail
 
 model="${1:?usage: run-worker.sh <model> [harness] [bench]}"
@@ -50,6 +52,7 @@ RUNS="$BENCH_DIR/runs"
 slug="$(echo "$model" | tr '/:' '--')"
 [ -n "$thinking" ] && slug="${slug}-${thinking}"
 branch="${slug}${suffix}"
+fslug="${slug}-${bench}"
 wt="$REPO/../${wtprefix}${slug}"
 mkdir -p "$RUNS"
 
@@ -72,7 +75,7 @@ done
 
 rm -rf "$wt"
 git -C "$REPO" worktree add -b "$branch" "$wt" "$BASE_COMMIT"
-(cd "$wt" && pnpm install > "$RUNS/$slug-install.log" 2>&1)
+(cd "$wt" && pnpm install > "$RUNS/$fslug-install.log" 2>&1)
 echo "$slug: worktree ready at $wt, starting $harness" >&2
 
 # Plan accounting: probe the subscription windows before and after (see PLAN.md).
@@ -81,7 +84,7 @@ case "$harness:$model" in
     pi:xai/*) plan_provider=xai ;;
     *) plan_provider=none ;;
 esac
-if ! node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$slug-plan-before.json" > /dev/null; then
+if ! node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$fslug-plan-before.json" > /dev/null; then
     echo "abort: plan probe failed for $plan_provider — no baseline, the run would not be accountable" >&2
     exit 1
 fi
@@ -89,7 +92,7 @@ fi
 # Pinned config dir, rebuilt per run: only credentials, model config, and the
 # frozen global instructions get in. Never versioned (see .gitignore).
 build_pi_agent_dir() {
-    local d="$BENCH_DIR/.pi-agent"
+    local d="$BENCH_DIR/.pi-agent-$fslug"
     rm -rf "$d" && mkdir -p "$d"
     for f in models.json auth.json models-store.json; do
         [ -e "$HOME/.pi/agent/$f" ] && cp "$HOME/.pi/agent/$f" "$d/"
@@ -110,8 +113,8 @@ case "$harness" in
         agentdir="$(build_pi_agent_dir)"
         PI_CODING_AGENT_DIR="$agentdir" \
         node "$BENCH_DIR/run-pi-rpc.mjs" --model "$model" --prompt "$PROMPT" \
-            --out "$RUNS/$slug" --cwd "$wt" --thinking "$thinking" \
-            2> "$RUNS/$slug-runner.log"
+            --out "$RUNS/$fslug" --cwd "$wt" --thinking "$thinking" \
+            2> "$RUNS/$fslug-runner.log"
         ;;
     *)
         echo "abort: unknown harness $harness" >&2
@@ -119,9 +122,10 @@ case "$harness" in
         ;;
 esac
 end=$(date -u +%FT%TZ)
-node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$slug-plan-after.json" > /dev/null \
+node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$fslug-plan-after.json" > /dev/null \
     || echo "warning: plan probe after the run failed; record the plan share by hand" >&2
 pkill -f "$wt" 2>/dev/null || true
+rm -rf "$BENCH_DIR/.pi-agent-$fslug"
 printf '{"model":"%s","harness":"%s","bench":"%s","thinking":"%s","plan_provider":"%s","branch":"%s","base_commit":"%s","start":"%s","end":"%s","pinned_env":"agents-global v1.0"}\n' \
-    "$model" "$harness" "$bench" "$thinking" "$plan_provider" "$branch" "$(git -C "$REPO" rev-parse --short "$BASE_COMMIT")" "$start" "$end" > "$RUNS/$slug-worker.json"
+    "$model" "$harness" "$bench" "$thinking" "$plan_provider" "$branch" "$(git -C "$REPO" rev-parse --short "$BASE_COMMIT")" "$start" "$end" > "$RUNS/$fslug-worker.json"
 echo "$slug: done" >&2
