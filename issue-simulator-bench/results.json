@@ -2756,7 +2756,7 @@
         "cache_read": 1644664,
         "peak_context": 50199,
         "window_pct": 77,
-        "compactions": 1,
+        "compactions": 0,
         "assistant_msgs": 79,
         "tool_calls": 76,
         "tool_errors": 22,
