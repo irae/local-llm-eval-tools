@@ -1323,6 +1323,108 @@
         "<td><span class=\"pill p-mid\">285</span></td>"
       ],
       "notes": "Scored on Fable 2026-09-03. Lint credit: score.mjs counts 0 self-runs because it looks for prettier --check/eslint ., but the model ran pnpm test (which runs the repo's static script: prettier + eslint) after its last commit, so self-run credit is given. The install loop mid-run (tap link broke after pnpm remove) is environmental, not a code repair. The chalk port uses plain util.styleText with no forced level, correct for v3.0."
+    },
+    {
+      "model": "google/gemma-4-12b",
+      "model_id": "google/gemma-4-12b",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "lmstudio",
+      "local": true,
+      "serving": "lm-studio",
+      "branch": "google-gemma-4-12b-high-guided-v3-issue-13",
+      "base_commit": "86935f4",
+      "partial": true,
+      "prompt_version": "v3.0",
+      "thinking": "high",
+      "end_reason": "model_budget_exhausted",
+      "libraries_done": 0,
+      "score_total": 30,
+      "scores": {
+        "bugs": 25,
+        "completion": 0,
+        "node_modules": 0,
+        "lint": 0,
+        "commit_craft": 0,
+        "first_time": 2,
+        "test_discipline": 0,
+        "conventions": 0,
+        "task_list": 1,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "Zero delivered work: branch tip is the base commit, no file changed, all 8 libraries untouched (28 stale requires, 18 stale package.json entries, root rimraf and tmp still declared). The model spent 18 min on orientation only (issue fetch, flat TASKS.md write, one grep pair per library), then its first edit call failed schema validation (the same TASKS.md sub-item edit was emitted twice in one call, the second copy without oldText). From that point every turn (1 spontaneous, 3 nudged) hit the 16384-token output cap with stop_reason length; the capped output is a newline flood in the thinking channel, plus a stray <|channel|> token in the first one. The last turn produced about 2.4K chars of real planning for uuid before the same flood took over. No source file was ever opened or edited."
+        },
+        {
+          "severity": "minor",
+          "summary": "Tool-argument emission glitches before the collapse: one write call with empty arguments {} that terminated the stream (harness retry at 03:52), two bash calls with command: 3 (an integer, not a string; the model wrote 'I keep typing 3 for some reason' and recovered at once), and one bash quoting error re-sent verbatim. These are wrong tokens in the tool-argument channel that the model recovered from; distinct from the newline flood in the reasoning channel that it never recovered from."
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 46,
+        "tokens_total": 305999,
+        "tokens_in": 237420,
+        "tokens_out": 68579,
+        "cache_read": 0,
+        "peak_context": 29970,
+        "window_pct": 19,
+        "compactions": 0,
+        "assistant_msgs": 25,
+        "tool_calls": 21,
+        "tool_errors": 5,
+        "commits": 0,
+        "failed_commits": 0,
+        "truncation_pct": null,
+        "nudges_tooling": 0,
+        "nudges_model": 3
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      },
+      "matrix_cells": [
+        "<td><span class=\"pill p-mid\">none, no code landed</span> <b>25</b></td>",
+        "<td><span class=\"pill p-mid\">not run</span></td>",
+        "<td><span class=\"pill p-mid\">not touched</span></td>",
+        "<td><span class=\"pill p-bad\">0 / 8</span></td>",
+        "<td><span class=\"pill p-bad\">28 sites left</span></td>",
+        "<td><span class=\"pill p-bad\">18 left</span></td>",
+        "<td><span class=\"pill p-mid\">grepped it, never acted</span></td>",
+        "<td><b>0</b></td>",
+        "<td><span class=\"pill p-bad\">never ran pnpm</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">0 lines</span></td>",
+        "<td><span class=\"pill p-bad\">no diff to check, never ran</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">n/a (v3 base)</span></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-mid\">untouched</span></td>",
+        "<td>n/a, no commits</td>",
+        "<td><span class=\"pill p-good\">kept out, nothing committed</span></td>",
+        "<td><b>0</b></td>",
+        "<td><span class=\"pill p-bad\">0 repairs, 3 nudges (-6)</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">none run</span></td>",
+        "<td><span class=\"pill p-bad\">never run</span> <b>0</b></td>",
+        "<td><span class=\"pill p-bad\">flat list, failed sub-item edit, no ticks</span> <b>1</b></td>",
+        "<td><span class=\"pill p-mid\">no noisy commands, greps filtered</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">no diff</span> <b>0</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">306 K</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">81 %</span></td>",
+        "<td><span class=\"pill p-bad\">21, then output collapse</span></td>"
+      ],
+      "notes": "Scored on Fable 2026-09-03; independent of the blind sibling row. model_budget_exhausted pattern: 21 tool calls of orientation in the first 18 min (gh issue view, TASKS.md write with the 8 libraries and no sub-items, one grep pair per library with --exclude-dir=node_modules), then an edit call that failed validation (duplicate edit entry, second without oldText), then 4 consecutive turns (1 spontaneous, 3 nudged) that each hit the 16384-token cap with stop_reason length. Output of those turns is a newline flood in the thinking channel; the last turn holds about 2.4K chars of real uuid planning before the flood resumes. Nudge text never changed the outcome. Bugs remaining is a vacuous 25: branch is identical to the base, so trap A, prettier, and eslint pass by absence of work; lint and conventions score 0 for the same reason. Criterion 6: 8 minus 2 per model nudge (3) = 2. Task list: the flat upfront list is the right v3 form, the per-package sub-item edit (v3 asks per file) failed and was never retried; never ticked; file stayed out of git. Truncation: evidence shows 0 noisy commands, so the share is null; partial credit for filtering every grep. Tool errors: 2 bash quoting errors (same command re-sent), 2 bash calls with command: 3, 1 edit validation; plus 1 write with empty args that terminated the stream (harness retry). Peak context 29970 of 158464. Difference from the blind sibling: the blind run collapsed after a failed exact-match edit on a real code file at about 23 min; this guided run collapsed earlier, at about 18 min, on a TASKS.md edit, before any code work. The command: 3 calls are a separate, milder glitch the model noticed and recovered from at once, distinct from the terminal newline-flood collapse."
     }
   ],
   "matrix_rows": [
