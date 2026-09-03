@@ -2084,7 +2084,7 @@
       "partial": true,
       "end_reason": "wall_clock",
       "libraries_done": 3,
-      "score_total": 55.0,
+      "score_total": 55,
       "scores": {
         "bugs": 25,
         "completion": 8,
@@ -2112,7 +2112,7 @@
         }
       ],
       "telemetry": {
-        "wall_clock_min": 300.0,
+        "wall_clock_min": 300,
         "tokens_total": 3555358,
         "tokens_in": 2008582,
         "tokens_out": 34534,
@@ -2190,7 +2190,7 @@
       "partial": false,
       "end_reason": "complete",
       "libraries_done": 8,
-      "score_total": 92.0,
+      "score_total": 92,
       "scores": {
         "bugs": 19,
         "completion": 20,
@@ -2597,6 +2597,108 @@
         "<td class=\"best\"><span class=\"pill p-good\">90 % free (99.6k / 1M)</span></td>",
         "<td class=\"best\"><span class=\"pill p-good\">141</span></td>"
       ]
+    },
+    {
+      "model": "google/gemma-4-12b",
+      "model_id": "google/gemma-4-12b",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "lmstudio",
+      "local": true,
+      "serving": "lm-studio",
+      "branch": "google-gemma-4-12b-high-issue-13",
+      "base_commit": "2652ed6",
+      "thinking": "high",
+      "prompt_version": "v1.1",
+      "partial": true,
+      "end_reason": "model_budget_exhausted",
+      "libraries_done": 0,
+      "score_total": 30.5,
+      "scores": {
+        "bugs": 25,
+        "completion": 0,
+        "node_modules": 0,
+        "lint": 0,
+        "commit_craft": 0,
+        "first_time": 2,
+        "test_discipline": 0,
+        "conventions": 0,
+        "task_list": 1,
+        "truncation": 2.5
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "Zero delivered work: no commit, no file changed, all 8 libraries untouched (28 stale requires, 18 stale package.json entries, root rimraf and tmp still declared). After the first edit call failed on an exact-text mismatch (uuid in examples/planout-example/package.json, ~23 min in), every later turn was a degenerate stream of newline characters with a stray <|channel|> token in the thinking channel until the 16384-token output cap; all 3 model nudges reproduced the same collapse."
+        },
+        {
+          "severity": "minor",
+          "summary": "Two edit tool calls were emitted with empty arguments ({}) and the stream terminated (meta retries at 03:03 and 03:08), costing ~10 min before the first real edit attempt; attribution between the model and the LM Studio tool-call path is unclear."
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 49.5,
+        "tokens_total": 217702,
+        "tokens_in": 150102,
+        "tokens_out": 67600,
+        "cache_read": 0,
+        "peak_context": 27987,
+        "window_pct": 18,
+        "compactions": 0,
+        "assistant_msgs": 19,
+        "tool_calls": 15,
+        "tool_errors": 4,
+        "commits": 0,
+        "failed_commits": 0,
+        "truncation_pct": 100,
+        "nudges_tooling": 0,
+        "nudges_model": 3
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      },
+      "matrix_cells": [
+        "<td><span class=\"pill p-mid\">none, no code landed</span> <b>25</b></td>",
+        "<td><span class=\"pill p-mid\">not run</span></td>",
+        "<td><span class=\"pill p-mid\">not touched</span></td>",
+        "<td><span class=\"pill p-bad\">0 / 8</span></td>",
+        "<td><span class=\"pill p-bad\">28 sites left</span></td>",
+        "<td><span class=\"pill p-bad\">18 left</span></td>",
+        "<td><span class=\"pill p-bad\">missed</span></td>",
+        "<td><b>0</b></td>",
+        "<td><span class=\"pill p-bad\">never ran pnpm</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">0 lines</span></td>",
+        "<td><span class=\"pill p-bad\">no diff to check, never ran</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-bad\">no commits</span></td>",
+        "<td><span class=\"pill p-bad\">no commits</span></td>",
+        "<td><span class=\"pill p-mid\">untouched</span></td>",
+        "<td>0 hook fails</td>",
+        "<td><span class=\"pill p-mid\">kept out, nothing committed</span></td>",
+        "<td><b>0</b></td>",
+        "<td><span class=\"pill p-bad\">0 repairs, 3 nudges (-6)</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">none run</span></td>",
+        "<td><span class=\"pill p-bad\">never run</span> <b>0</b></td>",
+        "<td><span class=\"pill p-bad\">full tree upfront, no ticks</span> <b>1</b></td>",
+        "<td><span class=\"pill p-good\">1 / 1 piped, thin sample</span> <b>2.5</b></td>",
+        "<td><span class=\"pill p-bad\">no diff</span> <b>0</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">218 K</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">82 %</span></td>",
+        "<td><span class=\"pill p-bad\">15, then output collapse</span></td>"
+      ],
+      "notes": "Scored on Fable 2026-09-03. model_budget_exhausted pattern: 15 tool calls of orientation (issue fetch, TASKS.md write, grep/ls/cat) in the first 23 min, then one failed exact-match edit, then 4 consecutive turns (3 nudged, 1 unsent) that each hit the 16384-token output cap with stop_reason length. The capped output is not reasoning: it is ~16K tokens of newline characters plus a stray <|channel|> token in the thinking channel. The nudge text never changed the behaviour. Bugs remaining is a vacuous 25: the branch is identical to the base, so trap A, chalk, prettier, and eslint pass by absence of work. Lint and conventions score 0 for the same reason. Criterion 6: 8 base minus 2 per model nudge (3 nudges) = 2. TASKS.md was written upfront with the full library and package tree and never ticked; the file stayed out of git."
     }
   ],
   "matrix_rows": [
