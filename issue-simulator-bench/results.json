@@ -2345,6 +2345,115 @@
         "rate_tone": "mid",
         "provider_label": "Anthropic"
       }
+    },
+    {
+      "model": "qwen3.6-35b-a3b",
+      "model_id": "qwen3.6-35b-a3b",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "llama",
+      "local": true,
+      "serving": "llama-server",
+      "branch": "qwen3.6-35b-a3b-high-issue-13",
+      "base_commit": "2652ed6",
+      "thinking": "high",
+      "prompt_version": "v1.1",
+      "partial": false,
+      "end_reason": "complete",
+      "libraries_done": 8,
+      "score_total": 61,
+      "scores": {
+        "bugs": 16,
+        "completion": 17,
+        "node_modules": 0,
+        "lint": 3,
+        "commit_craft": 2,
+        "first_time": 6,
+        "test_discipline": 8,
+        "conventions": 3,
+        "task_list": 4,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "packages/mendel-development/apply-extra-options.js does `var { glob } = require('fs')` then calls `glob(i).then(...)` \u2014 fs.glob is callback-based, not promise-based, so this throws TypeError at runtime (trap A, worse than the usual naive fs.promises.glob().then() miss)"
+        },
+        {
+          "severity": "minor",
+          "summary": "briefly reintroduced the trap-C exit-hook pattern (an fs.rmSync cleanup right after the manifest debug path is printed) in commit cc903dc, then self-caught and removed it two commits later in ac6d323 \u2014 recovered within the run, not left in the final tree"
+        },
+        {
+          "severity": "minor",
+          "summary": "root package.json still declares tmp as a devDependency; all 8 libraries' call sites were fixed but the root manifest was not fully pruned"
+        },
+        {
+          "severity": "minor",
+          "summary": "all 13 commits are typed fix, not chore; one commit used `git add -A`; 3 of 13 commits touch more than one package"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 79.2,
+        "tokens_total": 7932672,
+        "tokens_in": 91673,
+        "tokens_out": 39857,
+        "cache_read": 7801142,
+        "peak_context": 94298,
+        "window_pct": null,
+        "compactions": 0,
+        "assistant_msgs": 155,
+        "tool_calls": 203,
+        "tool_errors": null,
+        "commits": 13,
+        "failed_commits": 0,
+        "truncation_pct": 60,
+        "nudges_tooling": 0,
+        "nudges_model": 0
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      },
+      "matrix_cells": [
+        "<td><span class=\"pill p-bad\">TypeError: fs.glob is callback-based, not a Promise (trap A)</span> <b>16</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean (674/674, 1 skip)</span></td>",
+        "<td><span class=\"pill p-bad\">THREW: TypeError</span></td>",
+        "<td><span class=\"pill p-mid\">8 / 8, root tmp leftover</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td><span class=\"pill p-mid\">tmp left at root</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
+        "<td><b>17</b></td>",
+        "<td><span class=\"pill p-bad\">no install ran</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">0 lines</span></td>",
+        "<td><span class=\"pill p-mid\">clean \u00b7 hooks only, not self-run</span> <b>3</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">n/a</span></td>",
+        "<td><span class=\"pill p-bad\">all fix, not chore</span></td>",
+        "<td><span class=\"pill p-mid\">10 / 13 single-package</span></td>",
+        "<td><span class=\"pill p-bad\">tmp not removed</span></td>",
+        "<td><span class=\"pill p-bad\">1 git add -A</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td><b>2</b></td>",
+        "<td><span class=\"pill p-mid\">1 self-repair, caught trap C near-miss itself</span> <b>6</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">per-package runs</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">4 full-suite runs / 13 commits</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">per-file, ticked per commit incl. grep-discovered sites</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">60 %</span> <b>2</b></td>",
+        "<td><span class=\"pill p-mid\">wrong fs API choice (callback glob)</span> <b>3</b></td>",
+        "<td><span class=\"pill p-bad\">7.9 M</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0</span></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-mid\">203</span></td>"
+      ]
     }
   ],
   "matrix_rows": [
