@@ -2699,6 +2699,116 @@
         "<td><span class=\"pill p-bad\">15, then output collapse</span></td>"
       ],
       "notes": "Scored on Fable 2026-09-03. model_budget_exhausted pattern: 15 tool calls of orientation (issue fetch, TASKS.md write, grep/ls/cat) in the first 23 min, then one failed exact-match edit, then 4 consecutive turns (3 nudged, 1 unsent) that each hit the 16384-token output cap with stop_reason length. The capped output is not reasoning: it is ~16K tokens of newline characters plus a stray <|channel|> token in the thinking channel. The nudge text never changed the behaviour. Bugs remaining is a vacuous 25: the branch is identical to the base, so trap A, chalk, prettier, and eslint pass by absence of work. Lint and conventions score 0 for the same reason. Criterion 6: 8 base minus 2 per model nudge (3 nudges) = 2. TASKS.md was written upfront with the full library and package tree and never ticked; the file stayed out of git."
+    },
+    {
+      "model": "bonsai-prism",
+      "model_id": "bonsai-prism",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "llama",
+      "local": true,
+      "serving": "llama-server",
+      "branch": "bonsai-prism-high-issue-13",
+      "base_commit": "2652ed6",
+      "thinking": "high",
+      "prompt_version": "v1.1",
+      "partial": false,
+      "end_reason": "complete",
+      "libraries_done": 1,
+      "score_total": 60.5,
+      "scores": {
+        "bugs": 25,
+        "completion": 2.5,
+        "node_modules": 0,
+        "lint": 3,
+        "commit_craft": 10,
+        "first_time": 6,
+        "test_discipline": 6,
+        "conventions": 4,
+        "task_list": 1,
+        "truncation": 3
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "Self-inflicted scope collapse: the model never read issue 13. It typed the repo as irai/mendel (typo), got 404 on 8 gh/curl attempts, then inferred the task from git log --grep=chalk and treated chalk removal as the whole job. TASKS.md was chalk-only from its first write (never listed the 8 libraries), so the all-checked file never triggered a model nudge. 7 of 8 libraries untouched: 22 stale requires, 17 stale package.json entries, root rimraf and tmp still declared, trap B unreached. Final message claims 'All tasks are complete.'"
+        },
+        {
+          "severity": "medium",
+          "summary": "Commit aa1c4f6 shipped styleText('bgWhite black', ...), an invalid format that throws ERR_INVALID_ARG_VALUE in CliPrinter.print(); the package tap run after the commit caught it and 6ecf7fc repaired it with nested calls (self-inflicted repair, first commit made with no test run before it)."
+        },
+        {
+          "severity": "minor",
+          "summary": "Repair commit typed fix(...) instead of the house chore; 4 failed commit attempts before the 2 that landed (3 bash quoting errors on multi-line messages, 1 cd into a wrong worktree path), no hook rejects; the closing summary counts 3 commits where the branch has 2."
+        },
+        {
+          "severity": "minor",
+          "summary": "Left an explanatory comment in cli-printer.js where chalk.level = ... was removed, against the repo's minimize-comments rule; eslint was run only before any edit, prettier never, so lint cleanliness is hook-only."
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 43.1,
+        "tokens_total": 1718019,
+        "tokens_in": 56911,
+        "tokens_out": 16444,
+        "cache_read": 1644664,
+        "peak_context": 50199,
+        "window_pct": 77,
+        "compactions": 1,
+        "assistant_msgs": 79,
+        "tool_calls": 76,
+        "tool_errors": 22,
+        "commits": 2,
+        "failed_commits": 4,
+        "truncation_pct": 69,
+        "nudges_tooling": 0,
+        "nudges_model": 0
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      },
+      "matrix_cells": [
+        "<td><span class=\"pill p-mid\">chalk port correct; 7 libs never touched (vacuous)</span> <b>25</b></td>",
+        "<td><span class=\"pill p-good\">mendel-pipeline 15/15; root unit once at end</span></td>",
+        "<td><span class=\"pill p-mid\">SYNC OK, file never touched</span></td>",
+        "<td><span class=\"pill p-bad\">1 / 8</span></td>",
+        "<td><span class=\"pill p-bad\">22 left</span></td>",
+        "<td><span class=\"pill p-bad\">17 left</span></td>",
+        "<td><span class=\"pill p-bad\">not reached</span></td>",
+        "<td><b>2.5</b></td>",
+        "<td><span class=\"pill p-bad\">never ran pnpm install, lockfile unchanged</span> <b>0</b></td>",
+        "<td><span class=\"pill p-bad\">0 lines</span></td>",
+        "<td><span class=\"pill p-mid\">clean via hooks; eslint only before edits, no prettier</span> <b>3</b></td>",
+        "<td><span class=\"pill p-mid\">never hit it (no node: prefixes added)</span></td>",
+        "<td><span class=\"pill p-mid\">1/2 chore, repair typed fix</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">2/2 single-package</span></td>",
+        "<td><span class=\"pill p-bad\">not reached</span></td>",
+        "<td><span class=\"pill p-good\">0 hook fails; 4 shell/path fails</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">kept out</span></td>",
+        "<td><b>10</b></td>",
+        "<td><span class=\"pill p-mid\">1 self-repair (bgWhite black crash), 0 nudges</span> <b>6</b></td>",
+        "<td><span class=\"pill p-good\">package tap 6x</span></td>",
+        "<td><span class=\"pill p-mid\">commit 1 untested; 1 full suite / 2 commits</span> <b>6</b></td>",
+        "<td><span class=\"pill p-bad\">chalk-only list, 8 libs never listed</span> <b>1</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">69 %</span> <b>3</b></td>",
+        "<td><span class=\"pill p-mid\">tight diff, one drive-by comment</span> <b>4</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">1.7 M</span></td>",
+        "<td><span class=\"pill p-mid\">1</span></td>",
+        "<td><span class=\"pill p-mid\">23 % free (50.2k / 64k)</span></td>",
+        "<td><span class=\"pill p-mid\">76, 22 errors</span></td>"
+      ],
+      "notes": "Scored on Fable 2026-09-03. partial=false: end_reason is complete with 0 nudges and no budget end, so the rubric's partial definition does not apply; the incompleteness is a model decision, recorded as the critical defect. The blind prompt does not name the libraries; it says to fetch issue 13. The model misspelled the repo (irai/mendel), every fetch returned 404 (lines 5-29), and it never found the issue. It then ran git log --grep=chalk, read prior chalk commits, and scoped the whole task to chalk. TASKS.md is git-excluded (info/exclude), has no history, and all 3 writes were chalk-only; the all-checked file satisfied the harness end condition, so no model nudge fired. The compaction at 07:04 preserved the already-narrowed scope. Bugs is 25 on the landed work only, as for the gemma 0/8 and Bonsai-2bit 3/8 rows: the styleText port follows the v1.1 contract (no forced level, no enableColor; probe: no ANSI piped, ANSI on a TTY), tap 15/15, prettier and eslint clean on re-run. Root rimraf/tmp and trap B are scored as missing work under completion (2.5 = 1 of 8 at the 3/8=7.5 scale), not as criterion-1 bugs, to stay consistent with the not-reached precedent. The 60.5 total sits above rows with real bugs and more libraries; that is the known vacuous-pass artefact, and the 1/8 count is the number that matters. Two 'Connection error.' retries at 06:44-06:45 cost no work. No human message after the prompt."
     }
   ],
   "matrix_rows": [
