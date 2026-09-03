@@ -161,6 +161,10 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
 
 ## How to score a run
 
+Scoring is LLM judgment. The scorer runs in a subagent on the Fable
+model (`claude-fable-5`), never on a smaller model. Mechanical steps
+(`score.mjs`, table regeneration) may run anywhere.
+
 1. Run the full verification battery in `RUBRIC.md` against the branch. Never trust
    the model's own claims. `node benchmark/score.mjs <branch> --session <log>
 --meta <meta> [--worktree <dir>]` computes the mechanical parts (static
@@ -249,6 +253,12 @@ share of the plan's rate-limit windows they consume, measured, not estimated:
     - **xai**: no usage endpoint accepts the OAuth token. Grok plan rows keep
       `w5h`/`wweek` as `not exposed` and are priced from their metered/OpenRouter
       token figure only.
+
+xai exposes no usage endpoint for the OAuth token, so the SuperGrok
+plan share cannot be measured per run. Estimate it from the plan rate:
+weekly allocation ($40/mo × 75 % SuperGrok share ÷ 30 × 7 ≈ $6.92)
+divided by the observed runs-per-week capacity (≈ 50), ≈ $0.14 per
+run. Record that estimate as `paid_usd` with basis `plan share`.
 
 ## Harness attribution
 

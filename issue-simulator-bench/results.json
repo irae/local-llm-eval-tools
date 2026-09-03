@@ -397,10 +397,10 @@
       ],
       "cost": {
         "or_route": "Fireworks",
-        "or_usd": "2.13",
+        "or_usd": "2.08",
         "paid_basis": "metered",
-        "paid_usd": "2.13",
-        "vendor_usd": "2.13",
+        "paid_usd": "2.08",
+        "vendor_usd": "2.08",
         "rate_in": "3",
         "rate_out": "15",
         "rate_cr": "0.3",
@@ -1903,7 +1903,7 @@
         "nudges_model": 0
       },
       "cost_usd": 7.29,
-      "cost_basis": "metered",
+      "cost_basis": "plan",
       "matrix_cells": [
         "<td><span class=\"pill p-mid\">exit-hook regression</span> <b>19</b></td>",
         "<td class=\"best\"><span class=\"pill p-good\">260/260 (resolver 75/75 standalone)</span></td>",
@@ -1937,8 +1937,8 @@
       "cost": {
         "or_route": "xAI only",
         "or_usd": "7.29",
-        "paid_basis": "metered",
-        "paid_usd": "7.29",
+        "paid_basis": "plan share",
+        "paid_usd": "0.14",
         "vendor_usd": "7.29",
         "rate_in": "2.00",
         "rate_out": "6.00",
@@ -1949,7 +1949,19 @@
       "thinking": "high",
       "prompt_version": "v1.1",
       "end_reason": "complete",
-      "libraries_done": 8
+      "libraries_done": 8,
+      "plan": {
+        "marginal": "≈ $0.14",
+        "marginal_tone": "mid",
+        "plan": "X Premium+ $40/mo",
+        "alloc": "$30",
+        "alloc_note": "SuperGrok rate",
+        "week": "$6.92",
+        "w5h": "not exposed",
+        "wweek": "≈ 2 %",
+        "rpw": "≈ 50"
+      },
+      "config_note": "Cost basis corrected 2026-09-02: run-worker.sh matched plan providers only on provider-prefixed model ids, so this bare-name run recorded plan_provider=none and the metered token price as paid. The run authenticated with the SuperGrok OAuth login (no xai API key or credits exist); plan share mirrors the v1.0 rpw-based estimate."
     },
     {
       "model": "gpt-5.6-luna",
