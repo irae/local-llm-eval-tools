@@ -220,6 +220,16 @@ Checked on the Mac on 2026-09-01 without a model server running:
   memory, so if the resume fails the runner must append a synthetic error tool
   result before the nudge.
 
+## Credit exhaustion
+
+A billing, quota, or out-of-credits error is a PAUSE, never a
+teardown. Keep the run session, server, and worktree alive. Record
+the time and the last session event, escalate to the owner, and wait
+for the top-up. Resume the SAME session when credits return; the
+tokens already spent stay valid. Only the owner can declare a
+credit-interrupted run lost, and a redo after such a loss is the
+run's one retry, not a fresh failure.
+
 ## Plan accounting
 
 Runs on a flat subscription (Claude Max for Claude Code, ChatGPT Plus/Pro for pi's
