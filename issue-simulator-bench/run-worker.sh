@@ -80,8 +80,8 @@ echo "$slug: worktree ready at $wt, starting $harness" >&2
 
 # Plan accounting: probe the subscription windows before and after (see PLAN.md).
 case "$harness:$model" in
-    pi:openai-codex/*) plan_provider=openai-codex ;;
-    pi:xai/*) plan_provider=xai ;;
+    pi:openai-codex/*|pi:gpt-5.6-*) plan_provider=openai-codex ;;
+    pi:xai/*|pi:grok-*) plan_provider=xai ;;
     *) plan_provider=none ;;
 esac
 if ! node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$fslug-plan-before.json" > /dev/null; then

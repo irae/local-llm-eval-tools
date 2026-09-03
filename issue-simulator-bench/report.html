@@ -664,6 +664,10 @@
             transition: none !important;
         }
     }
+#costmode-radios { max-width: none; }
+#plan-note { color: var(--ink-faint); font-size: 12px; }
+a.mlink { color: inherit; text-decoration: none; }
+a.mlink:hover { text-decoration: underline; }
 </style>
 
 <div class="page">
@@ -685,9 +689,9 @@
         </div>
     </header>
 
-    <p class="lede" id="report-nav"><a id="crosslink" data-base="report-guided.html" href="report-guided.html">Guided report →</a>
-        &nbsp;·&nbsp; <label>Prompt versions:
-        <select id="pairsel" data-own="blind"><option value="v1.1_v3.0" selected>latest / latest</option><option value="v1.1_v2.1">blind v1.1 / guided v2.1</option><option value="v1.0_v3.0">blind v1.0 / guided v3.0</option><option value="v1.0_v2.1">blind v1.0 / guided v2.1</option></select></label></p>
+    <p class="lede" id="report-nav"><a href="report-guided.html">Guided report →</a>
+        &nbsp;·&nbsp; <label>Prompt version:
+        <select id="versel"><option value="v1.1" selected>latest</option><option value="v1.0">v1.0</option></select></label></p>
 
     <section>
         <h2>Scoreboard</h2>
@@ -701,6 +705,7 @@
         <label><input type="radio" name="costmode" value="none" checked> quality only</label>
         &nbsp; <label><input type="radio" name="costmode" value="or"> weighted by OpenRouter cost</label>
         &nbsp; <label><input type="radio" name="costmode" value="plan"> weighted by plan estimate</label>
+        &nbsp; <label><input type="radio" name="costmode" value="local"> local models only</label>
       </p>
       <p class="lede" id="plan-note" style="display:none">Cost-weighted score = 100 × quality score ÷ (1 + cost × (1 + criticals) + $0.01 per minute of wall clock), normalised to the leader. A critical bug is priced as one extra run of the same model — fixing after a cheap run is cheap, fixing after an expensive run is expensive. Plan mode uses the marginal plan estimate where one exists; runs without a plan keep their OpenRouter figure; local runs cost $0 plus time.</p>
       <div class="vsec" data-v="v1.1"><h3 class="lede">Prompt v1.1</h3>
@@ -720,9 +725,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr data-base="93.5" data-or="2.13" data-plan="2.13" data-crit="0" data-wall="20">
+          <tr data-base="93.5" data-or="2.13" data-plan="2.13" data-crit="0" data-wall="20" data-local="">
             <td class="rank rank-1">1</td>
-            <th scope="row" class="model best">Kimi K3<small>pi · fireworks · think high</small></th>
+            <th scope="row" class="model best"><a class="mlink" href="https://huggingface.co/moonshotai/Kimi-K3" target="_blank">Kimi K3</a><small>pi · fireworks · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">94</span><div class="bar gold"><span style="width:94%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Fireworks</small></td>
             <td class="num">$2.13<small style="display:block;color:var(--ink-faint)">paid $2.13</small></td>
             <td class="num best">20 min</td>
@@ -732,11 +737,11 @@
             <td class="num">17</td>
             <td class="num"><span class="pill p-mid">2</span></td>
           </tr>
-          <tr data-base="92.5" data-or="7.29" data-plan="7.29" data-crit="0" data-wall="21">
+          <tr data-base="92.5" data-or="7.29" data-plan="0.14" data-crit="0" data-wall="21" data-local="">
             <td class="rank">2</td>
-            <th scope="row" class="model">Grok 4.6<small>pi · xai · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/grok-4-6" target="_blank">Grok 4.6</a><small>pi · xai · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">93</span><div class="bar"><span style="width:93%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">xAI</small></td>
-            <td class="num">$7.29<small style="display:block;color:var(--ink-faint)">paid $7.29</small></td>
+            <td class="num">$7.29<small style="display:block;color:var(--ink-faint)">paid ≈$0.14</small></td>
             <td class="num">21 min</td>
             <td class="num">13.2 M</td>
             <td class="num">258 k</td>
@@ -744,11 +749,11 @@
             <td class="num">18</td>
             <td class="num"><span class="pill p-mid">2</span></td>
           </tr>
-          <tr data-base="92" data-or="12.11" data-plan="12.11" data-crit="0" data-wall="24">
+          <tr data-base="92" data-or="12.11" data-plan="0.45" data-crit="0" data-wall="24" data-local="">
             <td class="rank">3</td>
-            <th scope="row" class="model">GPT-5.6 Sol<small>pi · openai-codex · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-sol" target="_blank">GPT-5.6 Sol</a><small>pi · openai-codex · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">92</span><div class="bar"><span style="width:92%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">OpenAI (Codex)</small></td>
-            <td class="num">$12.11<small style="display:block;color:var(--ink-faint)">paid $12.11</small></td>
+            <td class="num">$12.11<small style="display:block;color:var(--ink-faint)">paid ≈$0.45</small></td>
             <td class="num">24 min</td>
             <td class="num">19.6 M</td>
             <td class="num">250 k</td>
@@ -756,9 +761,9 @@
             <td class="num">18</td>
             <td class="num"><span class="pill p-mid">2</span></td>
           </tr>
-          <tr data-base="84.5" data-or="0.55" data-plan="0.55" data-crit="0" data-wall="101">
+          <tr data-base="84.5" data-or="0.55" data-plan="0.55" data-crit="0" data-wall="101" data-local="">
             <td class="rank">4</td>
-            <th scope="row" class="model">DeepSeek V4 Flash (0731)<small>pi · fireworks · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731" target="_blank">DeepSeek V4 Flash (0731)</a><small>pi · fireworks · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">85</span><div class="bar"><span style="width:85%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Fireworks</small></td>
             <td class="num">$0.55<small style="display:block;color:var(--ink-faint)">paid $0.79</small></td>
             <td class="num">101 min</td>
@@ -768,11 +773,11 @@
             <td class="num">14</td>
             <td class="num"><span class="pill p-mid">1</span></td>
           </tr>
-          <tr data-base="83.5" data-or="0.56" data-plan="0.56" data-crit="0" data-wall="27">
+          <tr data-base="83.5" data-or="0.56" data-plan="0.03" data-crit="0" data-wall="27" data-local="">
             <td class="rank">5</td>
-            <th scope="row" class="model">GPT-5.6 Luna<small>pi · openai-codex · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-luna" target="_blank">GPT-5.6 Luna</a><small>pi · openai-codex · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">84</span><div class="bar"><span style="width:84%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">OpenAI (Codex)</small></td>
-            <td class="num">$0.56<small style="display:block;color:var(--ink-faint)">paid $0.47</small></td>
+            <td class="num">$0.56<small style="display:block;color:var(--ink-faint)">paid ≈$0.03</small></td>
             <td class="num">27 min</td>
             <td class="num">16.8 M</td>
             <td class="num">99 k</td>
@@ -780,9 +785,9 @@
             <td class="num">21</td>
             <td class="num"><span class="pill p-mid">2</span></td>
           </tr>
-          <tr data-base="79" data-or="2.1" data-plan="2.1" data-crit="1" data-wall="93">
+          <tr data-base="79" data-or="2.1" data-plan="2.1" data-crit="1" data-wall="93" data-local="">
             <td class="rank">6</td>
-            <th scope="row" class="model">DeepSeek V4 Pro (0813)<small>pi · fireworks · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813" target="_blank">DeepSeek V4 Pro (0813)</a><small>pi · fireworks · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">79</span><div class="bar"><span style="width:79%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Fireworks</small></td>
             <td class="num">$2.10<small style="display:block;color:var(--ink-faint)">paid $3.33</small></td>
             <td class="num">93 min</td>
@@ -792,9 +797,9 @@
             <td class="num">18</td>
             <td class="num"><span class="pill p-bad">5</span></td>
           </tr>
-          <tr data-base="75" data-or="0.19" data-plan="0.19" data-crit="1" data-wall="21">
+          <tr data-base="75" data-or="0.19" data-plan="0.19" data-crit="1" data-wall="21" data-local="">
             <td class="rank">7</td>
-            <th scope="row" class="model">GLM 5.3 Flash<small>pi · fireworks · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/zai-org/GLM-5.3-Flash" target="_blank">GLM 5.3 Flash</a><small>pi · fireworks · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">75</span><div class="bar"><span style="width:75%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Fireworks</small></td>
             <td class="num">$0.19<small style="display:block;color:var(--ink-faint)">paid $0.19</small></td>
             <td class="num">21 min</td>
@@ -804,9 +809,9 @@
             <td class="num">9</td>
             <td class="num"><span class="pill p-mid">3</span></td>
           </tr>
-          <tr data-base="67.5" data-or="0" data-plan="0" data-crit="0" data-wall="85">
+          <tr data-base="67.5" data-or="0" data-plan="0" data-crit="0" data-wall="85" data-local="1">
             <td class="rank">8</td>
-            <th scope="row" class="model">Qwen3.8 27B (MLX 4-bit, low reasoning)<small>pi · mlx · local · think low</small><small style="display:block;color:var(--ink-faint)">partial · 1 of 8 · harness budget</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/mlx-community/Qwen3.8-27B-4bit" target="_blank">Qwen3.8 27B (MLX 4-bit, low reasoning)</a><small>pi · mlx · local · think low</small><small style="display:block;color:var(--ink-faint)">partial · 1 of 8 · harness budget</small></th>
             <td><div class="scorewrap"><span class="scoreval">68</span><div class="bar"><span style="width:68%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">85 min</td>
@@ -816,9 +821,9 @@
             <td class="num">1</td>
             <td class="num"><span class="pill p-mid">1</span></td>
           </tr>
-          <tr data-base="61" data-or="0" data-plan="0" data-crit="1" data-wall="79">
+          <tr data-base="61" data-or="0" data-plan="0" data-crit="1" data-wall="79" data-local="1">
             <td class="rank">9</td>
-            <th scope="row" class="model">Qwen3.6 35B-A3B<small>pi · llama · local · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/Qwen/Qwen3.6-35B-A3B" target="_blank">Qwen3.6 35B-A3B</a><small>pi · llama · local · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">61</span><div class="bar"><span style="width:61%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">79 min</td>
@@ -828,9 +833,9 @@
             <td class="num">13</td>
             <td class="num"><span class="pill p-bad">6</span></td>
           </tr>
-          <tr data-base="55" data-or="0" data-plan="0" data-crit="0" data-wall="300">
+          <tr data-base="55" data-or="0" data-plan="0" data-crit="0" data-wall="300" data-local="1">
             <td class="rank">10</td>
-            <th scope="row" class="model">Ternary Bonsai 27B (MLX 2-bit, low reasoning)<small>pi · mlx · local · think low</small><small style="display:block;color:var(--ink-faint)">partial · 3 of 8 · time budget</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/prism-ml/Ternary-Bonsai-27B-mlx-2bit" target="_blank">Ternary Bonsai 27B (MLX 2-bit)</a><small>pi · mlx · local · think high</small><small style="display:block;color:var(--ink-faint)">partial · 3 of 8 · time budget</small></th>
             <td><div class="scorewrap"><span class="scoreval">55</span><div class="bar"><span style="width:55%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">300 min</td>
@@ -840,9 +845,9 @@
             <td class="num">4</td>
             <td class="num"><span class="pill p-mid">4</span></td>
           </tr>
-          <tr data-base="43.5" data-or="2.99" data-plan="2.99" data-crit="2" data-wall="31">
+          <tr data-base="43.5" data-or="2.99" data-plan="2.99" data-crit="2" data-wall="31" data-local="">
             <td class="rank">11</td>
-            <th scope="row" class="model">Claude Sonnet 4.5<small>pi · anthropic · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-sonnet" target="_blank">Claude Sonnet 4.5</a><small>pi · anthropic · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">44</span><div class="bar"><span style="width:44%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Anthropic</small></td>
             <td class="num">$2.99<small style="display:block;color:var(--ink-faint)">paid $2.99</small></td>
             <td class="num">31 min</td>
@@ -852,9 +857,9 @@
             <td class="num">13</td>
             <td class="num"><span class="pill p-bad">8</span></td>
           </tr>
-          <tr data-base="34" data-or="1.05" data-plan="1.05" data-crit="2" data-wall="10">
+          <tr data-base="34" data-or="1.05" data-plan="1.05" data-crit="2" data-wall="10" data-local="">
             <td class="rank">12</td>
-            <th scope="row" class="model">Claude Haiku 4.5<small>pi · anthropic · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-haiku" target="_blank">Claude Haiku 4.5</a><small>pi · anthropic · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">34</span><div class="bar"><span style="width:34%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Anthropic</small></td>
             <td class="num">$1.05<small style="display:block;color:var(--ink-faint)">paid $1.05</small></td>
             <td class="num best">10 min</td>
@@ -883,9 +888,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr data-base="89.5" data-or="7.76" data-plan="0.14" data-crit="0" data-wall="20">
+          <tr data-base="89.5" data-or="7.76" data-plan="0.14" data-crit="0" data-wall="20" data-local="">
             <td class="rank rank-1">1</td>
-            <th scope="row" class="model best">Grok 4.6<small>pi · xai · think high</small></th>
+            <th scope="row" class="model best"><a class="mlink" href="https://artificialanalysis.ai/models/grok-4-6" target="_blank">Grok 4.6</a><small>pi · xai · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">90</span><div class="bar gold"><span style="width:90%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">xAI</small></td>
             <td class="num">$7.76<small style="display:block;color:var(--ink-faint)">paid ≈$0.14</small></td>
             <td class="num best">20 min</td>
@@ -895,9 +900,9 @@
             <td class="num">17</td>
             <td class="num best"><span class="pill p-good">0</span></td>
           </tr>
-          <tr data-base="88" data-or="8.45" data-plan="0.56" data-crit="0" data-wall="44">
+          <tr data-base="88" data-or="8.45" data-plan="0.56" data-crit="0" data-wall="44" data-local="">
             <td class="rank">2</td>
-            <th scope="row" class="model">Claude Opus 5<small>claude-code · anthropic</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-opus-5" target="_blank">Claude Opus 5</a><small>claude-code · anthropic</small></th>
             <td><div class="scorewrap"><span class="scoreval">88</span><div class="bar"><span style="width:88%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Claude plan</small></td>
             <td class="num">$8.45<small style="display:block;color:var(--ink-faint)">paid ≈$0.56</small></td>
             <td class="num">44 min</td>
@@ -907,9 +912,9 @@
             <td class="num">18</td>
             <td class="num best"><span class="pill p-good">0</span></td>
           </tr>
-          <tr data-base="84.5" data-or="0.42" data-plan="0.05" data-crit="0" data-wall="39">
+          <tr data-base="84.5" data-or="0.42" data-plan="0.05" data-crit="0" data-wall="39" data-local="">
             <td class="rank">3</td>
-            <th scope="row" class="model">GPT-5.6 Luna<small>pi · openai-codex · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-luna" target="_blank">GPT-5.6 Luna</a><small>pi · openai-codex · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">85</span><div class="bar"><span style="width:85%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">ChatGPT plan</small></td>
             <td class="num">$0.42<small style="display:block;color:var(--ink-faint)">paid ≈$0.05</small></td>
             <td class="num">39 min</td>
@@ -919,9 +924,9 @@
             <td class="num">20</td>
             <td class="num"><span class="pill p-mid">2</span></td>
           </tr>
-          <tr data-base="83" data-or="10.17" data-plan="0.67" data-crit="0" data-wall="55">
+          <tr data-base="83" data-or="10.17" data-plan="0.67" data-crit="0" data-wall="55" data-local="">
             <td class="rank">4</td>
-            <th scope="row" class="model">Claude Sonnet 5<small>claude-code · anthropic</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-sonnet-5" target="_blank">Claude Sonnet 5</a><small>claude-code · anthropic</small></th>
             <td><div class="scorewrap"><span class="scoreval">83</span><div class="bar"><span style="width:83%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Claude plan</small></td>
             <td class="num">$10.17<small style="display:block;color:var(--ink-faint)">paid ≈$0.67</small></td>
             <td class="num">55 min</td>
@@ -931,11 +936,11 @@
             <td class="num">18</td>
             <td class="num"><span class="pill p-mid">2</span></td>
           </tr>
-          <tr data-base="80.5" data-or="2.13" data-plan="2.13" data-crit="0" data-wall="22">
+          <tr data-base="80.5" data-or="2.08" data-plan="2.08" data-crit="0" data-wall="22" data-local="">
             <td class="rank">5</td>
-            <th scope="row" class="model">Kimi K3<small>pi · fireworks · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/moonshotai/Kimi-K3" target="_blank">Kimi K3</a><small>pi · fireworks · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">81</span><div class="bar"><span style="width:81%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Fireworks</small></td>
-            <td class="num">$2.13<small style="display:block;color:var(--ink-faint)">paid $2.13</small></td>
+            <td class="num">$2.08<small style="display:block;color:var(--ink-faint)">paid $2.08</small></td>
             <td class="num">22 min</td>
             <td class="num">4.8 M</td>
             <td class="num">63 k</td>
@@ -943,9 +948,9 @@
             <td class="num">17</td>
             <td class="num"><span class="pill p-mid">2</span></td>
           </tr>
-          <tr data-base="80" data-or="0" data-plan="0" data-crit="0" data-wall="254">
+          <tr data-base="80" data-or="0" data-plan="0" data-crit="0" data-wall="254" data-local="1">
             <td class="rank">6</td>
-            <th scope="row" class="model">Qwen3.8 27B (MLX 4-bit)<small>pi · mlx · local · think medium</small><small style="display:block;color:var(--ink-faint)">partial · 3 of 8 · time budget</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/mlx-community/Qwen3.8-27B-4bit" target="_blank">Qwen3.8 27B (MLX 4-bit)</a><small>pi · mlx · local · think medium</small><small style="display:block;color:var(--ink-faint)">partial · 3 of 8 · time budget</small></th>
             <td><div class="scorewrap"><span class="scoreval">80</span><div class="bar"><span style="width:80%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">254 min</td>
@@ -955,9 +960,9 @@
             <td class="num">6</td>
             <td class="num"><span class="pill p-mid">4</span></td>
           </tr>
-          <tr data-base="70.5" data-or="0.85" data-plan="0.85" data-crit="1" data-wall="29">
+          <tr data-base="70.5" data-or="0.85" data-plan="0.85" data-crit="1" data-wall="29" data-local="">
             <td class="rank">7</td>
-            <th scope="row" class="model">DeepSeek V4 Pro (0813)<small>pi · fireworks · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813" target="_blank">DeepSeek V4 Pro (0813)</a><small>pi · fireworks · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">71</span><div class="bar"><span style="width:71%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Fireworks</small></td>
             <td class="num">$0.85<small style="display:block;color:var(--ink-faint)">paid $1.70</small></td>
             <td class="num">29 min</td>
@@ -967,9 +972,9 @@
             <td class="num">18</td>
             <td class="num"><span class="pill p-bad">6</span></td>
           </tr>
-          <tr data-base="65.5" data-or="6.97" data-plan="0.51" data-crit="0" data-wall="28">
+          <tr data-base="65.5" data-or="6.97" data-plan="0.51" data-crit="0" data-wall="28" data-local="">
             <td class="rank">8</td>
-            <th scope="row" class="model">GPT-5.6 Sol<small>pi · openai-codex · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-sol" target="_blank">GPT-5.6 Sol</a><small>pi · openai-codex · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">66</span><div class="bar"><span style="width:66%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">ChatGPT plan</small></td>
             <td class="num">$6.97<small style="display:block;color:var(--ink-faint)">paid ≈$0.51</small></td>
             <td class="num">28 min</td>
@@ -979,9 +984,9 @@
             <td class="num">19</td>
             <td class="num"><span class="pill p-bad">5</span></td>
           </tr>
-          <tr data-base="58" data-or="0" data-plan="0" data-crit="1" data-wall="102">
+          <tr data-base="58" data-or="0" data-plan="0" data-crit="1" data-wall="102" data-local="1">
             <td class="rank">9</td>
-            <th scope="row" class="model">Ternary Bonsai 27B (MLX 2-bit)<small>pi · mlx · local · think high</small><small style="display:block;color:var(--ink-faint)">partial · 3 of 8 · harness crash</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/prism-ml/Ternary-Bonsai-27B-mlx-2bit" target="_blank">Ternary Bonsai 27B (MLX 2-bit)</a><small>pi · mlx · local · think high</small><small style="display:block;color:var(--ink-faint)">partial · 3 of 8 · harness crash</small></th>
             <td><div class="scorewrap"><span class="scoreval">58</span><div class="bar"><span style="width:58%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">102 min</td>
@@ -991,9 +996,9 @@
             <td class="num">3</td>
             <td class="num"><span class="pill p-bad">8</span></td>
           </tr>
-          <tr data-base="51.5" data-or="1.24" data-plan="0.08" data-crit="1" data-wall="20">
+          <tr data-base="51.5" data-or="1.24" data-plan="0.08" data-crit="1" data-wall="20" data-local="">
             <td class="rank">10</td>
-            <th scope="row" class="model">Claude Haiku 4.5<small>claude-code · anthropic</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-haiku" target="_blank">Claude Haiku 4.5</a><small>claude-code · anthropic</small></th>
             <td><div class="scorewrap"><span class="scoreval">52</span><div class="bar"><span style="width:52%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Claude plan</small></td>
             <td class="num">$1.24<small style="display:block;color:var(--ink-faint)">paid ≈$0.08</small></td>
             <td class="num best">20 min</td>
@@ -1003,9 +1008,9 @@
             <td class="num">9</td>
             <td class="num"><span class="pill p-bad">5</span></td>
           </tr>
-          <tr data-base="41.5" data-or="0" data-plan="0" data-crit="1" data-wall="132">
+          <tr data-base="41.5" data-or="0" data-plan="0" data-crit="1" data-wall="132" data-local="1">
             <td class="rank">11</td>
-            <th scope="row" class="model">Qwen3.6 35B-A3B<small>pi · llama · local · think xhigh</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/Qwen/Qwen3.6-35B-A3B" target="_blank">Qwen3.6 35B-A3B</a><small>pi · llama · local · think xhigh</small></th>
             <td><div class="scorewrap"><span class="scoreval">42</span><div class="bar"><span style="width:42%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">132 min</td>
@@ -1015,9 +1020,9 @@
             <td class="num">13</td>
             <td class="num"><span class="pill p-bad">5</span></td>
           </tr>
-          <tr data-base="38" data-or="0" data-plan="0" data-crit="1" data-wall="104">
+          <tr data-base="38" data-or="0" data-plan="0" data-crit="1" data-wall="104" data-local="1">
             <td class="rank">12</td>
-            <th scope="row" class="model">Gemma 4 26B-A4B<small>pi · llama · local · think high</small><small style="display:block;color:var(--ink-faint)">partial · stuck</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/google/gemma-4-26B-A4B" target="_blank">Gemma 4 26B-A4B</a><small>pi · llama · local · think high</small><small style="display:block;color:var(--ink-faint)">partial · stuck</small></th>
             <td><div class="scorewrap"><span class="scoreval">38</span><div class="bar"><span style="width:38%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">104 min</td>
@@ -1048,9 +1053,8 @@
             against what the model said it did. Weights in the left column; the
             best cell in each row is highlighted.
         </p>
-        <div class="scroller">
             <div class="vsec" data-v="v1.1"><h3 class="lede">Prompt v1.1</h3>
-      <table class="matrix">
+      <div class="scroller"><table class="matrix">
         <thead>
           <tr>
             <th>Criterion</th>
@@ -1063,7 +1067,7 @@
             <th>glm-flash</th>
             <th>qwen3.8-low (partial)</th>
             <th>qwen</th>
-            <th>bonsai-low (partial)</th>
+            <th>bonsai (partial)</th>
             <th>sonnet-4.5</th>
             <th>haiku-4.5</th>
           </tr>
@@ -1514,9 +1518,9 @@
             <td>34</td>
           </tr>
         </tfoot>
-      </table></div>
+      </table></div></div>
       <div class="vsec" data-v="v1.0"><h3 class="lede">Prompt v1.0</h3>
-      <table class="matrix">
+      <div class="scroller"><table class="matrix">
         <thead>
           <tr>
             <th>Criterion</th>
@@ -1980,7 +1984,7 @@
             <td>38</td>
           </tr>
         </tfoot>
-      </table></div>
+      </table></div></div>
             <p class="lede">
                 Fable re-scored every run from the pushed branches and the
                 versioned session logs (2026-08-31). Four runs received mid-run
@@ -2044,7 +2048,6 @@
                 absolute minutes, which favours fast serving stacks; each run's
                 measured output speed is in its meta file.
             </p>
-        </div>
     </section>
 
     <section>
@@ -2077,7 +2080,7 @@
         </thead>
         <tbody>
           <tr>
-            <th scope="row" class="model">Claude Sonnet 5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-sonnet-5" target="_blank">Claude Sonnet 5</a></th>
             <td class="num" data-v="10.17"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Anthropic)</em> $10.17</td>
             <td class="num" data-v="0.67"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan est.)</em> $0.67</td>
             <td class="num" data-v="0.6">0.6 k</td>
@@ -2091,7 +2094,7 @@
             <td class="num" data-v="-1">Claude plan</td>
           </tr>
           <tr>
-            <th scope="row" class="model">Claude Opus 5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-opus-5" target="_blank">Claude Opus 5</a></th>
             <td class="num" data-v="8.45"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Anthropic)</em> $8.45</td>
             <td class="num" data-v="0.56"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan est.)</em> $0.56</td>
             <td class="num" data-v="0.3">0.3 k</td>
@@ -2105,7 +2108,7 @@
             <td class="num" data-v="-1">Claude plan</td>
           </tr>
           <tr>
-            <th scope="row" class="model">Grok 4.6</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/grok-4-6" target="_blank">Grok 4.6</a></th>
             <td class="num" data-v="7.76"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(xAI only)</em> $7.76</td>
             <td class="num" data-v="0.14"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan share)</em> $0.14</td>
             <td class="num" data-v="266">266 k</td>
@@ -2119,9 +2122,9 @@
             <td class="num" data-v="-1">xAI</td>
           </tr>
           <tr>
-            <th scope="row" class="model">Grok 4.6</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/grok-4-6" target="_blank">Grok 4.6</a></th>
             <td class="num" data-v="7.29"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(xAI only)</em> $7.29</td>
-            <td class="num" data-v="7.29"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $7.29</td>
+            <td class="num" data-v="0.14"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan share)</em> $0.14</td>
             <td class="num" data-v="353">353 k</td>
             <td class="num" data-v="33">33 k</td>
             <td class="num" data-v="12.8">12.8 M</td>
@@ -2133,7 +2136,7 @@
             <td class="num" data-v="-1">xAI</td>
           </tr>
           <tr>
-            <th scope="row" class="model">GPT-5.6 Sol</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-sol" target="_blank">GPT-5.6 Sol</a></th>
             <td class="num" data-v="6.97"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Flex est.)</em> $6.97</td>
             <td class="num" data-v="0.51"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan share)</em> $0.51</td>
             <td class="num" data-v="434">434 k</td>
@@ -2147,7 +2150,7 @@
             <td class="num" data-v="-1">ChatGPT plan</td>
           </tr>
           <tr>
-            <th scope="row" class="model">Kimi K3</th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/moonshotai/Kimi-K3" target="_blank">Kimi K3</a></th>
             <td class="num" data-v="2.13"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Fireworks)</em> $2.13</td>
             <td class="num" data-v="2.13"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $2.13</td>
             <td class="num" data-v="133">133 k</td>
@@ -2161,21 +2164,7 @@
             <td class="num" data-v="-1">Fireworks</td>
           </tr>
           <tr>
-            <th scope="row" class="model">Kimi K3</th>
-            <td class="num" data-v="2.13"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Fireworks)</em> $2.13</td>
-            <td class="num" data-v="2.13"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $2.13</td>
-            <td class="num" data-v="63">63 k</td>
-            <td class="num" data-v="32">32 k</td>
-            <td class="num" data-v="4.7">4.7 M</td>
-            <td class="num" data-v="2.13">$2.13</td>
-            <td class="num" data-v="3">3</td>
-            <td class="num" data-v="15">15</td>
-            <td class="num" data-v="0.3"><span class="pill p-mid">0.3</span></td>
-            <td class="num" data-v="98">98.0 %</td>
-            <td class="num" data-v="-1">Fireworks</td>
-          </tr>
-          <tr>
-            <th scope="row" class="model">DeepSeek V4 Pro (0813)</th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813" target="_blank">DeepSeek V4 Pro (0813)</a></th>
             <td class="num" data-v="4"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(DeepSeek V4 Pro)</em> $2.10</td>
             <td class="num" data-v="3.33"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $3.33</td>
             <td class="num" data-v="344">344 k</td>
@@ -2189,7 +2178,21 @@
             <td class="num" data-v="-1">Fireworks</td>
           </tr>
           <tr>
-            <th scope="row" class="model">Claude Haiku 4.5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/moonshotai/Kimi-K3" target="_blank">Kimi K3</a></th>
+            <td class="num" data-v="2.08"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Fireworks)</em> $2.08</td>
+            <td class="num" data-v="2.08"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $2.08</td>
+            <td class="num" data-v="63">63 k</td>
+            <td class="num" data-v="32">32 k</td>
+            <td class="num" data-v="4.7">4.7 M</td>
+            <td class="num" data-v="2.08">$2.08</td>
+            <td class="num" data-v="3">3</td>
+            <td class="num" data-v="15">15</td>
+            <td class="num" data-v="0.3"><span class="pill p-mid">0.3</span></td>
+            <td class="num" data-v="98">98.0 %</td>
+            <td class="num" data-v="-1">Fireworks</td>
+          </tr>
+          <tr>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-haiku" target="_blank">Claude Haiku 4.5</a></th>
             <td class="num" data-v="1.24"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Anthropic)</em> $1.24</td>
             <td class="num" data-v="0.08"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan est.)</em> $0.08</td>
             <td class="num" data-v="1">1 k</td>
@@ -2203,7 +2206,7 @@
             <td class="num" data-v="-1">Claude plan</td>
           </tr>
           <tr>
-            <th scope="row" class="model">DeepSeek V4 Pro (0813)</th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813" target="_blank">DeepSeek V4 Pro (0813)</a></th>
             <td class="num" data-v="0.85"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(DeepSeek)</em> $0.85</td>
             <td class="num" data-v="1.7"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $1.70</td>
             <td class="num" data-v="316">316 k</td>
@@ -2217,7 +2220,7 @@
             <td class="num" data-v="-1">Fireworks</td>
           </tr>
           <tr>
-            <th scope="row" class="model">DeepSeek V4 Flash (0731)</th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731" target="_blank">DeepSeek V4 Flash (0731)</a></th>
             <td class="num" data-v="0.55"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Makora)</em> $0.55</td>
             <td class="num" data-v="0.79"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $0.79</td>
             <td class="num" data-v="1131">1131 k</td>
@@ -2231,7 +2234,7 @@
             <td class="num" data-v="-1">Fireworks</td>
           </tr>
           <tr>
-            <th scope="row" class="model">GPT-5.6 Luna</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-luna" target="_blank">GPT-5.6 Luna</a></th>
             <td class="num" data-v="0.42"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Flex)</em> $0.42</td>
             <td class="num" data-v="0.05"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan share)</em> $0.05</td>
             <td class="num" data-v="487">487 k</td>
@@ -2245,7 +2248,7 @@
             <td class="num" data-v="-1">ChatGPT plan</td>
           </tr>
           <tr>
-            <th scope="row" class="model">GLM 5.3 Flash</th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/zai-org/GLM-5.3-Flash" target="_blank">GLM 5.3 Flash</a></th>
             <td class="num" data-v="0.19"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Fireworks)</em> $0.19</td>
             <td class="num" data-v="0.19"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $0.19</td>
             <td class="num" data-v="235">235 k</td>
@@ -2294,7 +2297,29 @@
         </thead>
         <tbody>
           <tr>
-            <th scope="row" class="model">Grok 4.6</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/grok-4-6" target="_blank">Grok 4.6</a></th>
+            <td class="num" data-v="0.14"><span class="pill p-mid">≈ $0.14</span></td>
+            <td class="num" data-v="7.29"><span class="pill p-bad">$7.29</span></td>
+            <td class="num" data-v="50">≈ 50</td>
+            <td class="num" data-v="40">X Premium+ $40/mo</td>
+            <td class="num" data-v="30"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">SuperGrok rate</em> $30</td>
+            <td class="num" data-v="6.92">$6.92</td>
+            <td class="num" data-v="-1"><span class="pill p-none">not exposed</span></td>
+            <td class="num" data-v="2">≈ 2 %</td>
+          </tr>
+          <tr>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-sol" target="_blank">GPT-5.6 Sol</a></th>
+            <td class="num" data-v="0.45"><span class="pill p-mid">≈ $0.45</span></td>
+            <td class="num" data-v="12.11"><span class="pill p-bad">$12.11</span></td>
+            <td class="num" data-v="9">≈ 9</td>
+            <td class="num" data-v="20">ChatGPT Plus $20/mo</td>
+            <td class="num" data-v="20"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">all of it</em> $20</td>
+            <td class="num" data-v="4.62">$4.62</td>
+            <td class="num" data-v="-1">not measured</td>
+            <td class="num" data-v="10">≈ 10 %</td>
+          </tr>
+          <tr>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/grok-4-6" target="_blank">Grok 4.6</a></th>
             <td class="num" data-v="0.14"><span class="pill p-mid">≈ $0.14</span></td>
             <td class="num" data-v="7.76"><span class="pill p-bad">$7.76</span></td>
             <td class="num" data-v="50">≈ 50</td>
@@ -2305,7 +2330,7 @@
             <td class="num" data-v="2">2 %</td>
           </tr>
           <tr>
-            <th scope="row" class="model">Claude Opus 5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-opus-5" target="_blank">Claude Opus 5</a></th>
             <td class="num" data-v="0.56"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(est)</em> <span class="pill p-bad">≈ $0.56</span></td>
             <td class="num" data-v="8.45"><span class="pill p-bad">$8.45</span></td>
             <td class="num" data-v="41">≈ 41</td>
@@ -2316,7 +2341,7 @@
             <td class="num" data-v="-1"><span class="pill p-none">not exposed</span></td>
           </tr>
           <tr>
-            <th scope="row" class="model">GPT-5.6 Luna</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-luna" target="_blank">GPT-5.6 Luna</a></th>
             <td class="num" data-v="0.05"><span class="pill p-good">≈ $0.05</span></td>
             <td class="num" data-v="0.84"><span class="pill p-good">$0.84</span></td>
             <td class="num" data-v="100">≈ 100</td>
@@ -2327,7 +2352,18 @@
             <td class="num" data-v="1">1 %</td>
           </tr>
           <tr>
-            <th scope="row" class="model">Claude Sonnet 5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-luna" target="_blank">GPT-5.6 Luna</a></th>
+            <td class="num" data-v="0.03"><span class="pill p-good">≈ $0.03</span></td>
+            <td class="num" data-v="0.47"><span class="pill p-good">$0.47</span></td>
+            <td class="num" data-v="100">≈ 100</td>
+            <td class="num" data-v="20">ChatGPT Plus $20/mo</td>
+            <td class="num" data-v="20"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">all of it</em> $20</td>
+            <td class="num" data-v="4.62">$4.62</td>
+            <td class="num" data-v="-1">not measured</td>
+            <td class="num" data-v="1">≈ 1 %</td>
+          </tr>
+          <tr>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-sonnet-5" target="_blank">Claude Sonnet 5</a></th>
             <td class="num" data-v="0.67"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(est)</em> <span class="pill p-bad">≈ $0.67</span></td>
             <td class="num" data-v="10.17"><span class="pill p-bad">$10.17</span></td>
             <td class="num" data-v="34">≈ 34</td>
@@ -2338,7 +2374,7 @@
             <td class="num" data-v="-1"><span class="pill p-none">not exposed</span></td>
           </tr>
           <tr>
-            <th scope="row" class="model">GPT-5.6 Sol</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-sol" target="_blank">GPT-5.6 Sol</a></th>
             <td class="num" data-v="0.51"><span class="pill p-bad">≈ $0.51</span></td>
             <td class="num" data-v="13.94"><span class="pill p-bad">$13.94</span></td>
             <td class="num" data-v="9">≈ 9</td>
@@ -2349,7 +2385,7 @@
             <td class="num" data-v="11">≈ 11 %</td>
           </tr>
           <tr>
-            <th scope="row" class="model">Claude Haiku 4.5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-haiku" target="_blank">Claude Haiku 4.5</a></th>
             <td class="num" data-v="0.08"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(est)</em> <span class="pill p-good">≈ $0.08</span></td>
             <td class="num" data-v="1.24"><span class="pill p-good">$1.24</span></td>
             <td class="num" data-v="280">≈ 280</td>
@@ -2796,9 +2832,13 @@
         ).value;
         for (const tbody of boards) {
             const rows = [...tbody.rows];
+            rows.forEach((r) => {
+                r.hidden = mode === 'local' && r.dataset.local !== '1';
+            });
             let vals = rows.map((r) => {
                 const d = r.dataset;
-                if (mode === 'none') return Number(d.base);
+                if (mode === 'none' || mode === 'local')
+                    return Number(d.base);
                 const raw = mode === 'or' ? d.or : d.plan;
                 if (raw === '') return NaN;
                 return (
@@ -2808,7 +2848,7 @@
                         0.01 * Number(d.wall))
                 );
             });
-            if (mode !== 'none') {
+            if (mode === 'or' || mode === 'plan') {
                 const mx = Math.max(...vals.filter(Number.isFinite));
                 vals = vals.map((v) => (100 * v) / mx);
             }
@@ -2825,8 +2865,10 @@
             const adj = (r) =>
                 r.dataset.adj === '' ? -Infinity : Number(r.dataset.adj);
             rows.sort((a, b) => adj(b) - adj(a));
-            rows.forEach((r, i) => {
+            let pos = 0;
+            rows.forEach((r) => {
                 tbody.appendChild(r);
+                const i = r.hidden ? -1 : pos++;
                 const rank = r.querySelector('.rank');
                 rank.textContent = i + 1;
                 rank.classList.toggle('rank-1', i === 0);
@@ -2841,24 +2883,18 @@
         .forEach((el) => el.addEventListener('change', apply));
 })();
 (() => {
-    const sel = document.getElementById('pairsel');
+    const sel = document.getElementById('versel');
     if (!sel) return;
-    const link = document.getElementById('crosslink');
-    const own = sel.dataset.own;
-    const fromHash = (location.hash.match(/pair=([^&]+)/) || [])[1];
+    const fromHash = (location.hash.match(/v=([^&]+)/) || [])[1];
     if (fromHash && [...sel.options].some((o) => o.value === fromHash))
         sel.value = fromHash;
     const apply = () => {
-        const [b, g] = sel.value.split('_');
-        const v = own === 'guided' ? g : b;
         document
             .querySelectorAll('.vsec')
-            .forEach((d) => (d.hidden = d.dataset.v !== v));
-        link.href = link.dataset.base + '#pair=' + sel.value;
-        if (location.hash) location.hash = 'pair=' + sel.value;
+            .forEach((d) => (d.hidden = d.dataset.v !== sel.value));
     };
     sel.addEventListener('change', () => {
-        location.hash = 'pair=' + sel.value;
+        location.hash = 'v=' + sel.value;
         apply();
     });
     apply();

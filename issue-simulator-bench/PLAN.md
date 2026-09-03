@@ -161,6 +161,10 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
 
 ## How to score a run
 
+Scoring is LLM judgment. The scorer runs in a subagent on the Fable
+model (`claude-fable-5`), never on a smaller model. Mechanical steps
+(`score.mjs`, table regeneration) may run anywhere.
+
 1. Run the full verification battery in `RUBRIC.md` against the branch. Never trust
    the model's own claims. `node benchmark/score.mjs <branch> --session <log>
 --meta <meta> [--worktree <dir>]` computes the mechanical parts (static
@@ -249,6 +253,27 @@ share of the plan's rate-limit windows they consume, measured, not estimated:
     - **xai**: no usage endpoint accepts the OAuth token. Grok plan rows keep
       `w5h`/`wweek` as `not exposed` and are priced from their metered/OpenRouter
       token figure only.
+
+xai exposes no usage endpoint for the OAuth token, so the SuperGrok
+plan share cannot be measured per run. Estimate it from the plan rate:
+weekly allocation ($40/mo × 75 % SuperGrok share ÷ 30 × 7 ≈ $6.92)
+divided by the observed runs-per-week capacity (≈ 50), ≈ $0.14 per
+run. Record that estimate as `paid_usd` with basis `plan share`.
+
+**Missing probes — the fallback estimator.** When a plan run has no
+usable probe delta (probe failed, xai, or the worker recorded
+`plan_provider=none`), do NOT record the metered token price as paid.
+Run `node estimate-plan-share.mjs <model>`: it anchors on the same
+model's most recent measured plan-share run and scales that share by
+vendor token cost, cross-checked against token and wall-clock
+scalings. If the three agree (≤ $0.05 spread), record the
+recommendation as `paid_usd` with basis `plan est.`, copy the anchor's
+plan block with `marginal`/`wweek` recomputed and `w5h: not measured`,
+and name the anchor in `config_note`. If they disagree, or no anchor
+exists, stop and ask the owner. A measured probe delta always beats
+this estimate. The anchors age: the owner plans to re-measure the
+ratio from their own usage; until then the newest measured run is the
+anchor.
 
 ## Harness attribution
 

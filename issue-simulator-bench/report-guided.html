@@ -664,6 +664,10 @@
             transition: none !important;
         }
     }
+#costmode-radios { max-width: none; }
+#plan-note { color: var(--ink-faint); font-size: 12px; }
+a.mlink { color: inherit; text-decoration: none; }
+a.mlink:hover { text-decoration: underline; }
 </style>
 
 <div class="page">
@@ -691,6 +695,10 @@
         </div>
     </header>
 
+    <p class="lede" id="report-nav"><a href="report.html">← Blind report</a>
+        &nbsp;·&nbsp; <label>Prompt version:
+        <select id="versel"><option value="v3.0" selected>latest</option><option value="v2.1">v2.1</option></select></label></p>
+
     <section>
         <h2>Scoreboard</h2>
         <p class="lede">
@@ -703,9 +711,10 @@
         <label><input type="radio" name="costmode" value="none" checked> quality only</label>
         &nbsp; <label><input type="radio" name="costmode" value="or"> weighted by OpenRouter cost</label>
         &nbsp; <label><input type="radio" name="costmode" value="plan"> weighted by plan estimate</label>
+        &nbsp; <label><input type="radio" name="costmode" value="local"> local models only</label>
       </p>
       <p class="lede" id="plan-note" style="display:none">Cost-weighted score = 100 × quality score ÷ (1 + cost × (1 + criticals) + $0.01 per minute of wall clock), normalised to the leader. A critical bug is priced as one extra run of the same model — fixing after a cheap run is cheap, fixing after an expensive run is expensive. Plan mode uses the marginal plan estimate where one exists; runs without a plan keep their OpenRouter figure; local runs cost $0 plus time.</p>
-      <h3 class="lede">Prompt v3.0</h3>
+      <div class="vsec" data-v="v3.0"><h3 class="lede">Prompt v3.0</h3>
       <div class="scroller"><table class="scoreboard">
         <thead>
           <tr>
@@ -722,9 +731,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr data-base="98" data-or="0.25" data-plan="0.25" data-crit="0" data-wall="24">
+          <tr data-base="98" data-or="0.25" data-plan="0.25" data-crit="0" data-wall="24" data-local="">
             <td class="rank rank-1">1</td>
-            <th scope="row" class="model best">glm-5p3-flash<small>pi · fireworks · think high</small></th>
+            <th scope="row" class="model best"><a class="mlink" href="https://huggingface.co/zai-org/GLM-5.3-Flash" target="_blank">GLM 5.3 Flash</a><small>pi · fireworks · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">98</span><div class="bar gold"><span style="width:98%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Fireworks</small></td>
             <td class="num">$0.25<small style="display:block;color:var(--ink-faint)">paid $0.25</small></td>
             <td class="num best">24 min</td>
@@ -734,9 +743,9 @@
             <td class="num">18</td>
             <td class="num best"><span class="pill p-good">0</span></td>
           </tr>
-          <tr data-base="97" data-or="2.10" data-plan="2.1" data-crit="0" data-wall="249">
+          <tr data-base="97" data-or="2.1" data-plan="2.1" data-crit="0" data-wall="249" data-local="">
             <td class="rank">2</td>
-            <th scope="row" class="model">deepseek-v4-flash-0731<small>pi · fireworks · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731" target="_blank">DeepSeek V4 Flash (0731)</a><small>pi · fireworks · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">97</span><div class="bar"><span style="width:97%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Fireworks</small></td>
             <td class="num">$2.10<small style="display:block;color:var(--ink-faint)">paid $2.47</small></td>
             <td class="num">249 min</td>
@@ -746,11 +755,11 @@
             <td class="num">16</td>
             <td class="num best"><span class="pill p-good">0</span></td>
           </tr>
-          <tr data-base="88.5" data-or="0.60" data-plan="0.6" data-crit="0" data-wall="40">
+          <tr data-base="88.5" data-or="0.6" data-plan="0.05" data-crit="0" data-wall="40" data-local="">
             <td class="rank">3</td>
-            <th scope="row" class="model">gpt-5.6-luna<small>pi · openai-codex · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-luna" target="_blank">GPT-5.6 Luna</a><small>pi · openai-codex · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">89</span><div class="bar"><span style="width:89%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">OpenAI Codex</small></td>
-            <td class="num">$0.60<small style="display:block;color:var(--ink-faint)">paid $0.70</small></td>
+            <td class="num">$0.60<small style="display:block;color:var(--ink-faint)">paid ≈$0.05</small></td>
             <td class="num">40 min</td>
             <td class="num">29.3 M</td>
             <td class="num">232 k</td>
@@ -758,11 +767,23 @@
             <td class="num">18</td>
             <td class="num"><span class="pill p-mid">2</span></td>
           </tr>
-          <tr data-base="76" data-or="estimate" data-plan="NaN" data-crit="1" data-wall="27">
+          <tr data-base="88" data-or="3.92" data-plan="3.92" data-crit="1" data-wall="32" data-local="">
             <td class="rank">4</td>
-            <th scope="row" class="model">Claude Haiku 4.5<small>pi · anthropic · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-sonnet" target="_blank">Claude Sonnet 4.5</a><small>pi · anthropic · think high</small></th>
+            <td><div class="scorewrap"><span class="scoreval">88</span><div class="bar"><span style="width:88%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Anthropic</small></td>
+            <td class="num">$3.92<small style="display:block;color:var(--ink-faint)">paid $3.92</small></td>
+            <td class="num">32 min</td>
+            <td class="num">10.3 M</td>
+            <td class="num">93 k</td>
+            <td class="num">9 %</td>
+            <td class="num">16</td>
+            <td class="num"><span class="pill p-mid">3</span></td>
+          </tr>
+          <tr data-base="76" data-or="" data-plan="" data-crit="1" data-wall="27" data-local="">
+            <td class="rank">5</td>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-haiku" target="_blank">Claude Haiku 4.5</a><small>pi · anthropic · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">76</span><div class="bar"><span style="width:76%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Anthropic</small></td>
-            <td class="num">$estimate<small style="display:block;color:var(--ink-faint)">paid $1.73</small></td>
+            <td class="num">—<small style="display:block;color:var(--ink-faint)">paid $1.73</small></td>
             <td class="num">27 min</td>
             <td class="num">13.9 M</td>
             <td class="num">108 k</td>
@@ -770,9 +791,9 @@
             <td class="num">19</td>
             <td class="num"><span class="pill p-mid">3</span></td>
           </tr>
-          <tr data-base="59" data-or="0" data-plan="0" data-crit="0" data-wall="300">
-            <td class="rank">5</td>
-            <th scope="row" class="model">prism-ml/Ternary-Bonsai-27B-mlx-2bit<small>pi · mlx · local · think high</small><small style="display:block;color:var(--ink-faint)">partial · 1 of 8 · time budget</small></th>
+          <tr data-base="59" data-or="0" data-plan="0" data-crit="0" data-wall="300" data-local="1">
+            <td class="rank">6</td>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/prism-ml/Ternary-Bonsai-27B-mlx-2bit" target="_blank">Ternary Bonsai 27B (MLX 2-bit)</a><small>pi · mlx · local · think high</small><small style="display:block;color:var(--ink-faint)">partial · 1 of 8 · time budget</small></th>
             <td><div class="scorewrap"><span class="scoreval">59</span><div class="bar"><span style="width:59%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">300 min</td>
@@ -782,9 +803,9 @@
             <td class="num">1</td>
             <td class="num"><span class="pill p-mid">1</span></td>
           </tr>
-          <tr data-base="34" data-or="0" data-plan="0" data-crit="1" data-wall="261">
-            <td class="rank">6</td>
-            <th scope="row" class="model">mlx-community/Qwen3.8-27B-4bit<small>pi · mlx · local · think low</small><small style="display:block;color:var(--ink-faint)">partial · 0 of 8 · harness budget</small></th>
+          <tr data-base="34" data-or="0" data-plan="0" data-crit="1" data-wall="261" data-local="1">
+            <td class="rank">7</td>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/mlx-community/Qwen3.8-27B-4bit" target="_blank">Qwen3.8 27B (MLX 4-bit)</a><small>pi · mlx · local · think low</small><small style="display:block;color:var(--ink-faint)">partial · 0 of 8 · harness budget</small></th>
             <td><div class="scorewrap"><span class="scoreval">34</span><div class="bar"><span style="width:34%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">261 min</td>
@@ -795,8 +816,8 @@
             <td class="num"><span class="pill p-mid">3</span></td>
           </tr>
         </tbody>
-      </table></div>
-      <h3 class="lede">Prompt v2.1</h3>
+      </table></div></div>
+      <div class="vsec" data-v="v2.1"><h3 class="lede">Prompt v2.1</h3>
       <div class="scroller"><table class="scoreboard">
         <thead>
           <tr>
@@ -813,9 +834,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr data-base="98.5" data-or="5.73" data-plan="0.38" data-crit="0" data-wall="31">
+          <tr data-base="98.5" data-or="5.73" data-plan="0.38" data-crit="0" data-wall="31" data-local="">
             <td class="rank rank-1">1</td>
-            <th scope="row" class="model best">claude-sonnet-5<small>claude-code · anthropic</small></th>
+            <th scope="row" class="model best"><a class="mlink" href="https://artificialanalysis.ai/models/claude-sonnet-5" target="_blank">Claude Sonnet 5</a><small>claude-code · anthropic</small></th>
             <td><div class="scorewrap"><span class="scoreval">99</span><div class="bar gold"><span style="width:99%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Claude plan</small></td>
             <td class="num">$5.73<small style="display:block;color:var(--ink-faint)">paid ≈$0.38</small></td>
             <td class="num">31 min</td>
@@ -825,9 +846,9 @@
             <td class="num">18</td>
             <td class="num best"><span class="pill p-good">0</span></td>
           </tr>
-          <tr data-base="84" data-or="0" data-plan="0" data-crit="0" data-wall="154">
+          <tr data-base="84" data-or="0" data-plan="0" data-crit="0" data-wall="154" data-local="1">
             <td class="rank">2</td>
-            <th scope="row" class="model">mlx-community/Qwen3.8-27B-4bit<small>pi · mlx · local · think low</small><small style="display:block;color:var(--ink-faint)">partial · 6 of 8 · harness crash</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/mlx-community/Qwen3.8-27B-4bit" target="_blank">Qwen3.8 27B (MLX 4-bit)</a><small>pi · mlx · local · think low</small><small style="display:block;color:var(--ink-faint)">partial · 6 of 8 · harness crash</small></th>
             <td><div class="scorewrap"><span class="scoreval">84</span><div class="bar"><span style="width:84%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">154 min</td>
@@ -837,9 +858,9 @@
             <td class="num">6</td>
             <td class="num"><span class="pill p-mid">4</span></td>
           </tr>
-          <tr data-base="69" data-or="0" data-plan="0" data-crit="0" data-wall="230">
+          <tr data-base="69" data-or="0" data-plan="0" data-crit="0" data-wall="230" data-local="1">
             <td class="rank">3</td>
-            <th scope="row" class="model">prism-ml/Ternary-Bonsai-27B-mlx-2bit<small>pi · mlx · local · think high</small><small style="display:block;color:var(--ink-faint)">partial · 3 of 8 · stuck</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/prism-ml/Ternary-Bonsai-27B-mlx-2bit" target="_blank">Ternary Bonsai 27B (MLX 2-bit)</a><small>pi · mlx · local · think high</small><small style="display:block;color:var(--ink-faint)">partial · 3 of 8 · stuck</small></th>
             <td><div class="scorewrap"><span class="scoreval">69</span><div class="bar"><span style="width:69%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">230 min</td>
@@ -849,9 +870,9 @@
             <td class="num">3</td>
             <td class="num"><span class="pill p-bad">5</span></td>
           </tr>
-          <tr data-base="68" data-or="2.56" data-plan="0.17" data-crit="1" data-wall="18">
+          <tr data-base="68" data-or="2.56" data-plan="0.17" data-crit="1" data-wall="18" data-local="">
             <td class="rank">4</td>
-            <th scope="row" class="model">claude-haiku-4.5<small>claude-code · anthropic</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-haiku" target="_blank">Claude Haiku 4.5</a><small>claude-code · anthropic</small></th>
             <td><div class="scorewrap"><span class="scoreval">68</span><div class="bar"><span style="width:68%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">Claude plan</small></td>
             <td class="num">$2.56<small style="display:block;color:var(--ink-faint)">paid ≈$0.17</small></td>
             <td class="num best">18 min</td>
@@ -861,9 +882,9 @@
             <td class="num">12</td>
             <td class="num"><span class="pill p-mid">4</span></td>
           </tr>
-          <tr data-base="65.5" data-or="0" data-plan="0" data-crit="1" data-wall="76">
+          <tr data-base="65.5" data-or="0" data-plan="0" data-crit="1" data-wall="76" data-local="1">
             <td class="rank">5</td>
-            <th scope="row" class="model">qwen3.6-35b-a3b<small>pi · llama · local · think high</small></th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/Qwen/Qwen3.6-35B-A3B" target="_blank">Qwen3.6 35B-A3B</a><small>pi · llama · local · think high</small></th>
             <td><div class="scorewrap"><span class="scoreval">66</span><div class="bar"><span style="width:66%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">local</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">paid ≈$0.00</small></td>
             <td class="num">76 min</td>
@@ -874,7 +895,7 @@
             <td class="num"><span class="pill p-bad">8</span></td>
           </tr>
         </tbody>
-      </table></div>
+      </table></div></div>
         <p class="lede">
             <b>Bugs</b> are weighted: critical 3, medium 2, minor 1. Every run
             uses the frozen <code>prompt-guided.txt</code>. Claude runs on a
@@ -889,27 +910,28 @@
             against what the model said it did. Weights in the left column; the
             best cell in each row is highlighted.
         </p>
-        <div class="scroller">
-            <h3 class="lede">Prompt v3.0</h3>
-      <table class="matrix">
+            <div class="vsec" data-v="v3.0"><h3 class="lede">Prompt v3.0</h3>
+      <div class="scroller"><table class="matrix">
         <thead>
           <tr>
             <th>Criterion</th>
-            <th>glm-5p3-flash</th>
-            <th>deepseek-v4-flash-0731</th>
+            <th>glm-flash</th>
+            <th>ds-flash</th>
             <th>luna</th>
-            <th>Claude Haiku 4.5</th>
-            <th>prism-ml/Ternary-Bonsai-27B-mlx-2bit (partial)</th>
-            <th>mlx-community/Qwen3.8-27B-4bit (partial)</th>
+            <th>sonnet-4.5</th>
+            <th>haiku-4.5</th>
+            <th>bonsai (partial)</th>
+            <th>qwen3.8 (partial)</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="group"><th scope="row">Correctness</th><td colspan="6"></td></tr>
+          <tr class="group"><th scope="row">Correctness</th><td colspan="7"></td></tr>
           <tr>
             <th scope="row">Bugs remaining <em>weighted, 25 pts</em></th>
             <td class="best"><span class="pill p-good">clean</span> <b>25</b></td>
             <td class="best"><span class="pill p-good">clean</span> <b>25</b></td>
             <td><span class="pill p-mid">exit-hook regression (trap C)</span> <b>19</b></td>
+            <td><span class="pill p-bad">trap A: TypeError</span> <b>16</b></td>
             <td><span class="pill p-bad">TypeError: glob(...).then is not a function (trap A)</span> <b>16</b></td>
             <td><span class="pill p-mid">no bugs in the 1 landed commit</span> <b>25</b></td>
             <td class="best"><span class="pill p-good">none</span> <b>25</b></td>
@@ -919,6 +941,7 @@
             <td class="best"><span class="pill p-good">680/680, 1 skip</span></td>
             <td class="best"><span class="pill p-good">710/709, lerna ok</span></td>
             <td class="best"><span class="pill p-good">clean &middot; pipeline flake confirmed clean standalone (260/260)</span></td>
+            <td class="best"><span class="pill p-good">674/674, 1 skip</span></td>
             <td class="best"><span class="pill p-good">clean (674/674, 1 skip)</span></td>
             <td><span class="pill p-mid">not run</span></td>
             <td><span class="pill p-mid">not run</span></td>
@@ -929,12 +952,14 @@
             <td class="best"><span class="pill p-good">SYNC OK</span></td>
             <td class="best"><span class="pill p-good">SYNC OK</span></td>
             <td><span class="pill p-bad">THREW: TypeError</span></td>
+            <td><span class="pill p-bad">THREW: TypeError</span></td>
             <td><span class="pill p-mid">not touched</span></td>
             <td><span class="pill p-mid">not touched</span></td>
           </tr>
-          <tr class="group"><th scope="row">Task completion</th><td colspan="6"></td></tr>
+          <tr class="group"><th scope="row">Task completion</th><td colspan="7"></td></tr>
           <tr>
             <th scope="row">All 8 libraries done <em>20 pts (shared)</em></th>
+            <td class="best"><span class="pill p-good">8 / 8</span></td>
             <td class="best"><span class="pill p-good">8 / 8</span></td>
             <td class="best"><span class="pill p-good">8 / 8</span></td>
             <td class="best"><span class="pill p-good">8 / 8</span></td>
@@ -947,6 +972,7 @@
             <td class="best"><span class="pill p-good">none left</span></td>
             <td class="best"><span class="pill p-good">none left</span></td>
             <td class="best"><span class="pill p-good">clean</span></td>
+            <td class="best"><span class="pill p-good">none left</span></td>
             <td class="best"><span class="pill p-good">clean</span></td>
             <td><span class="pill p-bad">27 files left</span></td>
             <td><span class="pill p-bad">28 files left</span></td>
@@ -956,12 +982,14 @@
             <td class="best"><span class="pill p-good">clean</span></td>
             <td class="best"><span class="pill p-good">clean</span></td>
             <td class="best"><span class="pill p-good">none left</span></td>
+            <td class="best"><span class="pill p-good">clean</span></td>
             <td class="best"><span class="pill p-good">none left</span></td>
             <td><span class="pill p-bad">16 files left</span></td>
             <td><span class="pill p-bad">18 files left</span></td>
           </tr>
           <tr>
             <th scope="row">Found the reference the issue missed <em>legacy-packages/mendel-requirify</em></th>
+            <td class="best"><span class="pill p-good">found + fixed</span></td>
             <td class="best"><span class="pill p-good">found + fixed</span></td>
             <td class="best"><span class="pill p-good">found + fixed</span></td>
             <td class="best"><span class="pill p-good">found + fixed</span></td>
@@ -975,15 +1003,17 @@
             <td class="best"><b>20</b></td>
             <td class="best"><b>20</b></td>
             <td class="best"><b>20</b></td>
+            <td class="best"><b>20</b></td>
             <td><b>2</b></td>
             <td><b>0</b></td>
           </tr>
-          <tr class="group"><th scope="row">Dependency hygiene</th><td colspan="6"></td></tr>
+          <tr class="group"><th scope="row">Dependency hygiene</th><td colspan="7"></td></tr>
           <tr>
             <th scope="row">node_modules actually pruned <em>8 pts</em></th>
             <td class="best"><span class="pill p-good">real install</span> <b>8</b></td>
             <td class="best"><span class="pill p-good">real install</span> <b>8</b></td>
             <td class="best"><span class="pill p-good">real install</span> <b>8</b></td>
+            <td class="best"><span class="pill p-good">real remove, verified</span> <b>8</b></td>
             <td><span class="pill p-mid">install unverified &middot; only root deps via `pnpm remove -w`</span> <b>4</b></td>
             <td><span class="pill p-bad">not pruned</span> <b>0</b></td>
             <td><span class="pill p-bad">not pruned</span> <b>0</b></td>
@@ -993,16 +1023,18 @@
             <td><span class="pill p-mid">+199/−106 lines</span></td>
             <td><span class="pill p-mid">+134/−133 lines</span></td>
             <td><span class="pill p-mid">+4/&minus;197 lines</span></td>
+            <td class="best"><span class="pill p-good">+123/−101 lines</span></td>
             <td class="best"><span class="pill p-good">+91/&minus;99 lines</span></td>
             <td><span class="pill p-mid">0 lines</span></td>
             <td><span class="pill p-mid">0 lines</span></td>
           </tr>
-          <tr class="group"><th scope="row">Static checks</th><td colspan="6"></td></tr>
+          <tr class="group"><th scope="row">Static checks</th><td colspan="7"></td></tr>
           <tr>
             <th scope="row">Prettier &amp; ESLint clean <em>5 pts · re-run on the branch</em></th>
             <td class="best"><span class="pill p-good">clean, self-checked 2x</span> <b>5</b></td>
             <td class="best"><span class="pill p-good">clean, self-checked 14x</span> <b>5</b></td>
             <td class="best"><span class="pill p-good">clean, self-checked 4x</span> <b>5</b></td>
+            <td class="best"><span class="pill p-good">clean, self-checked</span> <b>5</b></td>
             <td class="best"><span class="pill p-good">clean, self-checked after last commit</span> <b>5</b></td>
             <td><span class="pill p-bad">prettier warn (mendel-config/legacy)</span> <b>0</b></td>
             <td><span class="pill p-bad">never run</span> <b>0</b></td>
@@ -1013,12 +1045,14 @@
             <td><span class="pill p-mid">retired (v3 base)</span></td>
             <td><span class="pill p-mid">retired (v3 base)</span></td>
             <td><span class="pill p-mid">retired (v3 base)</span></td>
+            <td><span class="pill p-mid">retired (v3 base)</span></td>
             <td><span class="pill p-mid">n/a (v3 base)</span></td>
             <td><span class="pill p-mid">n/a (v3 base)</span></td>
           </tr>
-          <tr class="group"><th scope="row">Commit craft</th><td colspan="6"></td></tr>
+          <tr class="group"><th scope="row">Commit craft</th><td colspan="7"></td></tr>
           <tr>
             <th scope="row">Right type — all <code>chore</code></th>
+            <td class="best"><span class="pill p-good">all chore</span></td>
             <td class="best"><span class="pill p-good">all chore</span></td>
             <td class="best"><span class="pill p-good">all chore</span></td>
             <td class="best"><span class="pill p-good">all chore</span></td>
@@ -1031,12 +1065,14 @@
             <td class="best"><span class="pill p-good">no multi-package</span></td>
             <td class="best"><span class="pill p-good">no multi-package</span></td>
             <td><span class="pill p-mid">1 multi-package commit</span></td>
+            <td class="best"><span class="pill p-good">no multi-package</span></td>
             <td><span class="pill p-mid">1 multi-package commit</span></td>
             <td class="best"><span class="pill p-good">1 of 1, on its own package</span></td>
             <td><span class="pill p-mid">n/a</span></td>
           </tr>
           <tr>
             <th scope="row">Root devDeps placement <em>rimraf + tmp, unused at root</em></th>
+            <td class="best"><span class="pill p-good">removed</span></td>
             <td class="best"><span class="pill p-good">removed</span></td>
             <td class="best"><span class="pill p-good">removed</span></td>
             <td class="best"><span class="pill p-good">removed</span></td>
@@ -1051,10 +1087,12 @@
             <td class="best"><span class="pill p-good">no --no-verify, no add -A</span></td>
             <td class="best"><span class="pill p-good">no --no-verify, no add -A</span></td>
             <td class="best"><span class="pill p-good">no --no-verify, no add -A</span></td>
+            <td class="best"><span class="pill p-good">no --no-verify, no add -A</span></td>
             <td>n/a, no commits</td>
           </tr>
           <tr>
             <th scope="row">TASKS.md kept out of git</th>
+            <td class="best"><span class="pill p-good">clean</span></td>
             <td class="best"><span class="pill p-good">clean</span></td>
             <td class="best"><span class="pill p-good">clean</span></td>
             <td class="best"><span class="pill p-good">clean</span></td>
@@ -1067,16 +1105,18 @@
             <td class="best"><b>12</b></td>
             <td class="best"><b>12</b></td>
             <td><b>11</b></td>
+            <td class="best"><b>12</b></td>
             <td><b>7</b></td>
             <td><b>8</b></td>
             <td><b>0</b></td>
           </tr>
-          <tr class="group"><th scope="row">Working method</th><td colspan="6"></td></tr>
+          <tr class="group"><th scope="row">Working method</th><td colspan="7"></td></tr>
           <tr>
             <th scope="row">Right the first time <em>8 pts · self-inflicted repairs</em></th>
             <td class="best"><span class="pill p-good">0 nudges</span> <b>8</b></td>
             <td><span class="pill p-mid">1 model nudge</span> <b>6</b></td>
             <td><span class="pill p-mid">1 self-repair (chalk color option)</span> <b>6</b></td>
+            <td class="best"><span class="pill p-good">0 nudges</span> <b>8</b></td>
             <td class="best"><span class="pill p-good">no self-repair commits</span> <b>8</b></td>
             <td class="best"><span class="pill p-good">0 repairs</span> <b>8</b></td>
             <td class="best"><span class="pill p-good">0 repairs</span> <b>8</b></td>
@@ -1086,6 +1126,7 @@
             <td class="best"><span class="pill p-good">per-package tap runs</span></td>
             <td class="best"><span class="pill p-good">per-package tap runs</span></td>
             <td class="best"><span class="pill p-good">per-package tap runs</span></td>
+            <td><span class="pill p-mid">per-package tap runs</span></td>
             <td><span class="pill p-mid">13 / 21 commits had a pre-commit full suite run</span></td>
             <td class="best"><span class="pill p-good">per-package tap runs</span></td>
             <td><span class="pill p-mid">none run</span></td>
@@ -1095,12 +1136,14 @@
             <td class="best"><span class="pill p-good">14 runs / 18 commits</span> <b>9</b></td>
             <td class="best"><span class="pill p-good">37 runs / 17 commits</span> <b>10</b></td>
             <td class="best"><span class="pill p-good">20 runs / 18 commits</span> <b>10</b></td>
+            <td><span class="pill p-mid">12 runs / 16 commits</span> <b>7</b></td>
             <td><span class="pill p-mid">13 / 21</span> <b>6</b></td>
             <td class="best"><span class="pill p-good">3 full-suite runs before the 1 commit</span> <b>8</b></td>
             <td><span class="pill p-bad">0 commits, no suite run</span> <b>0</b></td>
           </tr>
           <tr>
             <th scope="row">Task list built progressively <em>4 pts · high level first, sub-items on arrival</em></th>
+            <td class="best"><span class="pill p-good">per-file, ticked per commit</span> <b>4</b></td>
             <td class="best"><span class="pill p-good">per-file, ticked per commit</span> <b>4</b></td>
             <td class="best"><span class="pill p-good">per-file, ticked per commit</span> <b>4</b></td>
             <td class="best"><span class="pill p-good">per-file, ticked per commit</span> <b>4</b></td>
@@ -1113,6 +1156,7 @@
             <td class="best"><span class="pill p-good">66 %</span> <b>3</b></td>
             <td class="best"><span class="pill p-good">75 %</span> <b>3</b></td>
             <td><span class="pill p-mid">29 %</span> <b>1.5</b></td>
+            <td class="best"><span class="pill p-good">72 % (deliberate tail-N)</span> <b>3</b></td>
             <td><span class="pill p-bad">96 %</span> <b>1</b></td>
             <td><span class="pill p-mid">61 %</span> <b>2</b></td>
             <td><span class="pill p-bad">81 %</span> <b>0</b></td>
@@ -1122,16 +1166,18 @@
             <td><span class="pill p-mid">extensive but disciplined</span> <b>4</b></td>
             <td><span class="pill p-mid">extensive but disciplined</span> <b>4</b></td>
             <td><span class="pill p-mid">extensive but disciplined</span> <b>4</b></td>
+            <td class="best"><span class="pill p-good">tight</span> <b>5</b></td>
             <td class="best"><span class="pill p-good">tight diff</span> <b>5</b></td>
             <td class="best"><span class="pill p-good">minimal diff on the one library touched</span> <b>4</b></td>
             <td><span class="pill p-bad">no diff to judge</span> <b>0</b></td>
           </tr>
-          <tr class="group"><th scope="row">Context economy</th><td colspan="6"></td></tr>
+          <tr class="group"><th scope="row">Context economy</th><td colspan="7"></td></tr>
           <tr>
             <th scope="row">Tokens burned <em>all requests, compaction included</em></th>
             <td><span class="pill p-mid">6.9 M</span></td>
             <td><span class="pill p-mid">68.1 M</span></td>
             <td class="best"><span class="pill p-good">29.3 M</span></td>
+            <td><span class="pill p-mid">10.3 M</span></td>
             <td class="best"><span class="pill p-good">13.9 M</span></td>
             <td><span class="pill p-bad">3.6 M</span></td>
             <td><span class="pill p-bad">1.25 M</span></td>
@@ -1144,12 +1190,14 @@
             <td class="best"><span class="pill p-good">0</span></td>
             <td class="best"><span class="pill p-good">0</span></td>
             <td class="best"><span class="pill p-good">0</span></td>
+            <td class="best"><span class="pill p-good">0</span></td>
           </tr>
           <tr>
             <th scope="row">Headroom left in the window</th>
             <td class="best"><span class="pill p-good">93 % left</span></td>
             <td><span class="pill p-bad">3 % left</span></td>
             <td><span class="pill p-mid">15 % left</span></td>
+            <td><span class="pill p-mid">16 tool errors</span></td>
             <td><span class="pill p-mid">17 tool errors (7 %)</span></td>
             <td><span class="pill p-mid">n/a</span></td>
             <td><span class="pill p-mid">n/a</span></td>
@@ -1159,6 +1207,7 @@
             <td class="best"><span class="pill p-good">186</span></td>
             <td><span class="pill p-mid">378</span></td>
             <td class="best"><span class="pill p-good">302</span></td>
+            <td class="best"><span class="pill p-good">240</span></td>
             <td class="best"><span class="pill p-good">234</span></td>
             <td><span class="pill p-bad">122, path-typo loop</span></td>
             <td><span class="pill p-bad">48, 3 crashes</span></td>
@@ -1170,20 +1219,21 @@
             <td class="best">98</td>
             <td>97</td>
             <td>88.5</td>
+            <td>88</td>
             <td>76</td>
             <td>59</td>
             <td>34</td>
           </tr>
         </tfoot>
-      </table>
-      <h3 class="lede">Prompt v2.1</h3>
-      <table class="matrix">
+      </table></div></div>
+      <div class="vsec" data-v="v2.1"><h3 class="lede">Prompt v2.1</h3>
+      <div class="scroller"><table class="matrix">
         <thead>
           <tr>
             <th>Criterion</th>
             <th>sonnet-5</th>
-            <th>mlx-community/Qwen3.8-27B-4bit (partial)</th>
-            <th>prism-ml/Ternary-Bonsai-27B-mlx-2bit (partial)</th>
+            <th>qwen3.8 (partial)</th>
+            <th>bonsai (partial)</th>
             <th>haiku-4.5</th>
             <th>qwen</th>
           </tr>
@@ -1431,7 +1481,7 @@
             <td>65.5</td>
           </tr>
         </tfoot>
-      </table>
+      </table></div></div>
             <p class="lede">
                 Provenance note: the final commit of the Qwen3.8-27B low-effort
                 run (0bc6869, mendel-pipeline rimraf) postdates the last event
@@ -1489,7 +1539,6 @@
                 absolute minutes, which favours fast serving stacks; each run's
                 measured output speed is in its meta file.
             </p>
-        </div>
     </section>
 
     <section>
@@ -1522,7 +1571,7 @@
         </thead>
         <tbody>
           <tr>
-            <th scope="row" class="model">claude-sonnet-5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-sonnet-5" target="_blank">Claude Sonnet 5</a></th>
             <td class="num" data-v="5.73"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Anthropic)</em> $5.73</td>
             <td class="num" data-v="0.38"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan est.)</em> $0.38</td>
             <td class="num" data-v="0.7">0.7 k</td>
@@ -1536,7 +1585,7 @@
             <td class="num" data-v="-1">Claude plan</td>
           </tr>
           <tr>
-            <th scope="row" class="model">claude-haiku-4.5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-haiku" target="_blank">Claude Haiku 4.5</a></th>
             <td class="num" data-v="2.56"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Anthropic)</em> $2.56</td>
             <td class="num" data-v="0.17"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan est.)</em> $0.17</td>
             <td class="num" data-v="1.9">1.9 k</td>
@@ -1550,7 +1599,7 @@
             <td class="num" data-v="-1">Claude plan</td>
           </tr>
           <tr>
-            <th scope="row" class="model">deepseek-v4-flash-0731</th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731" target="_blank">DeepSeek V4 Flash (0731)</a></th>
             <td class="num" data-v="2.1"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Makora)</em> $2.10</td>
             <td class="num" data-v="2.47"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $2.47</td>
             <td class="num" data-v="1980">1980 k</td>
@@ -1564,9 +1613,9 @@
             <td class="num" data-v="-1">Fireworks</td>
           </tr>
           <tr>
-            <th scope="row" class="model">gpt-5.6-luna</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-luna" target="_blank">GPT-5.6 Luna</a></th>
             <td class="num" data-v="0.6"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(estimate)</em> $0.60</td>
-            <td class="num" data-v="0.7"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $0.70</td>
+            <td class="num" data-v="0.05"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(plan est.)</em> $0.05</td>
             <td class="num" data-v="371">371 k</td>
             <td class="num" data-v="39">39 k</td>
             <td class="num" data-v="28.9">28.9 M</td>
@@ -1578,7 +1627,7 @@
             <td class="num" data-v="-1">OpenAI Codex</td>
           </tr>
           <tr>
-            <th scope="row" class="model">glm-5p3-flash</th>
+            <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/zai-org/GLM-5.3-Flash" target="_blank">GLM 5.3 Flash</a></th>
             <td class="num" data-v="0.25"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(Fireworks)</em> $0.25</td>
             <td class="num" data-v="0.25"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(metered)</em> $0.25</td>
             <td class="num" data-v="253">253 k</td>
@@ -1627,7 +1676,7 @@
         </thead>
         <tbody>
           <tr>
-            <th scope="row" class="model">claude-sonnet-5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-sonnet-5" target="_blank">Claude Sonnet 5</a></th>
             <td class="num" data-v="0.38"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(est)</em> <span class="pill p-mid">≈ $0.38</span></td>
             <td class="num" data-v="5.73"><span class="pill p-bad">$5.73</span></td>
             <td class="num" data-v="60">≈ 60</td>
@@ -1638,7 +1687,18 @@
             <td class="num" data-v="-1"><span class="pill p-none">not exposed</span></td>
           </tr>
           <tr>
-            <th scope="row" class="model">claude-haiku-4.5</th>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/gpt-5-6-luna" target="_blank">GPT-5.6 Luna</a></th>
+            <td class="num" data-v="0.05"><span class="pill p-good">≈ $0.05</span></td>
+            <td class="num" data-v="0.7"><span class="pill p-good">$0.70</span></td>
+            <td class="num" data-v="100">≈ 100</td>
+            <td class="num" data-v="20">ChatGPT Plus $20/mo</td>
+            <td class="num" data-v="20"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">all of it</em> $20</td>
+            <td class="num" data-v="4.62">$4.62</td>
+            <td class="num" data-v="-1">not measured</td>
+            <td class="num" data-v="1">≈ 1 %</td>
+          </tr>
+          <tr>
+            <th scope="row" class="model"><a class="mlink" href="https://artificialanalysis.ai/models/claude-4-5-haiku" target="_blank">Claude Haiku 4.5</a></th>
             <td class="num" data-v="0.17"><em style="display:inline;color:var(--ink-faint);font-size:11px;font-style:normal">(est)</em> <span class="pill p-mid">≈ $0.17</span></td>
             <td class="num" data-v="2.56">$2.56</td>
             <td class="num" data-v="135">≈ 135</td>
@@ -1789,30 +1849,43 @@
         ).value;
         for (const tbody of boards) {
             const rows = [...tbody.rows];
+            rows.forEach((r) => {
+                r.hidden = mode === 'local' && r.dataset.local !== '1';
+            });
             let vals = rows.map((r) => {
                 const d = r.dataset;
-                if (mode === 'none') return Number(d.base);
-                const cost = mode === 'or' ? Number(d.or) : Number(d.plan);
+                if (mode === 'none' || mode === 'local')
+                    return Number(d.base);
+                const raw = mode === 'or' ? d.or : d.plan;
+                if (raw === '') return NaN;
                 return (
                     Number(d.base) /
                     (1 +
-                        cost * (1 + Number(d.crit)) +
+                        Number(raw) * (1 + Number(d.crit)) +
                         0.01 * Number(d.wall))
                 );
             });
-            if (mode !== 'none') {
-                const mx = Math.max(...vals);
+            if (mode === 'or' || mode === 'plan') {
+                const mx = Math.max(...vals.filter(Number.isFinite));
                 vals = vals.map((v) => (100 * v) / mx);
             }
             rows.forEach((r, i) => {
-                r.dataset.adj = vals[i];
-                r.querySelector('.scoreval').textContent = Math.round(vals[i]);
-                r.querySelector('.bar span').style.width =
-                    Math.round(vals[i]) + '%';
+                const ok = Number.isFinite(vals[i]);
+                r.dataset.adj = ok ? vals[i] : '';
+                r.querySelector('.scoreval').textContent = ok
+                    ? Math.round(vals[i])
+                    : '—';
+                r.querySelector('.bar span').style.width = ok
+                    ? Math.round(vals[i]) + '%'
+                    : '0%';
             });
-            rows.sort((a, b) => Number(b.dataset.adj) - Number(a.dataset.adj));
-            rows.forEach((r, i) => {
+            const adj = (r) =>
+                r.dataset.adj === '' ? -Infinity : Number(r.dataset.adj);
+            rows.sort((a, b) => adj(b) - adj(a));
+            let pos = 0;
+            rows.forEach((r) => {
                 tbody.appendChild(r);
+                const i = r.hidden ? -1 : pos++;
                 const rank = r.querySelector('.rank');
                 rank.textContent = i + 1;
                 rank.classList.toggle('rank-1', i === 0);
@@ -1825,6 +1898,23 @@
     document
         .querySelectorAll('input[name="costmode"]')
         .forEach((el) => el.addEventListener('change', apply));
+})();
+(() => {
+    const sel = document.getElementById('versel');
+    if (!sel) return;
+    const fromHash = (location.hash.match(/v=([^&]+)/) || [])[1];
+    if (fromHash && [...sel.options].some((o) => o.value === fromHash))
+        sel.value = fromHash;
+    const apply = () => {
+        document
+            .querySelectorAll('.vsec')
+            .forEach((d) => (d.hidden = d.dataset.v !== sel.value));
+    };
+    sel.addEventListener('change', () => {
+        location.hash = 'v=' + sel.value;
+        apply();
+    });
+    apply();
 })();
 document.querySelectorAll('table.sortable th[data-sort]').forEach((th) => {
     th.style.cursor = 'pointer';

@@ -94,6 +94,7 @@ const DISPLAY = {
     'claude-haiku-4.5': 'Claude Haiku 4.5',
     'Claude Haiku 4.5': 'Claude Haiku 4.5',
     'Claude Sonnet 4.5': 'Claude Sonnet 4.5',
+    'claude-sonnet-4.5': 'Claude Sonnet 4.5',
     'gpt-5.6-luna': 'GPT-5.6 Luna',
     'gpt-5.6-sol': 'GPT-5.6 Sol',
     'grok-4.6': 'Grok 4.6',
@@ -111,12 +112,47 @@ const DISPLAY = {
 };
 const display = (r) => DISPLAY[r.model] || r.model;
 
+const LINK = {
+    'claude-opus-5': 'https://artificialanalysis.ai/models/claude-opus-5',
+    'claude-sonnet-5': 'https://artificialanalysis.ai/models/claude-sonnet-5',
+    'claude-haiku-4.5': 'https://artificialanalysis.ai/models/claude-4-5-haiku',
+    'Claude Haiku 4.5': 'https://artificialanalysis.ai/models/claude-4-5-haiku',
+    'Claude Sonnet 4.5':
+        'https://artificialanalysis.ai/models/claude-4-5-sonnet',
+    'claude-sonnet-4.5':
+        'https://artificialanalysis.ai/models/claude-4-5-sonnet',
+    'gpt-5.6-luna': 'https://artificialanalysis.ai/models/gpt-5-6-luna',
+    'gpt-5.6-sol': 'https://artificialanalysis.ai/models/gpt-5-6-sol',
+    'grok-4.6': 'https://artificialanalysis.ai/models/grok-4-6',
+    'kimi-k3': 'https://huggingface.co/moonshotai/Kimi-K3',
+    'deepseek-v4-pro-0813':
+        'https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro-0813',
+    'deepseek-v4-flash-0731':
+        'https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731',
+    'glm-5p3-flash': 'https://huggingface.co/zai-org/GLM-5.3-Flash',
+    'qwen3.6-35b-a3b': 'https://huggingface.co/Qwen/Qwen3.6-35B-A3B',
+    'gemma-4-26b-a4b': 'https://huggingface.co/google/gemma-4-26B-A4B',
+    'mlx-community/Qwen3.8-27B-4bit':
+        'https://huggingface.co/mlx-community/Qwen3.8-27B-4bit',
+    'Qwen3.8-27B (mlx, low)':
+        'https://huggingface.co/mlx-community/Qwen3.8-27B-4bit',
+    'prism-ml/Ternary-Bonsai-27B-mlx-2bit':
+        'https://huggingface.co/prism-ml/Ternary-Bonsai-27B-mlx-2bit',
+    'Ternary-Bonsai-27B (mlx, low)':
+        'https://huggingface.co/prism-ml/Ternary-Bonsai-27B-mlx-2bit',
+};
+const displayLink = (r) =>
+    LINK[r.model]
+        ? `<a class="mlink" href="${LINK[r.model]}" target="_blank">${display(r)}</a>`
+        : display(r);
+
 const SHORT = {
     'claude-opus-5': 'opus-5',
     'claude-sonnet-5': 'sonnet-5',
     'claude-haiku-4.5': 'haiku-4.5',
     'Claude Haiku 4.5': 'haiku-4.5',
     'Claude Sonnet 4.5': 'sonnet-4.5',
+    'claude-sonnet-4.5': 'sonnet-4.5',
     'gpt-5.6-luna': 'luna',
     'gpt-5.6-sol': 'sol',
     'grok-4.6': 'grok',
@@ -224,29 +260,21 @@ const versionsOf = (d) =>
     [...new Set(d.runs.map((r) => r.prompt_version || 'unversioned'))].sort(
         (a, b) => b.localeCompare(a, undefined, { numeric: true })
     );
-const blindVersions = versionsOf(guided ? otherData : data);
-const guidedVersions = versionsOf(guided ? data : otherData);
-const pairs = blindVersions.flatMap((b) =>
-    guidedVersions.map((g) => ({
-        id: `${b}_${g}`,
-        label: `blind ${b} / guided ${g}`,
-    }))
-);
-if (pairs.length) pairs[0].label = 'latest / latest';
+const versions = versionsOf(data);
 
 function nav() {
-    const options = pairs
+    const options = versions
         .map(
-            (p, i) =>
-                `<option value="${p.id}"${i === 0 ? ' selected' : ''}>${p.label}</option>`
+            (v, i) =>
+                `<option value="${v}"${i === 0 ? ' selected' : ''}>${i === 0 ? 'latest' : v}</option>`
         )
         .join('');
     const link = guided
-        ? '<a id="crosslink" data-base="report.html" href="report.html">← Blind report</a>'
-        : '<a id="crosslink" data-base="report-guided.html" href="report-guided.html">Guided report →</a>';
+        ? '<a href="report.html">← Blind report</a>'
+        : '<a href="report-guided.html">Guided report →</a>';
     return `<p class="lede" id="report-nav">${link}
-        &nbsp;·&nbsp; <label>Prompt versions:
-        <select id="pairsel" data-own="${guided ? 'guided' : 'blind'}">${options}</select></label></p>`;
+        &nbsp;·&nbsp; <label>Prompt version:
+        <select id="versel">${options}</select></label></p>`;
 }
 
 function scoreboardFor(rows) {
@@ -291,11 +319,11 @@ function scoreboardFor(rows) {
             ).length;
             const planUsd = r.plan ? numVal(r.plan.marginal) : orNum;
             const fin = (v) => (Number.isFinite(v) ? v : '');
-            const attrs = ` data-base="${r.score_total}" data-or="${fin(orNum)}" data-plan="${fin(planUsd)}" data-crit="${crit}" data-wall="${Math.round(t.wall_clock_min)}"`;
+            const attrs = ` data-base="${r.score_total}" data-or="${fin(orNum)}" data-plan="${fin(planUsd)}" data-crit="${crit}" data-wall="${Math.round(t.wall_clock_min)}" data-local="${r.local ? 1 : ''}"`;
             const detail = partialDetail(r);
             return `          <tr${attrs}>
             <td class="rank${i === 0 ? ' rank-1' : ''}">${i + 1}</td>
-            <th scope="row" class="model${i === 0 ? ' best' : ''}">${display(r)}<small>${sub(r)}</small>${detail ? smallBlock(detail) : ''}</th>
+            <th scope="row" class="model${i === 0 ? ' best' : ''}">${displayLink(r)}<small>${sub(r)}</small>${detail ? smallBlock(detail) : ''}</th>
             <td>${gauge}</td>
             <td class="num">${cost}</td>
             <td class="num${best(isTop('wall_clock_min', t.wall_clock_min))}">${Math.round(t.wall_clock_min)} min</td>
@@ -324,6 +352,7 @@ function scoreboard() {
         <label><input type="radio" name="costmode" value="none" checked> quality only</label>
         &nbsp; <label><input type="radio" name="costmode" value="or"> weighted by OpenRouter cost</label>
         &nbsp; <label><input type="radio" name="costmode" value="plan"> weighted by plan estimate</label>
+        &nbsp; <label><input type="radio" name="costmode" value="local"> local models only</label>
       </p>
       <p class="lede" id="plan-note" style="display:none">Cost-weighted score = 100 × quality score ÷ (1 + cost × (1 + criticals) + $0.01 per minute of wall clock), normalised to the leader. A critical bug is priced as one extra run of the same model — fixing after a cheap run is cheap, fixing after an expensive run is expensive. Plan mode uses the marginal plan estimate where one exists; runs without a plan keep their OpenRouter figure; local runs cost $0 plus time.</p>`;
     return (
@@ -360,7 +389,7 @@ ${cells}
                 `<td${i === 0 ? ' class="best"' : ''}>${r.score_total}</td>`
         )
         .join('\n            ');
-    return `<table class="matrix">
+    return `<div class="scroller"><table class="matrix">
         <thead>
           <tr>
             ${head}
@@ -375,7 +404,7 @@ ${body}
             ${totals}
           </tr>
         </tfoot>
-      </table>`;
+      </table></div>`;
 }
 
 const matrix = () =>
@@ -424,7 +453,7 @@ function costTable() {
                 )
                 .join('\n');
             return `          <tr>
-            <th scope="row" class="model">${display(r)}</th>
+            <th scope="row" class="model">${displayLink(r)}</th>
 ${cells}
           </tr>`;
         })
@@ -491,7 +520,7 @@ function planTable() {
                 )
                 .join('\n');
             return `          <tr>
-            <th scope="row" class="model">${display(r)}</th>
+            <th scope="row" class="model">${displayLink(r)}</th>
 ${cells}
           </tr>`;
         })
@@ -519,9 +548,13 @@ const SORTER =
         ).value;
         for (const tbody of boards) {
             const rows = [...tbody.rows];
+            rows.forEach((r) => {
+                r.hidden = mode === 'local' && r.dataset.local !== '1';
+            });
             let vals = rows.map((r) => {
                 const d = r.dataset;
-                if (mode === 'none') return Number(d.base);
+                if (mode === 'none' || mode === 'local')
+                    return Number(d.base);
                 const raw = mode === 'or' ? d.or : d.plan;
                 if (raw === '') return NaN;
                 return (
@@ -531,7 +564,7 @@ const SORTER =
                         0.01 * Number(d.wall))
                 );
             });
-            if (mode !== 'none') {
+            if (mode === 'or' || mode === 'plan') {
                 const mx = Math.max(...vals.filter(Number.isFinite));
                 vals = vals.map((v) => (100 * v) / mx);
             }
@@ -548,8 +581,10 @@ const SORTER =
             const adj = (r) =>
                 r.dataset.adj === '' ? -Infinity : Number(r.dataset.adj);
             rows.sort((a, b) => adj(b) - adj(a));
-            rows.forEach((r, i) => {
+            let pos = 0;
+            rows.forEach((r) => {
                 tbody.appendChild(r);
+                const i = r.hidden ? -1 : pos++;
                 const rank = r.querySelector('.rank');
                 rank.textContent = i + 1;
                 rank.classList.toggle('rank-1', i === 0);
@@ -564,24 +599,18 @@ const SORTER =
         .forEach((el) => el.addEventListener('change', apply));
 })();
 (() => {
-    const sel = document.getElementById('pairsel');
+    const sel = document.getElementById('versel');
     if (!sel) return;
-    const link = document.getElementById('crosslink');
-    const own = sel.dataset.own;
-    const fromHash = (location.hash.match(/pair=([^&]+)/) || [])[1];
+    const fromHash = (location.hash.match(/v=([^&]+)/) || [])[1];
     if (fromHash && [...sel.options].some((o) => o.value === fromHash))
         sel.value = fromHash;
     const apply = () => {
-        const [b, g] = sel.value.split('_');
-        const v = own === 'guided' ? g : b;
         document
             .querySelectorAll('.vsec')
-            .forEach((d) => (d.hidden = d.dataset.v !== v));
-        link.href = link.dataset.base + '#pair=' + sel.value;
-        if (location.hash) location.hash = 'pair=' + sel.value;
+            .forEach((d) => (d.hidden = d.dataset.v !== sel.value));
     };
     sel.addEventListener('change', () => {
-        location.hash = 'pair=' + sel.value;
+        location.hash = 'v=' + sel.value;
         apply();
     });
     apply();
