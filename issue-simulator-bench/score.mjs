@@ -201,10 +201,14 @@ if (args.session && existsSync(args.session)) {
             if (
                 b.type === 'toolCall' &&
                 b.name === 'bash' &&
-                b.arguments?.command
+                typeof b.arguments?.command === 'string'
             )
                 cmds.push(b.arguments.command);
-            if (b.type === 'tool_use' && b.name === 'Bash' && b.input?.command)
+            if (
+                b.type === 'tool_use' &&
+                b.name === 'Bash' &&
+                typeof b.input?.command === 'string'
+            )
                 cmds.push(b.input.command);
         }
     }
