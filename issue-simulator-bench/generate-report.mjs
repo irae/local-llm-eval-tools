@@ -30,7 +30,17 @@ const outputs = args;
 if (!outputs.length)
     outputs.push(join(dir, guided ? 'report-guided.html' : 'report.html'));
 
-const runs = [...data.runs].sort((a, b) => b.score_total - a.score_total);
+// Completion cap (owner policy 2026-09-03): a score cannot exceed the
+// fraction of the task that got done. Data keeps raw scores; the cap
+// applies at render and sort time.
+const capped = (r) =>
+    Math.min(r.score_total, (100 * (r.libraries_done ?? 8)) / 8);
+// Invalid rows (serving failures, zero commits) stay visible but
+// dimmed, ranked last, and never counted as best.
+const dimmed = (r) => r.invalid || (r.libraries_done ?? 8) < 8;
+const runs = [...data.runs].sort(
+    (a, b) => (a.invalid ? 1 : 0) - (b.invalid ? 1 : 0) || capped(b) - capped(a)
+);
 
 // Rows never mix across prompt versions (PLAN.md forbids the comparison):
 // every scoreboard and matrix renders once per version, newest first.
@@ -184,9 +194,9 @@ const short = (r) =>
 
 const END_REASON = {
     complete: null, // not shown; completeness is the default
-    wall_clock: 'time budget',
-    model_budget_exhausted: 'nudge budget',
-    tooling_budget_exhausted: 'harness budget',
+    wall_clock: 'hit the 300 min time budget',
+    model_budget_exhausted: 'model-nudge budget spent',
+    tooling_budget_exhausted: 'tooling-nudge budget spent',
     harness_crash: 'harness crash',
     stuck: 'stuck',
     operator_stop: 'stopped',
@@ -310,10 +320,45 @@ function scoreboardFor(rows) {
         .map((r, i) => {
             const t = r.telemetry;
             const best = (cond) => (cond ? ' best' : '');
+            const cap = capped(r);
+            const done = r.libraries_done ?? 8;
+            const endWhy =
+                END_REASON[r.end_reason] ||
+                (r.end_reason === 'complete'
+                    ? 'stopped without finishing'
+                    : r.end_reason || 'did not finish');
+            const negStats = [
+                [t.nudges_model, 'model nudges', 'model nudge'],
+                [t.nudges_tooling, 'tooling nudges', 'tooling nudge'],
+                [t.tool_errors, 'tool errors', 'tool error'],
+                [t.failed_commits, 'failed commits', 'failed commit'],
+                [t.compactions, 'compactions', 'compaction'],
+            ]
+                .filter(([n]) => n > 0)
+                .slice(0, 3)
+                .map(([n, pl, sg]) => `${n} ${n === 1 ? sg : pl}`)
+                .join(' · ');
+            const why = r.invalid
+                ? `invalid — ${r.invalid_reason}`
+                : done < 8
+                  ? [
+                        cap < r.score_total ? `raw ${r.score_total}` : null,
+                        `${done}/8 done`,
+                        endWhy,
+                    ]
+                        .filter(Boolean)
+                        .join(' · ')
+                  : r.best_of
+                    ? `best of ${r.best_of} runs`
+                    : r.reruns
+                      ? `${r.reruns} full re-run${r.reruns === 1 ? '' : 's'} needed`
+                      : r.anomaly || negStats;
             const gauge =
-                `<div class="scorewrap"><span class="scoreval">${Math.round(r.score_total)}</span>` +
-                `<div class="bar${i === 0 ? ' gold' : ''}"><span style="width:${Math.round(r.score_total)}%"></span></div></div>` +
-                `<small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">${r.cost.provider_label}</small>`;
+                `<div class="scorewrap"><span class="scoreval">${Math.round(cap)}</span>` +
+                `<div class="bar${i === 0 ? ' gold' : ''}"><span style="width:${Math.round(cap)}%"></span></div></div>` +
+                (why
+                    ? `<small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">${why}</small>`
+                    : '');
             const paid =
                 r.cost.paid_usd == null
                     ? 'paid ≈$?.??'
@@ -334,10 +379,10 @@ function scoreboardFor(rows) {
             ).length;
             const planUsd = r.plan ? numVal(r.plan.marginal) : orNum;
             const fin = (v) => (Number.isFinite(v) ? v : '');
-            const attrs = ` data-base="${r.score_total}" data-or="${fin(orNum)}" data-plan="${fin(planUsd)}" data-crit="${crit}" data-wall="${Math.round(t.wall_clock_min)}" data-local="${r.local ? 1 : ''}"`;
+            const attrs = `${r.invalid ? ' class="invalid dim"' : dimmed(r) ? ' class="dim"' : ''} data-base="${capped(r)}" data-or="${fin(orNum)}" data-plan="${fin(planUsd)}" data-crit="${crit}" data-wall="${Math.round(t.wall_clock_min)}" data-local="${r.local ? 1 : ''}"`;
             const detail = partialDetail(r);
             return `          <tr${attrs}>
-            <td class="rank${i === 0 ? ' rank-1' : ''}">${i + 1}</td>
+            <td class="rank${i === 0 ? ' rank-1' : ''}">${r.invalid ? '—' : i + 1}</td>
             <th scope="row" class="model${i === 0 ? ' best' : ''}">${displayLink(r)}<small>${sub(r)}</small>${detail ? smallBlock(detail) : ''}</th>
             <td>${gauge}</td>
             <td class="num">${cost}</td>
@@ -380,9 +425,13 @@ function scoreboard() {
 }
 
 function matrixFor(rows) {
-    const head = ['Criterion', ...rows.map(short)]
-        .map((h) => `<th>${h}</th>`)
-        .join('\n            ');
+    const head = [
+        '<th>Criterion</th>',
+        ...rows.map(
+            (r) =>
+                `<th${dimmed(r) ? ' style="opacity:.45"' : ''}>${short(r)}</th>`
+        ),
+    ].join('\n            ');
     let dataRow = 0;
     const body = data.matrix_rows
         .map((row) => {
@@ -390,7 +439,15 @@ function matrixFor(rows) {
                 return `          <tr class="group"><th scope="row">${row.label}</th><td colspan="${rows.length}"></td></tr>`;
             const i = dataRow++;
             const cells = rows
-                .map((r) => '            ' + r.matrix_cells[i])
+                .map((r) => {
+                    const c = r.matrix_cells[i];
+                    return (
+                        '            ' +
+                        (dimmed(r)
+                            ? c.replace(/<td/, '<td style="opacity:.45"')
+                            : c)
+                    );
+                })
                 .join('\n');
             return `          <tr>
             <th scope="row">${row.label}</th>
@@ -401,7 +458,7 @@ ${cells}
     const totals = rows
         .map(
             (r, i) =>
-                `<td${i === 0 ? ' class="best"' : ''}>${r.score_total}</td>`
+                `<td${i === 0 ? ' class="best"' : ''}${dimmed(r) ? ' style="opacity:.45"' : ''}>${r.score_total}</td>`
         )
         .join('\n            ');
     return `<div class="scroller"><table class="matrix">
@@ -467,7 +524,7 @@ function costTable() {
                         `            <td class="num" data-v="${numVal(x)}">${x}</td>`
                 )
                 .join('\n');
-            return `          <tr>
+            return `          <tr${dimmed(r) ? ' class="dim"' : ''}>
             <th scope="row" class="model">${displayLink(r)}</th>
 ${cells}
           </tr>`;
@@ -534,7 +591,7 @@ function planTable() {
                         `            <td class="num" data-v="${numVal(x)}">${x}</td>`
                 )
                 .join('\n');
-            return `          <tr>
+            return `          <tr${dimmed(r) ? ' class="dim"' : ''}>
             <th scope="row" class="model">${displayLink(r)}</th>
 ${cells}
           </tr>`;
@@ -599,9 +656,10 @@ const SORTER =
             let pos = 0;
             rows.forEach((r) => {
                 tbody.appendChild(r);
-                const i = r.hidden ? -1 : pos++;
+                const inv = r.classList.contains('invalid');
+                const i = r.hidden || inv ? -1 : pos++;
                 const rank = r.querySelector('.rank');
-                rank.textContent = i + 1;
+                rank.textContent = inv ? '—' : i + 1;
                 rank.classList.toggle('rank-1', i === 0);
                 r.querySelector('.bar').classList.toggle('gold', i === 0);
                 r.querySelector('.model').classList.toggle('best', i === 0);

@@ -1799,7 +1799,7 @@
         "cache_read": 18345878,
         "peak_context": 182058,
         "window_pct": 18,
-        "compactions": 1,
+        "compactions": 0,
         "assistant_msgs": 199,
         "tool_calls": 292,
         "tool_errors": 11,
@@ -1837,7 +1837,7 @@
         "<td><span class=\"pill p-mid\">49 %</span> <b>2</b></td>",
         "<td><span class=\"pill p-good\">tight</span> <b>5</b></td>",
         "<td><span class=\"pill p-mid\">19.2 M</span></td>",
-        "<td><span class=\"pill p-mid\">1</span></td>",
+        "<td><span class=\"pill p-good\">0</span></td>",
         "<td><span class=\"pill p-good\">82 % left</span></td>",
         "<td><span class=\"pill p-good\">292</span></td>"
       ],
@@ -2698,7 +2698,9 @@
         "<td class=\"best\"><span class=\"pill p-good\">82 %</span></td>",
         "<td><span class=\"pill p-bad\">15, then output collapse</span></td>"
       ],
-      "notes": "Scored on Fable 2026-09-03. model_budget_exhausted pattern: 15 tool calls of orientation (issue fetch, TASKS.md write, grep/ls/cat) in the first 23 min, then one failed exact-match edit, then 4 consecutive turns (3 nudged, 1 unsent) that each hit the 16384-token output cap with stop_reason length. The capped output is not reasoning: it is ~16K tokens of newline characters plus a stray <|channel|> token in the thinking channel. The nudge text never changed the behaviour. Bugs remaining is a vacuous 25: the branch is identical to the base, so trap A, chalk, prettier, and eslint pass by absence of work. Lint and conventions score 0 for the same reason. Criterion 6: 8 base minus 2 per model nudge (3 nudges) = 2. TASKS.md was written upfront with the full library and package tree and never ticked; the file stayed out of git."
+      "notes": "Scored on Fable 2026-09-03. model_budget_exhausted pattern: 15 tool calls of orientation (issue fetch, TASKS.md write, grep/ls/cat) in the first 23 min, then one failed exact-match edit, then 4 consecutive turns (3 nudged, 1 unsent) that each hit the 16384-token output cap with stop_reason length. The capped output is not reasoning: it is ~16K tokens of newline characters plus a stray <|channel|> token in the thinking channel. The nudge text never changed the behaviour. Bugs remaining is a vacuous 25: the branch is identical to the base, so trap A, chalk, prettier, and eslint pass by absence of work. Lint and conventions score 0 for the same reason. Criterion 6: 8 base minus 2 per model nudge (3 nudges) = 2. TASKS.md was written upfront with the full library and package tree and never ticked; the file stayed out of git.",
+      "invalid": true,
+      "invalid_reason": "LM Studio MLX serving collapse (newline flood); zero commits"
     },
     {
       "model": "bonsai-prism",
