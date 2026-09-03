@@ -90,6 +90,7 @@ const MATRIX_SCORE_ROWS = [
 
 const DISPLAY = {
     'claude-opus-5': 'Claude Opus 5',
+    'Claude Opus 5': 'Claude Opus 5',
     'claude-sonnet-5': 'Claude Sonnet 5',
     'claude-haiku-4.5': 'Claude Haiku 4.5',
     'Claude Haiku 4.5': 'Claude Haiku 4.5',
@@ -114,6 +115,7 @@ const display = (r) => DISPLAY[r.model] || r.model;
 
 const LINK = {
     'claude-opus-5': 'https://artificialanalysis.ai/models/claude-opus-5',
+    'Claude Opus 5': 'https://artificialanalysis.ai/models/claude-opus-5',
     'claude-sonnet-5': 'https://artificialanalysis.ai/models/claude-sonnet-5',
     'claude-haiku-4.5': 'https://artificialanalysis.ai/models/claude-4-5-haiku',
     'Claude Haiku 4.5': 'https://artificialanalysis.ai/models/claude-4-5-haiku',
@@ -148,6 +150,7 @@ const displayLink = (r) =>
 
 const SHORT = {
     'claude-opus-5': 'opus-5',
+    'Claude Opus 5': 'opus-5',
     'claude-sonnet-5': 'sonnet-5',
     'claude-haiku-4.5': 'haiku-4.5',
     'Claude Haiku 4.5': 'haiku-4.5',
