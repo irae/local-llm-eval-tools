@@ -220,6 +220,36 @@ Checked on the Mac on 2026-09-01 without a model server running:
   memory, so if the resume fails the runner must append a synthetic error tool
   result before the nudge.
 
+## Completion cap, invalid runs, and the score line
+
+- **Completion cap**: a displayed score cannot exceed the fraction of
+  the task done — `min(score_total, 100 × libraries_done/8)`. Data
+  keeps the raw criterion scores and raw total; the cap applies in
+  the report and on the site. Rows under 8/8 render dimmed on every
+  table.
+- **Invalid runs**: a run is invalid when it has zero commits, or a
+  documented serving/harness collapse ended the model's real
+  participation (a wrong config that still ran is a relabel, not an
+  invalidation). Invalid rows keep their data (`invalid: true`,
+  `invalid_reason`), render dimmed with a dash rank on the reports,
+  are excluded from the site tables, and do not occupy the
+  one-row-per-version slot.
+- **The line under each score** shows the first matching category:
+  invalid reason; completion (`n/8 done` + end reason, with the raw
+  score when capped); `best_of: <n>` ("best of N runs") — used when a
+  config error (for example an unhonored thinking flag) produced two
+  valid runs of the same level; `reruns: <n>` ("N full re-runs
+  needed"); `anomaly` (short scorer-written config deviation);
+  nonzero negative stats (nudges, tool errors, failed commits,
+  compactions). Clean runs show nothing.
+- **Not honored ≠ model error**: a flag the serving stack ignored is
+  a benchmark error. Re-label the run at the observed level; if that
+  yields two valid same-level runs, keep the best with `best_of` and
+  requeue the intended level.
+- pi's "split turn / No prior history" marker is NOT a compaction —
+  never count it. `peak_context` is the maximum across all compaction
+  cycles, not the post-compaction value.
+
 ## Credit exhaustion
 
 A billing, quota, or out-of-credits error is a PAUSE, never a
