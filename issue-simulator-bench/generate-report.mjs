@@ -305,9 +305,12 @@ function scoreboardFor(rows) {
                 `<div class="scorewrap"><span class="scoreval">${Math.round(r.score_total)}</span>` +
                 `<div class="bar${i === 0 ? ' gold' : ''}"><span style="width:${Math.round(r.score_total)}%"></span></div></div>` +
                 `<small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">${r.cost.provider_label}</small>`;
-            const paid = r.cost.paid_usd
-                ? `paid ${r.cost.paid_basis === 'metered' ? '' : '≈'}$${r.cost.paid_usd}`
-                : 'paid ≈$?.??';
+            const paid =
+                r.cost.paid_usd == null
+                    ? 'paid ≈$?.??'
+                    : r.cost.paid_basis === 'metered'
+                      ? `paid $${r.cost.paid_usd}`
+                      : `plan ≈$${r.cost.paid_usd}`;
             const orNum = Number(r.cost.or_usd);
             const orMain = r.local
                 ? pill('good', '$0')
@@ -331,8 +334,8 @@ function scoreboardFor(rows) {
             <td class="num">${cost}</td>
             <td class="num${best(isTop('wall_clock_min', t.wall_clock_min))}">${Math.round(t.wall_clock_min)} min</td>
             <td class="num${best(isTop('tokens_total', t.tokens_total))}">${mFmt(t.tokens_total)}</td>
-            <td class="num${best(isTop('peak_context', t.peak_context))}">${kFmt(t.peak_context)}</td>
-            <td class="num">${pill(winTone, t.window_pct + ' %')}</td>
+            <td class="num${best(t.peak_context != null && isTop('peak_context', t.peak_context))}">${t.peak_context != null ? kFmt(t.peak_context) : '—'}</td>
+            <td class="num">${t.window_pct != null ? pill(winTone, t.window_pct + ' %') : '—'}</td>
             <td class="num">${t.commits}</td>
             <td class="num${best(bp === 0)}">${pill(bugTone(bp), String(bp))}</td>
           </tr>`;
@@ -649,6 +652,24 @@ let html =
         .replace('{{MATRIX}}', matrix())
         .replace('{{COST}}', costTable())
         .replace('{{PLAN}}', planTable()) + SORTER;
+
+// A "null"/"NaN"/"undefined" leaking into a rendered cell means a
+// scorer left a field unfilled (a raw null in a row is fine — many
+// fields are legitimately not applicable). Refuse to write the
+// report — this is the last gate before publish.
+{
+    const errors = [];
+    const body = html.replace(/<script>[\s\S]*?<\/script>/g, '');
+    for (const m of body.matchAll(
+        />[^<]*?\b(null|undefined|NaN)\b[^<]*</g
+    ))
+        errors.push(`rendered cell contains "${m[1]}": ${m[0].slice(0, 60)}`);
+    if (errors.length) {
+        console.error('data completeness check failed:');
+        for (const e of errors) console.error('  ' + e);
+        process.exit(1);
+    }
+}
 
 for (const out of outputs) writeFileSync(out, html);
 
