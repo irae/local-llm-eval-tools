@@ -106,6 +106,7 @@ const DISPLAY = {
     'qwen3.6-35b-a3b': 'Qwen3.6 35B-A3B',
     'gemma-4-26b-a4b': 'Gemma 4 26B-A4B',
     'google/gemma-4-12b': 'Gemma 4 12B',
+    'Gemma-4-12B (low)': 'Gemma 4 12B (low reasoning)',
     'mlx-community/Qwen3.8-27B-4bit': 'Qwen3.8 27B (MLX 4-bit)',
     'Qwen3.8-27B (mlx, low)': 'Qwen3.8 27B (MLX 4-bit, low reasoning)',
     'prism-ml/Ternary-Bonsai-27B-mlx-2bit': 'Ternary Bonsai 27B (MLX 2-bit)',
@@ -137,6 +138,7 @@ const LINK = {
     'qwen3.6-35b-a3b': 'https://huggingface.co/Qwen/Qwen3.6-35B-A3B',
     'gemma-4-26b-a4b': 'https://huggingface.co/google/gemma-4-26B-A4B',
     'google/gemma-4-12b': 'https://huggingface.co/google/gemma-4-12b',
+    'Gemma-4-12B (low)': 'https://huggingface.co/google/gemma-4-12b',
     'mlx-community/Qwen3.8-27B-4bit':
         'https://huggingface.co/mlx-community/Qwen3.8-27B-4bit',
     'Qwen3.8-27B (mlx, low)':
@@ -170,6 +172,7 @@ const SHORT = {
     'qwen3.6-35b-a3b': 'qwen',
     'gemma-4-26b-a4b': 'gemma',
     'google/gemma-4-12b': 'gemma-12b',
+    'Gemma-4-12B (low)': 'gemma-12b-low',
     'mlx-community/Qwen3.8-27B-4bit': 'qwen3.8',
     'Qwen3.8-27B (mlx, low)': 'qwen3.8-low',
     'prism-ml/Ternary-Bonsai-27B-mlx-2bit': 'bonsai',
