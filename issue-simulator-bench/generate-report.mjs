@@ -105,11 +105,13 @@ const DISPLAY = {
     'glm-5p3-flash': 'GLM 5.3 Flash',
     'qwen3.6-35b-a3b': 'Qwen3.6 35B-A3B',
     'gemma-4-26b-a4b': 'Gemma 4 26B-A4B',
+    'google/gemma-4-12b': 'Gemma 4 12B',
     'mlx-community/Qwen3.8-27B-4bit': 'Qwen3.8 27B (MLX 4-bit)',
     'Qwen3.8-27B (mlx, low)': 'Qwen3.8 27B (MLX 4-bit, low reasoning)',
     'prism-ml/Ternary-Bonsai-27B-mlx-2bit': 'Ternary Bonsai 27B (MLX 2-bit)',
     'Ternary-Bonsai-27B (mlx, low)':
         'Ternary Bonsai 27B (MLX 2-bit, low reasoning)',
+    'bonsai-prism': 'Ternary Bonsai 27B (PrismML GGUF)',
 };
 const display = (r) => DISPLAY[r.model] || r.model;
 
@@ -134,6 +136,7 @@ const LINK = {
     'glm-5p3-flash': 'https://huggingface.co/zai-org/GLM-5.3-Flash',
     'qwen3.6-35b-a3b': 'https://huggingface.co/Qwen/Qwen3.6-35B-A3B',
     'gemma-4-26b-a4b': 'https://huggingface.co/google/gemma-4-26B-A4B',
+    'google/gemma-4-12b': 'https://huggingface.co/google/gemma-4-12b',
     'mlx-community/Qwen3.8-27B-4bit':
         'https://huggingface.co/mlx-community/Qwen3.8-27B-4bit',
     'Qwen3.8-27B (mlx, low)':
@@ -142,6 +145,7 @@ const LINK = {
         'https://huggingface.co/prism-ml/Ternary-Bonsai-27B-mlx-2bit',
     'Ternary-Bonsai-27B (mlx, low)':
         'https://huggingface.co/prism-ml/Ternary-Bonsai-27B-mlx-2bit',
+    'bonsai-prism': 'https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf',
 };
 const displayLink = (r) =>
     LINK[r.model]
@@ -165,10 +169,12 @@ const SHORT = {
     'glm-5p3-flash': 'glm-flash',
     'qwen3.6-35b-a3b': 'qwen',
     'gemma-4-26b-a4b': 'gemma',
+    'google/gemma-4-12b': 'gemma-12b',
     'mlx-community/Qwen3.8-27B-4bit': 'qwen3.8',
     'Qwen3.8-27B (mlx, low)': 'qwen3.8-low',
     'prism-ml/Ternary-Bonsai-27B-mlx-2bit': 'bonsai',
     'Ternary-Bonsai-27B (mlx, low)': 'bonsai-low',
+    'bonsai-prism': 'bonsai-prism',
 };
 const short = (r) =>
     (SHORT[r.model] || display(r)) + (r.partial ? ' (partial)' : '');
