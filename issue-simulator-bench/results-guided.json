@@ -567,7 +567,7 @@
       },
       "defects": [],
       "telemetry": {
-        "wall_clock_min": 24.0,
+        "wall_clock_min": 24,
         "tokens_total": 6900060,
         "tokens_in": 253112,
         "tokens_out": 36004,
@@ -965,7 +965,7 @@
         }
       ],
       "telemetry": {
-        "wall_clock_min": 300.0,
+        "wall_clock_min": 300,
         "tokens_total": 3618689,
         "tokens_in": 2138409,
         "tokens_out": 17616,
@@ -1217,6 +1217,112 @@
       "thinking": "high",
       "end_reason": "complete",
       "libraries_done": 8
+    },
+    {
+      "model": "qwen3.6-35b-a3b",
+      "model_id": "qwen3.6-35b-a3b",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "llama",
+      "local": true,
+      "serving": "llama-server",
+      "branch": "qwen3.6-35b-a3b-high-guided-v3-issue-13",
+      "base_commit": "86935f4",
+      "thinking": "high",
+      "prompt_version": "v3.0",
+      "partial": false,
+      "end_reason": "complete",
+      "libraries_done": 8,
+      "score_total": 83,
+      "scores": {
+        "bugs": 16,
+        "completion": 20,
+        "node_modules": 8,
+        "lint": 5,
+        "commit_craft": 10,
+        "first_time": 8,
+        "test_discipline": 7,
+        "conventions": 3,
+        "task_list": 4,
+        "truncation": 2
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "packages/mendel-development/apply-extra-options.js destructures `promises: { glob }` from node:fs and calls `glob(i).then(...)` at three call sites; fs.promises.glob() returns an AsyncIterator, not a Promise; the repro throws TypeError: glob(...).then is not a function (trap A)"
+        },
+        {
+          "severity": "minor",
+          "summary": "5 of 16 commits are typed `refactor(scope):` instead of `chore` (the tmp and shasum commits); the root package.json change was folded into the mendel-manifest-uglify commit by a --amend after the model noticed it left it uncommitted"
+        },
+        {
+          "severity": "minor",
+          "summary": "style drift: mixed node: prefix (node:crypto, node:fs, node:util) next to plain crypto/os requires while neighbours use plain names; a drive-by comment rewrite in planout-example/app.js; blank lines left where requires were removed; three identical t.teardown cleanup blocks added to manifest-uglify.js and post-process-manifest.js that the original tests never had"
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 91.9,
+        "tokens_total": 12712474,
+        "tokens_in": 187958,
+        "tokens_out": 42659,
+        "cache_read": 12481857,
+        "peak_context": 77849,
+        "window_pct": null,
+        "compactions": 1,
+        "assistant_msgs": 230,
+        "tool_calls": 285,
+        "tool_errors": 25,
+        "commits": 16,
+        "failed_commits": 0,
+        "truncation_pct": 65,
+        "nudges_tooling": 0,
+        "nudges_model": 0
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      },
+      "matrix_cells": [
+        "<td><span class=\"pill p-bad\">trap A: TypeError</span> <b>16</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">all package suites pass (core 71/72, 1 skip)</span></td>",
+        "<td><span class=\"pill p-bad\">THREW: TypeError</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">8 / 8</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">none left</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">found + fixed</span></td>",
+        "<td class=\"best\"><b>20</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">pnpm remove per package, reinstall verified</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">+22/-211 lines</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean, self-checked via pnpm test (static)</span> <b>5</b></td>",
+        "<td><span class=\"pill p-mid\">retired (v3 base)</span></td>",
+        "<td><span class=\"pill p-mid\">11 / 16 chore, 5 refactor</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no multi-package</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">removed</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">no --no-verify, no add -A</span></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">clean</span></td>",
+        "<td><b>10</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">0 repair commits, 0 nudges</span> <b>8</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">per-package tap runs</span></td>",
+        "<td><span class=\"pill p-mid\">3 of 16 commits with no full suite before</span> <b>7</b></td>",
+        "<td class=\"best\"><span class=\"pill p-good\">per-file, grouped by package, ticked per library</span> <b>4</b></td>",
+        "<td><span class=\"pill p-mid\">65 %</span> <b>2</b></td>",
+        "<td><span class=\"pill p-mid\">mixed node: prefix, extra teardowns, drive-by comment</span> <b>3</b></td>",
+        "<td><span class=\"pill p-bad\">12.7 M</span></td>",
+        "<td><span class=\"pill p-mid\">1</span></td>",
+        "<td><span class=\"pill p-mid\">25 tool errors</span></td>",
+        "<td><span class=\"pill p-mid\">285</span></td>"
+      ],
+      "notes": "Scored on Fable 2026-09-03. Lint credit: score.mjs counts 0 self-runs because it looks for prettier --check/eslint ., but the model ran pnpm test (which runs the repo's static script: prettier + eslint) after its last commit, so self-run credit is given. The install loop mid-run (tap link broke after pnpm remove) is environmental, not a code repair. The chalk port uses plain util.styleText with no forced level, correct for v3.0."
     }
   ],
   "matrix_rows": [
