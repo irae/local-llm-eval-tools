@@ -1425,6 +1425,112 @@
         "<td><span class=\"pill p-bad\">21, then output collapse</span></td>"
       ],
       "notes": "Scored on Fable 2026-09-03; independent of the blind sibling row. model_budget_exhausted pattern: 21 tool calls of orientation in the first 18 min (gh issue view, TASKS.md write with the 8 libraries and no sub-items, one grep pair per library with --exclude-dir=node_modules), then an edit call that failed validation (duplicate edit entry, second without oldText), then 4 consecutive turns (1 spontaneous, 3 nudged) that each hit the 16384-token cap with stop_reason length. Output of those turns is a newline flood in the thinking channel; the last turn holds about 2.4K chars of real uuid planning before the flood resumes. Nudge text never changed the outcome. Bugs remaining is a vacuous 25: branch is identical to the base, so trap A, prettier, and eslint pass by absence of work; lint and conventions score 0 for the same reason. Criterion 6: 8 minus 2 per model nudge (3) = 2. Task list: the flat upfront list is the right v3 form, the per-package sub-item edit (v3 asks per file) failed and was never retried; never ticked; file stayed out of git. Truncation: evidence shows 0 noisy commands, so the share is null; partial credit for filtering every grep. Tool errors: 2 bash quoting errors (same command re-sent), 2 bash calls with command: 3, 1 edit validation; plus 1 write with empty args that terminated the stream (harness retry). Peak context 29970 of 158464. Difference from the blind sibling: the blind run collapsed after a failed exact-match edit on a real code file at about 23 min; this guided run collapsed earlier, at about 18 min, on a TASKS.md edit, before any code work. The command: 3 calls are a separate, milder glitch the model noticed and recovered from at once, distinct from the terminal newline-flood collapse."
+    },
+    {
+      "model": "google/gemma-4-12b",
+      "model_id": "google/gemma-4-12b",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "lmstudio",
+      "local": true,
+      "serving": "lm-studio",
+      "branch": "google-gemma-4-12b-low-guided-v3-issue-13",
+      "base_commit": "86935f4",
+      "partial": true,
+      "prompt_version": "v3.0",
+      "thinking": "low",
+      "end_reason": "model_budget_exhausted",
+      "libraries_done": 0,
+      "score_total": 29.5,
+      "scores": {
+        "bugs": 25,
+        "completion": 0,
+        "node_modules": 0,
+        "lint": 0,
+        "commit_craft": 0,
+        "first_time": 2,
+        "test_discipline": 0,
+        "conventions": 0,
+        "task_list": 1,
+        "truncation": 1.5
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "Zero delivered work: branch tip is the base commit, no file changed, all 8 libraries untouched (28 stale requires, 18 stale package.json entries, root rimraf and tmp still declared). The investigation itself was correct: in the first 4 min the model fetched the issue, wrote TASKS.md with the 8 libraries plus per-package sub-items, ran 15 grep sweeps, and by 04:47 held a complete per-file inventory in its reasoning that matches the evidence pack exactly, including the unlisted legacy-packages/mendel-requirify rimraf reference (trap B) and the root rimraf/tmp entries. It never wrote that inventory to TASKS.md: the edit call went out with empty arguments {} and terminated the stream (harness retries at 04:47 and 04:52), and the next turn (05:02) hit the 16384-token cap with a newline flood in the thinking channel. Six turns in total ended on stop_reason length with the same flood (05:02, 05:14, 05:26, 05:35, 06:00, 06:13); the 05:14 turn carried one line of real uuid planning before the flood. No source file was ever edited."
+        },
+        {
+          "severity": "medium",
+          "summary": "Runaway command loop: between 05:38 and 05:50 the model issued ls -F_r (and ls -R_r) 100 times in a row, each rejected with 'invalid option -- _', and re-sent the identical string even after writing 'ls -F_r is not a valid command, I will just use ls'. The loop consumed about 12 min and 100 of the 130 tool calls. The turn that ended the loop (05:50) emitted a malformed raw tool-call token string as text and stopped after 36 tokens, which triggered the third nudge. Inside the loop it did read TASKS.md, examples/planout-example/package.json, and app.js, and ran 5 filtered greps for uuid, so it had reached the first real edit point and still did not edit."
+        },
+        {
+          "severity": "minor",
+          "summary": "Tool-argument emission glitches: 3 calls with empty arguments {} (edit at 04:47, bash at 04:52, bash at 05:44), each terminating the stream and costing a harness retry; the first 10 grep calls in the orientation phase were several commands concatenated onto one line without separators (the model recovered by re-issuing them one at a time)."
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 99,
+        "tokens_total": 1971236,
+        "tokens_in": 1856994,
+        "tokens_out": 114242,
+        "cache_read": 0,
+        "peak_context": 45159,
+        "window_pct": 28,
+        "compactions": 4,
+        "assistant_msgs": 137,
+        "tool_calls": 130,
+        "tool_errors": 108,
+        "commits": 0,
+        "failed_commits": 0,
+        "truncation_pct": 0,
+        "nudges_tooling": 0,
+        "nudges_model": 3
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      },
+      "matrix_cells": [
+        "<td><span class=\"pill p-mid\">none, no code landed</span> <b>25</b></td>",
+        "<td><span class=\"pill p-mid\">not run</span></td>",
+        "<td><span class=\"pill p-mid\">not touched</span></td>",
+        "<td><span class=\"pill p-bad\">0 / 8</span></td>",
+        "<td><span class=\"pill p-bad\">28 sites left</span></td>",
+        "<td><span class=\"pill p-bad\">18 left</span></td>",
+        "<td><span class=\"pill p-mid\">found it in the plan, never acted</span></td>",
+        "<td><b>0</b></td>",
+        "<td><span class=\"pill p-bad\">never ran pnpm</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">0 lines</span></td>",
+        "<td><span class=\"pill p-bad\">no diff to check, never ran</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">n/a (v3 base)</span></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-mid\">n/a</span></td>",
+        "<td><span class=\"pill p-mid\">untouched</span></td>",
+        "<td>n/a, no commits</td>",
+        "<td><span class=\"pill p-good\">kept out, nothing committed</span></td>",
+        "<td><b>0</b></td>",
+        "<td><span class=\"pill p-bad\">0 repairs, 3 nudges (-6), 100-call ls loop</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">none run</span></td>",
+        "<td><span class=\"pill p-bad\">never run</span> <b>0</b></td>",
+        "<td><span class=\"pill p-bad\">per-package sub-items upfront, per-file inventory never written, no ticks</span> <b>1</b></td>",
+        "<td><span class=\"pill p-mid\">3 noisy unpiped, most greps filtered</span> <b>1.5</b></td>",
+        "<td><span class=\"pill p-bad\">no diff</span> <b>0</b></td>",
+        "<td><span class=\"pill p-bad\">1.97 M</span></td>",
+        "<td><span class=\"pill p-mid\">4</span></td>",
+        "<td><span class=\"pill p-mid\">83 %</span></td>",
+        "<td><span class=\"pill p-bad\">130, 100 of them one failing ls</span></td>"
+      ],
+      "notes": "Scored on Fable 2026-09-03; independent of the two sibling rows. Same terminal failure as the high siblings (newline flood at the 16384-token cap, 6 length-capped turns) but a different path to it. Orientation was faster and more complete: 4 min, gh issue view, TASKS.md with 8 libraries and per-package sub-items, 15 greps, and by 04:47 a fully correct per-file inventory in the reasoning channel that names trap B (legacy-packages/mendel-requirify rimraf) and the root rimraf/tmp. The failure point was the edit that should have written that inventory: empty arguments {} twice (04:47, 04:52), then the flood at 05:02. After nudges 1 and 2 the run alternated floods with a 12-min window (05:37-05:50) of 100 identical failing ls -F_r calls, inside which it read app.js and package.json for uuid but made no edit. Nudge 3 (05:50) followed a 36-token turn that emitted a raw tool-call token string as text; the two turns after it were floods, ending the run on the model budget at 06:13. Bugs remaining is a vacuous 25: branch identical to base, trap A, prettier, eslint pass by absence of work. Criterion 6: 8 minus 2 per model nudge (3) = 2; the ls loop is not a repair commit so it is not scored again there. Task list 1: upfront per-package sub-items where v3 asks per-file, never expanded, never ticked; the correct inventory existed only in reasoning. Truncation 1.5: evidence shows 3 noisy commands, none piped, but almost every grep was narrowed with grep -v; the 100 ls errors were tiny outputs. Tool errors 108 = 100 ls loop + 3 empty-argument calls + 5 concatenated-grep errors. Peak context 45159 of 158464 with 4 overflow compactions; 1.97M total tokens versus about 0.3M for the high siblings because the run lasted 99 min instead of 46-49."
     }
   ],
   "matrix_rows": [
