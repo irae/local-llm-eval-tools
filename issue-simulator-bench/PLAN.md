@@ -260,6 +260,21 @@ weekly allocation ($40/mo × 75 % SuperGrok share ÷ 30 × 7 ≈ $6.92)
 divided by the observed runs-per-week capacity (≈ 50), ≈ $0.14 per
 run. Record that estimate as `paid_usd` with basis `plan share`.
 
+**Missing probes — the fallback estimator.** When a plan run has no
+usable probe delta (probe failed, xai, or the worker recorded
+`plan_provider=none`), do NOT record the metered token price as paid.
+Run `node estimate-plan-share.mjs <model>`: it anchors on the same
+model's most recent measured plan-share run and scales that share by
+vendor token cost, cross-checked against token and wall-clock
+scalings. If the three agree (≤ $0.05 spread), record the
+recommendation as `paid_usd` with basis `plan est.`, copy the anchor's
+plan block with `marginal`/`wweek` recomputed and `w5h: not measured`,
+and name the anchor in `config_note`. If they disagree, or no anchor
+exists, stop and ask the owner. A measured probe delta always beats
+this estimate. The anchors age: the owner plans to re-measure the
+ratio from their own usage; until then the newest measured run is the
+anchor.
+
 ## Harness attribution
 
 Each result row records the model and, as a sub-line, the harness — not only the
