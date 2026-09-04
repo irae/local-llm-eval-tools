@@ -33,7 +33,13 @@ What this file owns, so that every backend gets it identically:
   which are what the compression-onset criterion reads.
 - **The stop conditions.** Decode below the floor, an OOM or any request
   failure, a silent halt, swap growth, sustained material compaction,
-  and a dead server.
+  and a dead server. Compaction counts only when it is material
+  (COMPACT_PAGES, hundreds of pages, not the machine's idle noise of
+  about 12 per tick), persists for MAX_COMPACTING_STEPS steps, and
+  speed does not recover against the PREVIOUS step. A depth sweep
+  declines by design, so recovery against the best step of the run
+  can never be met; an earlier rule did that and truncated a healthy
+  sweep at 196618 on 2026-09-04.
 - **Liveness, one signal.** A server can answer `/health` after its
   generation thread died, so `/health` is never used. The runner watches
   the server log for the backend's death signature, and, when a step
@@ -84,8 +90,7 @@ BLOCK = ("def parse_record_%06d(line):\n"
 # share a prefix, which would make the server's cache treat them as one.
 RANGE_SPAN = 200000
 
-# Compaction is normal under pressure and often recovers. Stop only when
-# it persists AND speed does not come back.
+RECOVERY_FRACTION = 0.85
 MAX_COMPACTING_STEPS = 3
 
 # A probe queued behind a live step on a one-slot server fails exactly
@@ -323,7 +328,7 @@ def run(step, probe=None):
     compressions = start.get("Compressions", 0)
     decompressions = start.get("Decompressions", 0)
     compacting_steps = 0
-    best_toks = 0.0
+    previous_toks = 0.0
 
     print("start: wired %.0f MB, free %.0f MB, swap used %.0f MB"
           % (wired_mb(start), free_mb(start), swap_start), flush=True)
@@ -374,7 +379,7 @@ def run(step, probe=None):
                 return 42
 
             compacting = compress_delta + decompress_delta >= COMPACT_PAGES
-            recovered = tok_s >= 0.9 * best_toks
+            recovered = previous_toks == 0 or tok_s >= RECOVERY_FRACTION * previous_toks
             if compacting and not recovered:
                 compacting_steps += 1
                 if compacting_steps >= MAX_COMPACTING_STEPS:
@@ -387,7 +392,7 @@ def run(step, probe=None):
             else:
                 compacting_steps = 0
 
-            best_toks = max(best_toks, tok_s)
+            previous_toks = tok_s
 
             if tok_s < FLOOR_TOKS:
                 print("STOP: below %.0f tok/s at depth %d"
