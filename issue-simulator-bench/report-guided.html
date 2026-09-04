@@ -726,7 +726,7 @@ a.mlink:hover { text-decoration: underline; }
             <th>Cost</th>
             <th class="num">Wall</th>
             <th class="num">Tokens</th>
-            <th class="num">Peak ctx</th>
+            <th class="num">Peak ctx †</th>
             <th class="num">Window</th>
             <th class="num">Commits</th>
             <th class="num">Bugs</th>
@@ -865,7 +865,7 @@ a.mlink:hover { text-decoration: underline; }
             <th>Cost</th>
             <th class="num">Wall</th>
             <th class="num">Tokens</th>
-            <th class="num">Peak ctx</th>
+            <th class="num">Peak ctx †</th>
             <th class="num">Window</th>
             <th class="num">Commits</th>
             <th class="num">Bugs</th>
@@ -938,6 +938,13 @@ a.mlink:hover { text-decoration: underline; }
             <b>Bugs</b> are weighted: critical 3, medium 2, minor 1. Every run
             uses the frozen <code>prompt-guided.txt</code>. Claude runs on a
             subscription plan show computed token cost, not a metered bill.
+        </p>
+        <p class="lede">
+            <b>&dagger; Peak context is not verifiable for a row scored before
+            2026-09-04.</b> The session log of such a row shows that a
+            compaction happened. It does not record the context size at each
+            cycle, so the figure agrees with a maximum but no log proves it.
+            Runs from 2026-09-04 record the context at every cycle.
         </p>
     </section>
 

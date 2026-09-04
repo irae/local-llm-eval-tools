@@ -192,7 +192,8 @@ model (`claude-fable-5`), never on a smaller model. Mechanical steps
       To find the log of an older run, match a candidate session against the row:
       each pi assistant message carries its own `model` and `usage`, so count the
       assistant messages of the run's model, count the `toolCall` blocks, and
-      compare both against `telemetry`. Do not trust the directory name alone —
+      compare both against `telemetry`. `node count-tool-calls.mjs
+      [--lines <n>] <session.jsonl> [...]` prints both counts. Do not trust the directory name alone —
       runs made before the bench worktrees existed sit under
       `~/.pi/agent/sessions/--Users-irae-code-mendel--/`, next to unrelated work.
 

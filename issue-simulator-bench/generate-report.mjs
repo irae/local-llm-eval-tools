@@ -320,7 +320,7 @@ function scoreboardFor(rows) {
         'Cost',
         'Wall',
         'Tokens',
-        'Peak ctx',
+        'Peak ctx †',
         'Window',
         'Commits',
         'Bugs',
