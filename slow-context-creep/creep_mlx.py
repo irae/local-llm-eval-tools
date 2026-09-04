@@ -16,8 +16,9 @@ thread can die while the process lives and `/health` keeps answering.
 The runner owns the liveness rule; this file gives it the two backend
 parts. `SERVER_LOG` points it at the server log, where the Metal
 out-of-memory signature appears — set it. The probe is one real
-completion, which the runner sends only after a step gives no reply for
-`STALL_S`.
+completion, which the runner sends only after a step stays SILENT for
+`STALL_S`. This path streams, so every chunk calls `creep.beat()`; a
+step that still sends tokens never counts as stalled.
 
 Decode speed comes from the gaps between streamed chunks; this server
 reports no timings of its own.
@@ -70,6 +71,7 @@ def step(prompt, _label):
             chunk = json.loads(line[5:])
             piece = chunk["choices"][0].get("text")
             if piece:
+                creep.beat()
                 stamps.append(time.time())
                 pieces.append(piece)
 
@@ -82,7 +84,7 @@ def step(prompt, _label):
 def main():
     creep.usage(__doc__)
     if not creep.MODEL:
-        raise SystemExit("MODEL must be the repo id the server was started with")
+        creep.die("MODEL must be the repo id the server was started with")
     if SERVER_LOG:
         creep.watch_server_log(SERVER_LOG, DEATH_SIGNATURES)
     else:

@@ -22,9 +22,12 @@ Two consequences worth carrying when comparing against llama-server:
 Decode speed comes from the gaps between streamed chunks, because this
 server reports no timings of its own.
 
-Liveness: the runner probes ONE real completion here when a step gives
-no reply for `STALL_S`. LM Studio writes its log through the app, so
-this adapter passes no server log.
+Liveness: this path streams, so every chunk calls `creep.beat()` and a
+step that still sends tokens never counts as stalled. Only a silent
+phase — prefill, or a full recompute near the window edge — can reach
+`STALL_S` and start the one real completion the runner probes with. LM
+Studio writes its log through the app, so this file passes no server
+log.
 
 Usage:
     DEPTH_LIST=4096,8192 MODEL=gemma-4-12b-it-mlx creep_lmstudio.py \\
@@ -70,6 +73,7 @@ def step(prompt, _label):
             delta = chunk["choices"][0].get("delta", {})
             piece = delta.get("content") or delta.get("reasoning_content")
             if piece:
+                creep.beat()
                 stamps.append(time.time())
                 pieces.append(piece)
 
@@ -84,7 +88,8 @@ def step(prompt, _label):
 def main():
     creep.usage(__doc__)
     if not creep.MODEL:
-        raise SystemExit("MODEL must be the key from `lms ls`, e.g. gemma-4-12b-it-mlx")
+        creep.die("MODEL must be the key from `lms ls`, "
+                  "e.g. gemma-4-12b-it-mlx")
     print("LM Studio, chat endpoint, contexts=%d pause=%.0fs"
           % (creep.N_CONTEXTS, creep.STEP_PAUSE_S), flush=True)
     raise SystemExit(creep.run(step, probe))

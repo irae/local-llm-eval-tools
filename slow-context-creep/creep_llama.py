@@ -21,9 +21,12 @@ Thinking: llama-server defaults `enable_thinking` to TRUE on the chat
 path. `THINKING=off` sends `enable_thinking: false`. The raw completion
 path has no template and therefore no thinking either way.
 
-Liveness: the runner probes ONE real completion here when a step gives
-no reply for `STALL_S`. llama-server has no silent-death signature worth
-grepping, so it passes no server log.
+Liveness: the runner probes ONE real completion here when a step stays
+silent for `STALL_S`. Neither endpoint streams, so the whole step counts
+as silence and the stall clock runs from the start of the request. Set
+`STALL_S` above the longest prefill this config can have. llama-server
+has no silent-death signature worth grepping, so this file passes no
+server log.
 
 Usage:
     DEPTH_LIST=4096,8192,16384 MODEL=gemma-4-12b-it creep_llama.py \\
@@ -89,7 +92,7 @@ def step_chat(prompt, _label):
 def main():
     creep.usage(__doc__)
     if ENDPOINT == "chat" and not creep.MODEL:
-        raise SystemExit("chat endpoint needs MODEL set")
+        creep.die("chat endpoint needs MODEL set")
     print("llama-server, endpoint=%s thinking=%s contexts=%d pause=%.0fs"
           % (ENDPOINT, THINKING if ENDPOINT == "chat" else "n/a (no template)",
              creep.N_CONTEXTS, creep.STEP_PAUSE_S), flush=True)

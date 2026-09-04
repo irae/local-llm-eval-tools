@@ -49,7 +49,7 @@ Environment, all optional except DEPTH_LIST:
     FLOOR_TOKS      usability floor, default 8
     COMPACT_PAGES   pages compressed or decompressed in one step that
                     count as material compaction, default 200
-    STALL_S         seconds without a reply before one liveness probe,
+    STALL_S         seconds of silence before one liveness probe,
                     default 600
     PROBE_TIMEOUT_S seconds to wait for that probe, default 300
     SWEEP_BASE      server base URL, default http://127.0.0.1:8081
@@ -88,12 +88,24 @@ RANGE_SPAN = 200000
 # it persists AND speed does not come back.
 MAX_COMPACTING_STEPS = 3
 
+# A probe queued behind a live step on a one-slot server fails exactly
+# like a probe to a dead one. So one failure is a suspicion and two are
+# the verdict, and the step gets another silent STALL_S to answer in
+# between.
+PROBES_BEFORE_DEAD = 2
+
 PAGE_BYTES = 16384
 POLL_S = min(30.0, STALL_S)
+LAST_BEAT = [0.0]
 
 
 class ServerDead(Exception):
     pass
+
+
+def die(message):
+    print(message, file=sys.stderr, flush=True)
+    raise SystemExit(2)
 
 
 def usage(doc):
@@ -106,9 +118,8 @@ def vm_counters():
     try:
         out = subprocess.run(["vm_stat"], capture_output=True, text=True).stdout
     except FileNotFoundError:
-        raise SystemExit("vm_stat not found. This method reads the macOS "
-                         "memory counters; run the sweep on the machine "
-                         "under test.")
+        die("vm_stat not found. This method reads the macOS memory "
+            "counters; run the sweep on the machine under test.")
     counters = {}
     for line in out.splitlines():
         if ":" not in line:
@@ -173,8 +184,17 @@ def watch_server_log(path, signatures):
     threading.Thread(target=loop, daemon=True).start()
 
 
+def beat():
+    """An adapter calls this for every streamed chunk it receives.
+
+    The stall clock counts silence, so a step that still sends tokens
+    never looks stalled.
+    """
+    LAST_BEAT[0] = time.time()
+
+
 def take_step(step, probe, prompt, label, depth):
-    """Run one step, and probe liveness if it gives no reply for STALL_S."""
+    """Run one step, and probe liveness while the step stays silent."""
     box = {}
 
     def worker():
@@ -184,38 +204,90 @@ def take_step(step, probe, prompt, label, depth):
             box["error"] = error
 
     began = time.time()
+    LAST_BEAT[0] = began
     thread = threading.Thread(target=worker, daemon=True)
     thread.start()
 
-    waited = 0.0
+    probe_box = {}
+    probe_thread = None
+    stall_at = STALL_S
+    seen_beat = began
+    failures = 0
+
+    def probe_worker():
+        try:
+            probe_box["alive"] = bool(probe(PROBE_TIMEOUT_S))
+        except Exception as error:
+            probe_box["alive"] = False
+            probe_box["error"] = error
+
     while True:
         thread.join(POLL_S)
+
         if not thread.is_alive():
+            if probe_thread is not None and probe_thread.is_alive():
+                print("  the step answered while the probe was still "
+                      "waiting. The server is alive; the probe is dropped.",
+                      flush=True)
             break
-        waited += POLL_S
-        if waited < STALL_S:
+
+        silent = time.time() - LAST_BEAT[0]
+
+        if LAST_BEAT[0] > seen_beat:
+            seen_beat = LAST_BEAT[0]
+            stall_at = STALL_S
+            failures = 0
+            if probe_thread is not None:
+                print("  the step sends tokens again. The server is alive; "
+                      "the probe is dropped.", flush=True)
+                probe_thread = None
+                probe_box = {}
+
+        if probe_thread is not None:
+            if probe_thread.is_alive():
+                continue
+            took = time.time() - probe_box.get("began", time.time())
+            if probe_box.get("alive"):
+                print("  the probe answered in %.0f s. The server is alive "
+                      "and the step is slow. The probe took a cache slot, so "
+                      "the next step can re-read its prompt and read slow."
+                      % took, flush=True)
+                probe_thread = None
+                probe_box = {}
+                failures = 0
+                stall_at = silent + STALL_S
+                continue
+            if "error" in probe_box:
+                print("  the probe did not come back: %s" % probe_box["error"],
+                      flush=True)
+            probe_thread = None
+            probe_box = {}
+            failures += 1
+            if failures < PROBES_BEFORE_DEAD:
+                print("  probe %d of %d failed. A queued probe behind a live "
+                      "step fails the same way, so the sweep waits another "
+                      "%.0f s of silence and probes again."
+                      % (failures, PROBES_BEFORE_DEAD, STALL_S), flush=True)
+                stall_at = silent + STALL_S
+                continue
+            print("STOP: server dead. The step gave nothing for %.0f s and "
+                  "%d probes did not come back, at depth %d."
+                  % (silent, failures, depth), flush=True)
+            raise ServerDead()
+
+        if silent < stall_at:
             continue
-        waited = 0.0
-        print("STALL: no reply for %.0f s at depth %d on context %s"
-              % (STALL_S, depth, label), flush=True)
+
+        print("STALL: no output for %.0f s at depth %d on context %s"
+              % (silent, depth, label), flush=True)
         if probe is None:
             print("  this backend gives no probe; the sweep keeps waiting",
                   flush=True)
+            stall_at = silent + STALL_S
             continue
-        probe_began = time.time()
-        try:
-            alive = bool(probe(PROBE_TIMEOUT_S))
-        except Exception as error:
-            print("  probe failed: %s" % error, flush=True)
-            alive = False
-        took = time.time() - probe_began
-        if not alive:
-            print("STOP: server dead. One real completion did not return in "
-                  "%.0f s at depth %d." % (took, depth), flush=True)
-            raise ServerDead()
-        print("  probe answered in %.0f s. The server is alive and the step "
-              "is slow. The probe took a cache slot, so the next step can "
-              "re-read its prompt and read slow." % took, flush=True)
+        probe_box = {"began": time.time()}
+        probe_thread = threading.Thread(target=probe_worker, daemon=True)
+        probe_thread.start()
 
     if "error" in box:
         raise box["error"]
@@ -232,8 +304,7 @@ def run(step, probe=None):
     server without a second process.
     """
     if not DEPTHS:
-        raise SystemExit("DEPTH_LIST must be set, "
-                         "e.g. DEPTH_LIST=4096,8192,16384")
+        die("DEPTH_LIST must be set, e.g. DEPTH_LIST=4096,8192,16384")
     if STEP_PAUSE_S < 25:
         print("WARNING: pause %.0fs is below the documented 25s. A fast "
               "sweep understates the ceiling." % STEP_PAUSE_S, flush=True)
