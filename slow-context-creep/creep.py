@@ -107,6 +107,13 @@ def free_mb(counters):
     return counters.get("Pages free", 0) * 16384 / 1048576
 
 
+def wired_mb(counters):
+    # The meter the method names. Free stays low after the first model
+    # load because the weights sit in the page cache, so free alone
+    # cannot say whether the GPU has room.
+    return counters.get("Pages wired down", 0) * 16384 / 1048576
+
+
 def run(step):
     """Drive the sweep. `step(prompt, label)` returns (tok_s, generated).
 
@@ -131,7 +138,7 @@ def run(step):
     compacting_steps = 0
     previous_toks = 0.0
 
-    print("context\tdepth_tokens\tdecode_toks\tfree_mb\tswap_delta_mb\tstep_seconds",
+    print("context\tdepth_tokens\tdecode_toks\twired_mb\tfree_mb\tswap_delta_mb\tstep_seconds",
           flush=True)
 
     for target in DEPTHS:
@@ -154,9 +161,9 @@ def run(step):
 
             counters = vm_counters()
             swap_delta = swap_used_mb() - swap_start
-            print("%s\t%d\t%.2f\t%.0f\t%.0f\t%.0f"
-                  % (ctx["label"], ctx["depth"], tok_s, free_mb(counters),
-                     swap_delta, elapsed), flush=True)
+            print("%s\t%d\t%.2f\t%.0f\t%.0f\t%.0f\t%.0f"
+                  % (ctx["label"], ctx["depth"], tok_s, wired_mb(counters),
+                     free_mb(counters), swap_delta, elapsed), flush=True)
 
             if tok_s <= 0:
                 print("STOP: silent halt, no tokens at depth %d"
