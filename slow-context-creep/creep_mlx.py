@@ -13,21 +13,24 @@ and every step will re-read its whole prompt.
 
 The one failure this backend has that the others do not: its generation
 thread can die while the process lives and `/health` keeps answering.
-`SERVER_LOG` points this script at the server log so it can see the Metal
-out-of-memory signature and stop, instead of hanging. Set it.
+The runner owns the liveness rule; this file gives it the two backend
+parts. `SERVER_LOG` points it at the server log, where the Metal
+out-of-memory signature appears — set it. The probe is one real
+completion, which the runner sends only after a step gives no reply for
+`STALL_S`.
 
 Decode speed comes from the gaps between streamed chunks; this server
 reports no timings of its own.
 
 Usage:
     DEPTH_LIST=4096,8192 MODEL=mlx-community/Qwen3.8-27B-4bit \\
-    SERVER_LOG=/tmp/mlx-server.log creep_mlx.py
+    SERVER_LOG=/tmp/mlx-server.log creep_mlx.py \\
+    > results/<config>-creep.tsv 2>&1
 """
 
 import json
 import os
 import sys
-import threading
 import time
 import urllib.request
 
@@ -41,26 +44,14 @@ DEATH_SIGNATURES = ("Insufficient Memory",
                     "Traceback (most recent call last)")
 
 
-def watch_server_log():
-    position = 0
-    try:
-        with open(SERVER_LOG, errors="ignore") as handle:
-            handle.seek(0, os.SEEK_END)
-            position = handle.tell()
-    except OSError:
-        return
-    while True:
-        time.sleep(3)
-        try:
-            with open(SERVER_LOG, errors="ignore") as handle:
-                handle.seek(position)
-                chunk = handle.read()
-                position = handle.tell()
-        except OSError:
-            continue
-        if any(signature in chunk for signature in DEATH_SIGNATURES):
-            print("STOP: generation thread died in %s" % SERVER_LOG, flush=True)
-            os._exit(42)
+def probe(timeout):
+    payload = {"model": creep.MODEL, "prompt": "ok", "max_tokens": 1,
+               "temperature": 0}
+    request = urllib.request.Request(
+        creep.BASE + "/v1/completions", json.dumps(payload).encode(),
+        {"Content-Type": "application/json"})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return bool(json.load(response).get("choices"))
 
 
 def step(prompt, _label):
@@ -89,20 +80,21 @@ def step(prompt, _label):
 
 
 def main():
+    creep.usage(__doc__)
     if not creep.MODEL:
         raise SystemExit("MODEL must be the repo id the server was started with")
-    if not SERVER_LOG:
-        print("WARNING: SERVER_LOG unset. This backend can die silently with "
-              "a green /health; without the log the sweep will hang instead "
-              "of stopping.", flush=True)
+    if SERVER_LOG:
+        creep.watch_server_log(SERVER_LOG, DEATH_SIGNATURES)
     else:
-        threading.Thread(target=watch_server_log, daemon=True).start()
+        print("WARNING: SERVER_LOG unset. This backend can die with a green "
+              "/health, so the sweep loses the fastest half of its liveness "
+              "signal. The stall probe still runs.", flush=True)
     if creep.N_CONTEXTS > 1:
         print("NOTE: start the server with --prompt-cache-size >= %d"
               % creep.N_CONTEXTS, flush=True)
     print("mlx_lm.server, contexts=%d pause=%.0fs"
           % (creep.N_CONTEXTS, creep.STEP_PAUSE_S), flush=True)
-    raise SystemExit(creep.run(step))
+    raise SystemExit(creep.run(step, probe))
 
 
 if __name__ == "__main__":

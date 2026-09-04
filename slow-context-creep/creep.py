@@ -3,8 +3,15 @@
 One implementation of the method in `docs/methodology/context-creep.md`,
 used by `creep_llama.py`, `creep_mlx.py` and `creep_lmstudio.py`. Those
 three files hold only what genuinely differs per backend: the endpoint,
-the request shape, how decode speed is read, and how a dead server is
-detected.
+the request shape, how decode speed is read, and the two backend parts
+of the liveness signal (the server-log death signature, and the one real
+completion used as a probe).
+
+One command, one output file. The runner is also the monitor: it samples
+memory itself and it watches liveness itself, so a sweep needs no second
+process beside it. Send stdout to a file and that file holds the whole
+run — the column header, one row per step, every event, and the STOP
+line that carries the verdict.
 
 What this file owns, so that every backend gets it identically:
 
@@ -18,11 +25,21 @@ What this file owns, so that every backend gets it identically:
   Parallel slot testing is deliberately not supported: the project
   measures round-robin, which is what separate sessions keeping their
   own cache actually look like.
+- **Memory sampling, wired first.** The runner reads `vm_stat` after
+  every step. Wired memory is the meter that cannot lie: free memory
+  stays low after the first model load, because the weights sit in the
+  page cache (`research/run1/results/backend-diagnosis.md`). Free and
+  the swap delta ride beside it, and so do the compressor page counts,
+  which are what the compression-onset criterion reads.
 - **The stop conditions.** Decode below the floor, an OOM or any request
-  failure, a silent halt, swap growth, and sustained memory compaction.
-- **Memory sampling.** The runner reads `vm_stat` itself rather than
-  trusting an external watcher, so a sweep cannot silently run blind.
-  Run the watcher as well, for the record.
+  failure, a silent halt, swap growth, sustained material compaction,
+  and a dead server.
+- **Liveness, one signal.** A server can answer `/health` after its
+  generation thread died, so `/health` is never used. The runner watches
+  the server log for the backend's death signature, and, when a step
+  gives no reply for `STALL_S`, it sends ONE real completion. A
+  completion that returns means the server is alive and the step is
+  merely slow. One that does not return means the server is dead.
 
 Environment, all optional except DEPTH_LIST:
 
@@ -30,20 +47,32 @@ Environment, all optional except DEPTH_LIST:
     N_CONTEXTS      round-robin contexts, default 1
     STEP_PAUSE_S    seconds between steps, default 25
     FLOOR_TOKS      usability floor, default 8
+    COMPACT_PAGES   pages compressed or decompressed in one step that
+                    count as material compaction, default 200
+    STALL_S         seconds without a reply before one liveness probe,
+                    default 600
+    PROBE_TIMEOUT_S seconds to wait for that probe, default 300
     SWEEP_BASE      server base URL, default http://127.0.0.1:8081
     MODEL           model id the server answers to, where needed
+
+Exit codes: 0 the sweep found the floor or reached the last depth, 42 a
+stop that invalidates every number past it, 2 a usage or platform error.
 """
 
-import json
 import os
 import subprocess
 import sys
+import threading
 import time
 
-DEPTHS = [int(x) for x in os.environ["DEPTH_LIST"].split(",")]
+DEPTHS = [int(x) for x in
+          os.environ.get("DEPTH_LIST", "").replace(" ", "").split(",") if x]
 N_CONTEXTS = int(os.environ.get("N_CONTEXTS", "1"))
 STEP_PAUSE_S = float(os.environ.get("STEP_PAUSE_S", "25"))
 FLOOR_TOKS = float(os.environ.get("FLOOR_TOKS", "8"))
+COMPACT_PAGES = int(os.environ.get("COMPACT_PAGES", "200"))
+STALL_S = float(os.environ.get("STALL_S", "600"))
+PROBE_TIMEOUT_S = float(os.environ.get("PROBE_TIMEOUT_S", "300"))
 BASE = os.environ.get("SWEEP_BASE", "http://127.0.0.1:8081")
 MODEL = os.environ.get("MODEL", "")
 
@@ -59,9 +88,27 @@ RANGE_SPAN = 200000
 # it persists AND speed does not come back.
 MAX_COMPACTING_STEPS = 3
 
+PAGE_BYTES = 16384
+POLL_S = min(30.0, STALL_S)
+
+
+class ServerDead(Exception):
+    pass
+
+
+def usage(doc):
+    if "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
+        print(doc.strip())
+        raise SystemExit(0)
+
 
 def vm_counters():
-    out = subprocess.run(["vm_stat"], capture_output=True, text=True).stdout
+    try:
+        out = subprocess.run(["vm_stat"], capture_output=True, text=True).stdout
+    except FileNotFoundError:
+        raise SystemExit("vm_stat not found. This method reads the macOS "
+                         "memory counters; run the sweep on the machine "
+                         "under test.")
     counters = {}
     for line in out.splitlines():
         if ":" not in line:
@@ -74,30 +121,119 @@ def vm_counters():
 
 
 def swap_used_mb():
-    out = subprocess.run(["sysctl", "-n", "vm.swapusage"],
-                         capture_output=True, text=True).stdout
-    for token in out.split():
-        if token.endswith("M") and "used" in out.split(token)[0][-8:]:
-            try:
-                return float(token.rstrip("M"))
-            except ValueError:
-                pass
+    try:
+        out = subprocess.run(["sysctl", "-n", "vm.swapusage"],
+                             capture_output=True, text=True).stdout
+    except FileNotFoundError:
+        return 0.0
     parts = out.split()
-    for i, token in enumerate(parts):
-        if token == "used" and i + 2 < len(parts):
-            return float(parts[i + 2].rstrip("M"))
+    for index, token in enumerate(parts):
+        if token == "used" and index + 2 < len(parts):
+            return float(parts[index + 2].rstrip("M"))
     return 0.0
 
 
+def wired_mb(counters):
+    return counters.get("Pages wired down", 0) * PAGE_BYTES / 1048576
+
+
 def free_mb(counters):
-    return counters.get("Pages free", 0) * 16384 / 1048576
+    return counters.get("Pages free", 0) * PAGE_BYTES / 1048576
 
 
-def run(step):
+def watch_server_log(path, signatures):
+    """Stop the sweep when the server log shows a death signature.
+
+    The signatures belong to the backend, so the adapter passes them in.
+    """
+    try:
+        with open(path, errors="ignore") as handle:
+            handle.seek(0, os.SEEK_END)
+            start = handle.tell()
+    except OSError as error:
+        print("WARNING: cannot read %s (%s). The log signal is off; the "
+              "stall probe still runs." % (path, error), flush=True)
+        return
+
+    def loop():
+        position = start
+        while True:
+            time.sleep(3)
+            try:
+                with open(path, errors="ignore") as handle:
+                    handle.seek(position)
+                    chunk = handle.read()
+                    position = handle.tell()
+            except OSError:
+                continue
+            if any(signature in chunk for signature in signatures):
+                print("STOP: generation thread died in %s" % path, flush=True)
+                os._exit(42)
+
+    threading.Thread(target=loop, daemon=True).start()
+
+
+def take_step(step, probe, prompt, label, depth):
+    """Run one step, and probe liveness if it gives no reply for STALL_S."""
+    box = {}
+
+    def worker():
+        try:
+            box["value"] = step(prompt, label)
+        except BaseException as error:
+            box["error"] = error
+
+    began = time.time()
+    thread = threading.Thread(target=worker, daemon=True)
+    thread.start()
+
+    waited = 0.0
+    while True:
+        thread.join(POLL_S)
+        if not thread.is_alive():
+            break
+        waited += POLL_S
+        if waited < STALL_S:
+            continue
+        waited = 0.0
+        print("STALL: no reply for %.0f s at depth %d on context %s"
+              % (STALL_S, depth, label), flush=True)
+        if probe is None:
+            print("  this backend gives no probe; the sweep keeps waiting",
+                  flush=True)
+            continue
+        probe_began = time.time()
+        try:
+            alive = bool(probe(PROBE_TIMEOUT_S))
+        except Exception as error:
+            print("  probe failed: %s" % error, flush=True)
+            alive = False
+        took = time.time() - probe_began
+        if not alive:
+            print("STOP: server dead. One real completion did not return in "
+                  "%.0f s at depth %d." % (took, depth), flush=True)
+            raise ServerDead()
+        print("  probe answered in %.0f s. The server is alive and the step "
+              "is slow. The probe took a cache slot, so the next step can "
+              "re-read its prompt and read slow." % took, flush=True)
+
+    if "error" in box:
+        raise box["error"]
+    tok_s, generated = box["value"]
+    return tok_s, generated, time.time() - began
+
+
+def run(step, probe=None):
     """Drive the sweep. `step(prompt, label)` returns (tok_s, generated).
 
     It must raise on failure; the runner turns that into an OOM stop.
+    `probe(timeout)` sends ONE real completion and returns whether it
+    came back. Pass it, so the runner can tell a slow step from a dead
+    server without a second process.
     """
+    if not DEPTHS:
+        raise SystemExit("DEPTH_LIST must be set, "
+                         "e.g. DEPTH_LIST=4096,8192,16384")
     if STEP_PAUSE_S < 25:
         print("WARNING: pause %.0fs is below the documented 25s. A fast "
               "sweep understates the ceiling." % STEP_PAUSE_S, flush=True)
@@ -113,11 +249,15 @@ def run(step):
 
     start = vm_counters()
     swap_start = swap_used_mb()
-    compaction_start = start.get("Decompressions", 0)
+    compressions = start.get("Compressions", 0)
+    decompressions = start.get("Decompressions", 0)
     compacting_steps = 0
     best_toks = 0.0
 
-    print("context\tdepth_tokens\tdecode_toks\tfree_mb\tswap_delta_mb\tstep_seconds",
+    print("start: wired %.0f MB, free %.0f MB, swap used %.0f MB"
+          % (wired_mb(start), free_mb(start), swap_start), flush=True)
+    print("context\tdepth_tokens\tdecode_toks\twired_mb\tfree_mb\t"
+          "swap_delta_mb\tcompress_pages\tdecompress_pages\tstep_seconds",
           flush=True)
 
     for target in DEPTHS:
@@ -127,22 +267,29 @@ def run(step):
                 ctx["block"] += 1
                 ctx["depth"] += 52
 
-            began = time.time()
             try:
-                tok_s, generated = step(ctx["prompt"], ctx["label"])
+                tok_s, generated, elapsed = take_step(
+                    step, probe, ctx["prompt"], ctx["label"], ctx["depth"])
+            except ServerDead:
+                return 42
             except Exception as error:
                 print("STOP: request failed at depth %d on context %s: %s"
                       % (ctx["depth"], ctx["label"], error), flush=True)
                 return 42
-            elapsed = time.time() - began
 
             ctx["prompt"] += generated
 
             counters = vm_counters()
             swap_delta = swap_used_mb() - swap_start
-            print("%s\t%d\t%.2f\t%.0f\t%.0f\t%.0f"
-                  % (ctx["label"], ctx["depth"], tok_s, free_mb(counters),
-                     swap_delta, elapsed), flush=True)
+            compress_delta = counters.get("Compressions", 0) - compressions
+            decompress_delta = counters.get("Decompressions", 0) - decompressions
+            compressions = counters.get("Compressions", 0)
+            decompressions = counters.get("Decompressions", 0)
+
+            print("%s\t%d\t%.2f\t%.0f\t%.0f\t%.0f\t%d\t%d\t%.0f"
+                  % (ctx["label"], ctx["depth"], tok_s, wired_mb(counters),
+                     free_mb(counters), swap_delta, compress_delta,
+                     decompress_delta, elapsed), flush=True)
 
             if tok_s <= 0:
                 print("STOP: silent halt, no tokens at depth %d"
@@ -155,15 +302,16 @@ def run(step):
                       % (swap_delta, ctx["depth"]), flush=True)
                 return 42
 
-            compacting = counters.get("Decompressions", 0) > compaction_start
-            compaction_start = counters.get("Decompressions", 0)
+            compacting = compress_delta + decompress_delta >= COMPACT_PAGES
             recovered = tok_s >= 0.9 * best_toks
             if compacting and not recovered:
                 compacting_steps += 1
                 if compacting_steps >= MAX_COMPACTING_STEPS:
-                    print("STOP: memory compaction on %d consecutive steps "
-                          "without speed recovering, by depth %d"
-                          % (compacting_steps, ctx["depth"]), flush=True)
+                    print("STOP: %d or more pages compressed or decompressed "
+                          "on %d steps in a row, and speed did not come back, "
+                          "by depth %d"
+                          % (COMPACT_PAGES, compacting_steps, ctx["depth"]),
+                          flush=True)
                     return 42
             else:
                 compacting_steps = 0

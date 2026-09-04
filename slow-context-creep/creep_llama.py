@@ -21,8 +21,13 @@ Thinking: llama-server defaults `enable_thinking` to TRUE on the chat
 path. `THINKING=off` sends `enable_thinking: false`. The raw completion
 path has no template and therefore no thinking either way.
 
+Liveness: the runner probes ONE real completion here when a step gives
+no reply for `STALL_S`. llama-server has no silent-death signature worth
+grepping, so it passes no server log.
+
 Usage:
-    DEPTH_LIST=4096,8192,16384 MODEL=gemma-4-12b-it creep_llama.py
+    DEPTH_LIST=4096,8192,16384 MODEL=gemma-4-12b-it creep_llama.py \\
+    > results/<config>-creep.tsv 2>&1
 """
 
 import json
@@ -53,6 +58,19 @@ def step_completion(prompt, _label):
     return timings.get("predicted_per_second") or 0.0, reply.get("content", "")
 
 
+def probe(timeout):
+    if ENDPOINT == "chat":
+        reply = post("/v1/chat/completions",
+                     {"model": creep.MODEL,
+                      "messages": [{"role": "user", "content": "ok"}],
+                      "max_tokens": 1, "temperature": 0}, timeout)
+        return bool(reply.get("choices"))
+    reply = post("/completion", {"prompt": "ok", "n_predict": 1,
+                                 "temperature": 0, "cache_prompt": False},
+                 timeout)
+    return "content" in reply
+
+
 def step_chat(prompt, _label):
     payload = {"model": creep.MODEL,
                "messages": [{"role": "user", "content": prompt}],
@@ -69,13 +87,14 @@ def step_chat(prompt, _label):
 
 
 def main():
+    creep.usage(__doc__)
     if ENDPOINT == "chat" and not creep.MODEL:
         raise SystemExit("chat endpoint needs MODEL set")
     print("llama-server, endpoint=%s thinking=%s contexts=%d pause=%.0fs"
           % (ENDPOINT, THINKING if ENDPOINT == "chat" else "n/a (no template)",
              creep.N_CONTEXTS, creep.STEP_PAUSE_S), flush=True)
     step = step_chat if ENDPOINT == "chat" else step_completion
-    raise SystemExit(creep.run(step))
+    raise SystemExit(creep.run(step, probe))
 
 
 if __name__ == "__main__":

@@ -22,8 +22,13 @@ Two consequences worth carrying when comparing against llama-server:
 Decode speed comes from the gaps between streamed chunks, because this
 server reports no timings of its own.
 
+Liveness: the runner probes ONE real completion here when a step gives
+no reply for `STALL_S`. LM Studio writes its log through the app, so
+this adapter passes no server log.
+
 Usage:
-    DEPTH_LIST=4096,8192 MODEL=gemma-4-12b-it-mlx creep_lmstudio.py
+    DEPTH_LIST=4096,8192 MODEL=gemma-4-12b-it-mlx creep_lmstudio.py \\
+    > results/<config>-creep.tsv 2>&1
 """
 
 import json
@@ -34,6 +39,17 @@ import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import creep
+
+
+def probe(timeout):
+    payload = {"model": creep.MODEL,
+               "messages": [{"role": "user", "content": "ok"}],
+               "max_tokens": 1, "temperature": 0}
+    request = urllib.request.Request(
+        creep.BASE + "/v1/chat/completions", json.dumps(payload).encode(),
+        {"Content-Type": "application/json"})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return bool(json.load(response).get("choices"))
 
 
 def step(prompt, _label):
@@ -66,11 +82,12 @@ def step(prompt, _label):
 
 
 def main():
+    creep.usage(__doc__)
     if not creep.MODEL:
         raise SystemExit("MODEL must be the key from `lms ls`, e.g. gemma-4-12b-it-mlx")
     print("LM Studio, chat endpoint, contexts=%d pause=%.0fs"
           % (creep.N_CONTEXTS, creep.STEP_PAUSE_S), flush=True)
-    raise SystemExit(creep.run(step))
+    raise SystemExit(creep.run(step, probe))
 
 
 if __name__ == "__main__":
