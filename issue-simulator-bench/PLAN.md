@@ -193,7 +193,8 @@ model (`claude-fable-5`), never on a smaller model. Mechanical steps
       each pi assistant message carries its own `model` and `usage`, so count the
       assistant messages of the run's model, count the `toolCall` blocks, and
       compare both against `telemetry`. `node count-tool-calls.mjs
-      [--lines <n>] <session.jsonl> [...]` prints both counts. Do not trust the directory name alone —
+      [--lines <n>] <session.jsonl> [...]` prints both counts and the peak
+      context. Do not trust the directory name alone —
       runs made before the bench worktrees existed sit under
       `~/.pi/agent/sessions/--Users-irae-code-mendel--/`, next to unrelated work.
 
@@ -274,8 +275,17 @@ Checked on the Mac on 2026-09-01 without a model server running:
   yields two valid same-level runs, keep the best with `best_of` and
   requeue the intended level.
 - pi's "split turn / No prior history" marker is NOT a compaction —
-  never count it. `peak_context` is the maximum across all compaction
-  cycles, not the post-compaction value.
+  never count it. `peak_context` is the maximum, over the assistant
+  messages of the scored session(s), of `usage.input + usage.cacheRead
+  + usage.cacheWrite + usage.output`, which is pi's
+  `usage.totalTokens`. It is the largest context one turn occupied,
+  the response of that turn included, across all compaction cycles. It
+  is never the post-compaction value. `node count-tool-calls.mjs
+  [--lines <n>] <session.jsonl> [...]` prints it. Check the number
+  against the log before you commit the row. The retired claude-code
+  harness writes its log in another shape, which the counter does not
+  read; those rows keep an older reading and carry a dagger in the
+  report.
 
 ## Credit exhaustion
 
@@ -433,7 +443,7 @@ One object per run in a top-level `runs` array:
         "tokens_in": 266195,
         "tokens_out": 32603,
         "cache_read": 11324032,
-        "peak_context": 259619,
+        "peak_context": 260064,
         "window_pct": 52,
         "compactions": 0,
         "assistant_msgs": 113,

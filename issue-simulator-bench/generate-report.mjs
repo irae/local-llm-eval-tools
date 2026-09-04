@@ -320,7 +320,7 @@ function scoreboardFor(rows) {
         'Cost',
         'Wall',
         'Tokens',
-        'Peak ctx †',
+        'Peak ctx',
         'Window',
         'Commits',
         'Bugs',
@@ -368,7 +368,8 @@ function scoreboardFor(rows) {
                         .join(' · ')
                   : r.best_of
                     ? `best of ${r.best_of} runs`
-                    : rerunWhy || r.anomaly || negStats;
+                    : rerunWhy ||
+                      [r.anomaly, negStats].filter(Boolean).join(' · ');
             const gauge =
                 `<div class="scorewrap"><span class="scoreval">${Math.round(cap)}</span>` +
                 `<div class="bar${i === 0 ? ' gold' : ''}"><span style="width:${Math.round(cap)}%"></span></div></div>` +
@@ -404,7 +405,7 @@ function scoreboardFor(rows) {
             <td class="num">${cost}</td>
             <td class="num${best(isTop('wall_clock_min', t.wall_clock_min))}">${Math.round(t.wall_clock_min)} min</td>
             <td class="num${best(isTop('tokens_total', t.tokens_total))}">${mFmt(t.tokens_total)}</td>
-            <td class="num${best(t.peak_context != null && isTop('peak_context', t.peak_context))}">${t.peak_context != null ? kFmt(t.peak_context) : '—'}</td>
+            <td class="num${best(t.peak_context != null && isTop('peak_context', t.peak_context))}">${t.peak_context != null ? kFmt(t.peak_context) : '—'}${r.harness === 'claude-code' ? ' &dagger;' : ''}</td>
             <td class="num">${t.window_pct != null ? pill(winTone, t.window_pct + ' %') : '—'}</td>
             <td class="num">${t.commits}</td>
             <td class="num${best(bp === 0)}">${pill(bugTone(bp), String(bp))}</td>

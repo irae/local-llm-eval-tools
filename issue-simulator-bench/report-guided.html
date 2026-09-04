@@ -726,7 +726,7 @@ a.mlink:hover { text-decoration: underline; }
             <th>Cost</th>
             <th class="num">Wall</th>
             <th class="num">Tokens</th>
-            <th class="num">Peak ctx †</th>
+            <th class="num">Peak ctx</th>
             <th class="num">Window</th>
             <th class="num">Commits</th>
             <th class="num">Bugs</th>
@@ -752,7 +752,7 @@ a.mlink:hover { text-decoration: underline; }
             <td class="num">$2.10<small style="display:block;color:var(--ink-faint)">paid $2.47</small></td>
             <td class="num">249 min</td>
             <td class="num">68.1 M</td>
-            <td class="num">973 k</td>
+            <td class="num">996 k</td>
             <td class="num"><span class="pill p-bad">97 %</span></td>
             <td class="num">16</td>
             <td class="num best"><span class="pill p-good">0</span></td>
@@ -784,11 +784,11 @@ a.mlink:hover { text-decoration: underline; }
           <tr data-base="83" data-or="0" data-plan="0" data-crit="1" data-wall="92" data-local="1">
             <td class="rank">5</td>
             <th scope="row" class="model"><a class="mlink" href="https://huggingface.co/Qwen/Qwen3.6-35B-A3B" target="_blank">Qwen3.6 35B-A3B</a><small>pi · llama · local · think high</small></th>
-            <td><div class="scorewrap"><span class="scoreval">83</span><div class="bar"><span style="width:83%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">25 tool errors · 1 compaction</small></td>
+            <td><div class="scorewrap"><span class="scoreval">83</span><div class="bar"><span style="width:83%"></span></div></div><small style="display:block;color:var(--ink-faint);font-size:11px;margin-top:3px">peak_context corrected 2026-09-04: the earlier 77849 was the value after the compaction. · 25 tool errors · 1 compaction</small></td>
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">plan ≈$0.00</small></td>
             <td class="num">92 min</td>
             <td class="num">12.7 M</td>
-            <td class="num">78 k</td>
+            <td class="num">94 k</td>
             <td class="num">79 %</td>
             <td class="num">16</td>
             <td class="num"><span class="pill p-bad">5</span></td>
@@ -824,7 +824,7 @@ a.mlink:hover { text-decoration: underline; }
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">plan ≈$0.00</small></td>
             <td class="num">261 min</td>
             <td class="num best">1.3 M</td>
-            <td class="num">—</td>
+            <td class="num best">30 k</td>
             <td class="num">—</td>
             <td class="num">0</td>
             <td class="num"><span class="pill p-mid">3</span></td>
@@ -865,7 +865,7 @@ a.mlink:hover { text-decoration: underline; }
             <th>Cost</th>
             <th class="num">Wall</th>
             <th class="num">Tokens</th>
-            <th class="num">Peak ctx †</th>
+            <th class="num">Peak ctx</th>
             <th class="num">Window</th>
             <th class="num">Commits</th>
             <th class="num">Bugs</th>
@@ -879,7 +879,7 @@ a.mlink:hover { text-decoration: underline; }
             <td class="num">$5.73<small style="display:block;color:var(--ink-faint)">plan ≈$0.38</small></td>
             <td class="num">31 min</td>
             <td class="num">36.1 M</td>
-            <td class="num">180 k</td>
+            <td class="num">180 k &dagger;</td>
             <td class="num">18 %</td>
             <td class="num">18</td>
             <td class="num best"><span class="pill p-good">0</span></td>
@@ -891,7 +891,7 @@ a.mlink:hover { text-decoration: underline; }
             <td class="num"><span class="pill p-good">$0</span><small style="display:block;color:var(--ink-faint)">plan ≈$0.00</small></td>
             <td class="num">154 min</td>
             <td class="num best">1.1 M</td>
-            <td class="num best">22 k</td>
+            <td class="num best">23 k</td>
             <td class="num">85 %</td>
             <td class="num">6</td>
             <td class="num"><span class="pill p-mid">4</span></td>
@@ -903,7 +903,7 @@ a.mlink:hover { text-decoration: underline; }
             <td class="num">$2.56<small style="display:block;color:var(--ink-faint)">plan ≈$0.17</small></td>
             <td class="num best">18 min</td>
             <td class="num">20.3 M</td>
-            <td class="num">160 k</td>
+            <td class="num">160 k &dagger;</td>
             <td class="num">80 %</td>
             <td class="num">12</td>
             <td class="num"><span class="pill p-mid">4</span></td>
@@ -940,11 +940,14 @@ a.mlink:hover { text-decoration: underline; }
             subscription plan show computed token cost, not a metered bill.
         </p>
         <p class="lede">
-            <b>&dagger; Peak context is not verifiable for a row scored before
-            2026-09-04.</b> The session log of such a row shows that a
-            compaction happened. It does not record the context size at each
-            cycle, so the figure agrees with a maximum but no log proves it.
-            Runs from 2026-09-04 record the context at every cycle.
+            <b>Peak ctx</b> is the largest context one turn occupied, the
+            response of that turn included, across all compaction cycles.
+            <code>count-tool-calls.mjs</code> reads it from the session log of
+            the scored run. &dagger; marks the rows from the retired
+            claude-code harness: that harness writes its log in another shape,
+            which the counter does not read, so those cells keep the older
+            reading, which counts the prompt of the largest turn without the
+            response.
         </p>
     </section>
 

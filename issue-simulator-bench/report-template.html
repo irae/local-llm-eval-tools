@@ -713,11 +713,14 @@ a.mlink:hover { text-decoration: underline; }
             (≈5¢). See the cost section.
         </p>
         <p class="lede">
-            <b>&dagger; Peak context is not verifiable for a row scored before
-            2026-09-04.</b> The session log of such a row shows that a
-            compaction happened. It does not record the context size at each
-            cycle, so the figure agrees with a maximum but no log proves it.
-            Runs from 2026-09-04 record the context at every cycle.
+            <b>Peak ctx</b> is the largest context one turn occupied, the
+            response of that turn included, across all compaction cycles.
+            <code>count-tool-calls.mjs</code> reads it from the session log of
+            the scored run. &dagger; marks the rows from the retired
+            claude-code harness: that harness writes its log in another shape,
+            which the counter does not read, so those cells keep the older
+            reading, which counts the prompt of the largest turn without the
+            response.
         </p>
     </section>
 
