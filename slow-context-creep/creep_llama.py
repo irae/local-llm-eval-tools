@@ -64,6 +64,15 @@ def step_chat(prompt, _label):
     elapsed = time.time() - began
     message = reply["choices"][0].get("message") or {}
     text = (message.get("content") or "") + (message.get("reasoning_content") or "")
+
+    # Use the server's own decode rate, as the completion path does.
+    # Wall clock here would include prompt processing, which makes the
+    # chat curve look catastrophically slower than the raw one for a
+    # reason that has nothing to do with decode.
+    timings = reply.get("timings") or {}
+    rate = timings.get("predicted_per_second")
+    if rate:
+        return rate, text
     produced = reply.get("usage", {}).get("completion_tokens") or 0
     return (produced / elapsed if elapsed else 0.0), text
 
