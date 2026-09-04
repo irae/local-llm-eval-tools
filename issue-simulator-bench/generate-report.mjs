@@ -35,6 +35,7 @@ if (!outputs.length)
 // applies at render and sort time.
 const capped = (r) =>
     Math.min(r.score_total, (100 * (r.libraries_done ?? 8)) / 8);
+const rawScore = (r) => r.score_raw ?? r.score_total;
 // Invalid rows (serving failures, zero commits) stay visible but
 // dimmed, ranked last, and never counted as best.
 const dimmed = (r) => r.invalid || (r.libraries_done ?? 8) < 8;
@@ -76,10 +77,22 @@ const MATRIX_SCORE_ROWS = [
     const errors = [];
     for (const r of runs) {
         const sum = Object.values(r.scores).reduce((a, b) => a + b, 0);
-        if (Math.abs(sum - r.score_total) > 0.001)
+        const rawField = r.score_raw == null ? 'score_total' : 'score_raw';
+        if (Math.abs(sum - rawScore(r)) > 0.001)
             errors.push(
-                `${r.model}: scores sum ${sum} != score_total ${r.score_total}`
+                `${r.model}: scores sum ${sum} != ${rawField} ${rawScore(r)}`
             );
+        if (r.reruns) {
+            const want = Math.max(
+                0,
+                Math.min(rawScore(r), (100 * (r.libraries_done ?? 8)) / 8) -
+                    10 * r.reruns
+            );
+            if (Math.abs(want - r.score_total) > 0.001)
+                errors.push(
+                    `${r.model}: reruns ${r.reruns} needs score_total ${want}, row says ${r.score_total}`
+                );
+        }
         dataRows.forEach((row, i) => {
             const label = row.label.replace(/<[^>]+>/g, ' ').trim();
             const map = MATRIX_SCORE_ROWS.find(([re]) => re.test(label));
@@ -338,11 +351,16 @@ function scoreboardFor(rows) {
                 .slice(0, 3)
                 .map(([n, pl, sg]) => `${n} ${n === 1 ? sg : pl}`)
                 .join(' · ');
+            const raw = rawScore(r);
+            const rerunWhy = r.reruns
+                ? `${r.reruns} re-run${r.reruns === 1 ? '' : 's'}, −${10 * r.reruns}`
+                : null;
             const why = r.invalid
                 ? `invalid — ${r.invalid_reason}`
                 : done < 8
                   ? [
-                        cap < r.score_total ? `raw ${r.score_total}` : null,
+                        cap < raw ? `raw ${raw}` : null,
+                        rerunWhy,
                         `${done}/8 done`,
                         endWhy,
                     ]
@@ -350,9 +368,7 @@ function scoreboardFor(rows) {
                         .join(' · ')
                   : r.best_of
                     ? `best of ${r.best_of} runs`
-                    : r.reruns
-                      ? `${r.reruns} full re-run${r.reruns === 1 ? '' : 's'} needed`
-                      : r.anomaly || negStats;
+                    : rerunWhy || r.anomaly || negStats;
             const gauge =
                 `<div class="scorewrap"><span class="scoreval">${Math.round(cap)}</span>` +
                 `<div class="bar${i === 0 ? ' gold' : ''}"><span style="width:${Math.round(cap)}%"></span></div></div>` +
@@ -458,7 +474,7 @@ ${cells}
     const totals = rows
         .map(
             (r, i) =>
-                `<td${i === 0 ? ' class="best"' : ''}${dimmed(r) ? ' style="opacity:.45"' : ''}>${r.score_total}</td>`
+                `<td${i === 0 ? ' class="best"' : ''}${dimmed(r) ? ' style="opacity:.45"' : ''}>${rawScore(r)}</td>`
         )
         .join('\n            ');
     return `<div class="scroller"><table class="matrix">

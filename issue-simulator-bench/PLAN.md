@@ -234,14 +234,40 @@ Checked on the Mac on 2026-09-01 without a model server running:
   `invalid_reason`), render dimmed with a dash rank on the reports,
   are excluded from the site tables, and do not occupy the
   one-row-per-version slot.
+- **Retry of a valid partial row**: a valid but partial run can run
+  again. The cause of the failure sets the score.
+    - _The model failed_: the new row replaces the old one and loses 10
+      points for each earlier attempt —
+      `score_total = max(0, min(score_raw, cap) − 10 × reruns)`, where
+      `cap` is the completion cap above. `reruns` counts the earlier
+      valid attempts of the same model, version and level. The row
+      keeps `score_raw` (the sum of the criteria) and `reruns: <n>`,
+      and the report writes the count and the penalty under the score.
+      Remove the first attempt from the live results; git history keeps
+      it. Worked example: the Bonsai-on-PrismML-fork blind
+      thinking-high row (60.5 raw, 12.5 capped, 1 of 8) typed the
+      repository name wrong, got 404 on every issue fetch, read "remove
+      chalk" out of the git log, and declared the task complete. Its
+      retry scores with `reruns: 1`.
+    - _The benchmark failed_: an output budget or context window too
+      small to fit the work, a flag the stack did not honor, or a
+      serving fault is our error, not the model's. Correct the config,
+      run again, keep the best row under the `best_of` rule above, and
+      apply no `reruns` penalty. Name the config change in `anomaly`.
+      Worked example: the Qwen3.8 27B MLX blind effort-low row (67.5
+      raw, 12.5 capped, 1 of 8) stopped early because the harness entry
+      gave it a 16384-token output budget inside a 26624-token window.
+    - An invalid row is never an attempt, so it adds nothing to
+      `reruns`.
 - **The line under each score** shows the first matching category:
   invalid reason; completion (`n/8 done` + end reason, with the raw
-  score when capped); `best_of: <n>` ("best of N runs") — used when a
+  score when capped, and the re-run count and penalty when the row has
+  `reruns`); `best_of: <n>` ("best of N runs") — used when a
   config error (for example an unhonored thinking flag) produced two
-  valid runs of the same level; `reruns: <n>` ("N full re-runs
-  needed"); `anomaly` (short scorer-written config deviation);
-  nonzero negative stats (nudges, tool errors, failed commits,
-  compactions). Clean runs show nothing.
+  valid runs of the same level; `reruns: <n>` ("<n> re-run(s),
+  −<penalty>", the retry penalty above); `anomaly` (short
+  scorer-written config deviation); nonzero negative stats (nudges,
+  tool errors, failed commits, compactions). Clean runs show nothing.
 - **Not honored ≠ model error**: a flag the serving stack ignored is
   a benchmark error. Re-label the run at the observed level; if that
   yields two valid same-level runs, keep the best with `best_of` and
