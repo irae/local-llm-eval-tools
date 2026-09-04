@@ -56,7 +56,21 @@ BLOCK = ("def parse_record_%06d(line):\n"
 RANGE_SPAN = 200000
 
 # Compaction is normal under pressure and often recovers. Stop only when
-# it persists AND speed does not come back.
+# it is MATERIAL, persists, and speed does not come back.
+#
+# Two thresholds, both learned the hard way on 2026-09-04 when an earlier
+# version of this rule truncated a healthy sweep at 196618:
+#
+# - Material means hundreds of pages, not single digits, exactly as
+#   `context-creep.md` says. The first version counted any non-zero
+#   decompression; the machine idles at about 12 per tick, so every step
+#   looked like compaction.
+# - Recovery is measured against the PREVIOUS step, not the best step of
+#   the run. A depth sweep declines by design — that is the curve — so
+#   comparing against the best guarantees "not recovered" after a couple
+#   of steps and stops the sweep on normal behaviour.
+MATERIAL_DECOMPRESSIONS = 200
+RECOVERY_FRACTION = 0.85
 MAX_COMPACTING_STEPS = 3
 
 
@@ -115,7 +129,7 @@ def run(step):
     swap_start = swap_used_mb()
     compaction_start = start.get("Decompressions", 0)
     compacting_steps = 0
-    best_toks = 0.0
+    previous_toks = 0.0
 
     print("context\tdepth_tokens\tdecode_toks\tfree_mb\tswap_delta_mb\tstep_seconds",
           flush=True)
@@ -155,9 +169,10 @@ def run(step):
                       % (swap_delta, ctx["depth"]), flush=True)
                 return 42
 
-            compacting = counters.get("Decompressions", 0) > compaction_start
-            compaction_start = counters.get("Decompressions", 0)
-            recovered = tok_s >= 0.9 * best_toks
+            decompressions = counters.get("Decompressions", 0)
+            compacting = (decompressions - compaction_start) >= MATERIAL_DECOMPRESSIONS
+            compaction_start = decompressions
+            recovered = previous_toks == 0 or tok_s >= RECOVERY_FRACTION * previous_toks
             if compacting and not recovered:
                 compacting_steps += 1
                 if compacting_steps >= MAX_COMPACTING_STEPS:
@@ -168,7 +183,7 @@ def run(step):
             else:
                 compacting_steps = 0
 
-            best_toks = max(best_toks, tok_s)
+            previous_toks = tok_s
 
             if tok_s < FLOOR_TOKS:
                 print("STOP: below %.0f tok/s at depth %d"
