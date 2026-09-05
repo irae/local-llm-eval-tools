@@ -1538,6 +1538,117 @@
       "notes": "Scored on Fable 2026-09-03; independent of the two sibling rows. Same terminal failure as the high siblings (newline flood at the 16384-token cap, 6 length-capped turns) but a different path to it. Orientation was faster and more complete: 4 min, gh issue view, TASKS.md with 8 libraries and per-package sub-items, 15 greps, and by 04:47 a fully correct per-file inventory in the reasoning channel that names trap B (legacy-packages/mendel-requirify rimraf) and the root rimraf/tmp. The failure point was the edit that should have written that inventory: empty arguments {} twice (04:47, 04:52), then the flood at 05:02. After nudges 1 and 2 the run alternated floods with a 12-min window (05:37-05:50) of 100 identical failing ls -F_r calls, inside which it read app.js and package.json for uuid but made no edit. Nudge 3 (05:50) followed a 36-token turn that emitted a raw tool-call token string as text; the two turns after it were floods, ending the run on the model budget at 06:13. Bugs remaining is a vacuous 25: branch identical to base, trap A, prettier, eslint pass by absence of work. Criterion 6: 8 minus 2 per model nudge (3) = 2; the ls loop is not a repair commit so it is not scored again there. Task list 1: upfront per-package sub-items where v3 asks per-file, never expanded, never ticked; the correct inventory existed only in reasoning. Truncation 1.5: evidence shows 3 noisy commands, none piped, but almost every grep was narrowed with grep -v; the 100 ls errors were tiny outputs. Tool errors 108 = 100 ls loop + 3 empty-argument calls + 5 concatenated-grep errors. Peak context 45159 of 158464 with 4 overflow compactions; 1.97M total tokens versus about 0.3M for the high siblings because the run lasted 99 min instead of 46-49.",
       "invalid": true,
       "invalid_reason": "repetition loop on the LM Studio MLX thinking-on entry google/gemma-4-12b, pre-fix chat template (research run 2); zero commits"
+    },
+    {
+      "model": "Gemma-4-12B (llama.cpp, off)",
+      "model_id": "google/gemma-4-12b",
+      "harness": "pi",
+      "harness_guessed": false,
+      "provider": "llama",
+      "local": true,
+      "serving": "llama-server",
+      "branch": "gemma-4-12b-off-guided-v3-issue-13",
+      "base_commit": "86935f4",
+      "partial": true,
+      "prompt_version": "v3.0",
+      "thinking": "off",
+      "config_note": "f16 KV, no MTP",
+      "end_reason": "model_budget_exhausted",
+      "libraries_done": 3,
+      "score_total": 58,
+      "scores": {
+        "bugs": 25,
+        "completion": 7.5,
+        "node_modules": 8,
+        "lint": 3,
+        "commit_craft": 7,
+        "first_time": 2,
+        "test_discipline": 0,
+        "conventions": 3,
+        "task_list": 2,
+        "truncation": 0.5
+      },
+      "defects": [
+        {
+          "severity": "critical",
+          "summary": "Process collapse, not a code defect: three turns (14:38, 15:00, 15:35) hit the 16384-token output cap with stop_reason length. Each capped turn is a text-channel deliberation loop with no tool call: about 40 K characters of 'Wait, I will do glob first / Actually, I will do rimraf in legacy-packages' (about 300 repeats per turn) and, in the last turn, 'Wait, I will do that now / Actually, I will just do that' (about 815 repeats). Thinking was off, so there is no reasoning channel; the loop sits in the visible answer. Nudge 1 (14:06) followed a 2-token turn that emitted only a stray <tool_call|> token. Work in progress at the collapse (rimraf in 4 package.json files and the 2 legacy-packages/mendel-requirify test files, root rimraf removal) stayed uncommitted in the worktree."
+        },
+        {
+          "severity": "minor",
+          "summary": "Stray file examples/planout-example/test-uuid.js (29 lines, commit 7c00481) committed with the uuid change: a hand-written script that is not wired to any test runner, passes a url option that http.request ignores, and calls process.exit; the model ran it twice (14:00:55, 14:02:33) and it failed both times because the example app cannot boot without a config. Drive-by churn, scored under conventions, not under bugs."
+        },
+        {
+          "severity": "minor",
+          "summary": "Commit 5d2579e 'chore: remove unused xtend from mendel-config legacy' carries 11 files across 5 packages and 3 libraries (uuid package.json, xtend in mendel-config and tree-hash-walker, urlsafe-base64 in mendel-core, half of rimraf, the lockfile): it is the staged set of the hook-rejected 'git add .' omnibus commit at 14:40:39, re-committed under a narrower message after the legacy/index.js fix. Commit 7c00481 (uuid) left its package.json change for that later commit."
+        },
+        {
+          "severity": "minor",
+          "summary": "Repetition in tool use: the TASKS.md tick for uuid was re-sent 12 times after a sed -i had already applied it (each failed with no match), and the outlet-css.js rimraf edit 5 times; 42 tool errors of 132 calls. examples/planout-example/app.js:5 uses require('node:crypto') while packages/mendel-core/tree-serialiser.js:8 on the same branch uses bare require('crypto')."
+        }
+      ],
+      "telemetry": {
+        "wall_clock_min": 97.6,
+        "tokens_total": 6452794,
+        "tokens_in": 101157,
+        "tokens_out": 78552,
+        "cache_read": 6273085,
+        "peak_context": 125135,
+        "window_pct": 48,
+        "compactions": 0,
+        "assistant_msgs": 136,
+        "tool_calls": 132,
+        "tool_errors": 42,
+        "commits": 3,
+        "failed_commits": 1,
+        "truncation_pct": 0,
+        "nudges_tooling": 0,
+        "nudges_model": 3
+      },
+      "cost_usd": 0,
+      "cost_basis": "local",
+      "cost": {
+        "or_route": null,
+        "or_usd": "0",
+        "paid_basis": "local",
+        "paid_usd": "0.00",
+        "vendor_usd": "0",
+        "rate_in": null,
+        "rate_out": null,
+        "rate_cr": null,
+        "rate_tone": null,
+        "provider_label": "local"
+      },
+      "matrix_cells": [
+        "<td><span class=\"pill p-good\">none in the 3 landed replacements</span> <b>25</b></td>",
+        "<td><span class=\"pill p-good\">core 71/71, config 41/41 (one documented flake)</span></td>",
+        "<td><span class=\"pill p-mid\">vacuous pass, apply-extra-options.js untouched</span></td>",
+        "<td><span class=\"pill p-bad\">3 / 8 done</span></td>",
+        "<td><span class=\"pill p-bad\">5 libraries left, rimraf half done</span></td>",
+        "<td><span class=\"pill p-bad\">5 left, root rimraf + tmp still declared</span></td>",
+        "<td><span class=\"pill p-mid\">grepped and edited it, never committed</span></td>",
+        "<td><b>7.5</b></td>",
+        "<td><span class=\"pill p-good\">pnpm remove x4, store pruned</span> <b>8</b></td>",
+        "<td><span class=\"pill p-good\">121 lines</span></td>",
+        "<td><span class=\"pill p-mid\">clean on re-run, never ran itself</span> <b>3</b></td>",
+        "<td><span class=\"pill p-mid\">n/a (v3 base)</span></td>",
+        "<td><span class=\"pill p-good\">all chore</span></td>",
+        "<td><span class=\"pill p-bad\">1 of 3; last commit spans 5 packages, 3 libraries</span></td>",
+        "<td><span class=\"pill p-bad\">rimraf + tmp still declared; removed in the worktree, uncommitted</span></td>",
+        "<td><span class=\"pill p-mid\">1 lint-staged reject, no bypass, one git add .</span></td>",
+        "<td><span class=\"pill p-good\">kept out (gitignored)</span></td>",
+        "<td><b>7</b></td>",
+        "<td><span class=\"pill p-bad\">0 repair commits, 3 nudges (-6)</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">none; only its own test-uuid.js, which failed</span></td>",
+        "<td><span class=\"pill p-bad\">never run, 3 of 3 commits unchecked</span> <b>0</b></td>",
+        "<td><span class=\"pill p-mid\">flat list, then per-file tree; 2 of 3 ticks before the commit</span> <b>2</b></td>",
+        "<td><span class=\"pill p-bad\">0 of 28 piped, later greps filtered</span> <b>0.5</b></td>",
+        "<td><span class=\"pill p-mid\">tidy swaps; stray test-uuid.js, node: prefix mismatch</span> <b>3</b></td>",
+        "<td><span class=\"pill p-bad\">6.45 M</span></td>",
+        "<td><span class=\"pill p-good\">0</span></td>",
+        "<td><span class=\"pill p-mid\">52 %</span></td>",
+        "<td><span class=\"pill p-bad\">132, 42 errors, 3 capped turns</span></td>"
+      ],
+      "notes": "Scored on Fable 2026-09-05. Config: llama-server b10621, unsloth gemma-4-12b-it-UD-Q4_K_XL.gguf, n_ctx 262144, speculative.types none (no MTP drafter), f16 KV, thinking off; the models.json entry name still reads 'llama MTP, q8 KV', the server props are authoritative. First scored attempt at this config, no reruns penalty. Raw 58, capped 37.5 (3 of 8). Bugs 25: the three landed replacements are correct; Buffer base64url matches urlsafe-base64 encode/decode and tap passes tree-serializer/deserializer; Object.assign on the fresh object that MendelWalker.found() returns is behaviour-equivalent to xtend; crypto.randomUUID is right. Static grep for uuid, xtend, urlsafe-base64 is clean in code and package.json. Trap A is a vacuous pass (apply-extra-options.js untouched). Completion 7.5 = 20 x 3/8, the same as the Bonsai 3/8 row; trap B was grepped at 14:13 and the two mendel-requirify test files were edited in the final turn, but nothing of rimraf beyond 2 of 4 requires reached the branch. node_modules 8: four pnpm --filter remove calls, lockfile -121 lines, uuid@11.1.1 and urlsafe-base64 gone from the store (uuid@14 and xtend@4.0.2 remain as other packages' transitive deps). Lint 3: prettier and eslint clean on re-run, the model never ran either; husky ran and rejected the first omnibus commit (eslint on legacy/index.js, which still required xtend after its package.json entry was removed). Commit craft 7 = chore 4 + split 1 + hygiene 2 (one git add ., no --no-verify, TASKS.md gitignored). Right the first time 2 = 8 - 2 x 3 model nudges; no repair commit. Test discipline 0: no tap, no pnpm run unit, no full suite before any of the 3 commits. Conventions 3: swaps match neighbour style, but a stray test-uuid.js landed and node:crypto sits next to bare crypto. Task list 2: flat 8-library list at 13:58, per-file sub-items on discovery (v3 form), uuid ticked right after its commit, xtend and urlsafe-base64 ticked 30 min before their commit, trap-B files never added. Truncation 0.5: 0 of 28 noisy commands piped; the first two grep -r sweeps dumped node_modules, later greps used --exclude-dir. Provenance: the 3 branch commits match session commands at 14:04:18, 14:06:43, 14:43:14; the 14:40:39 commit was hook-rejected. No human message inside the scored region other than the 3 harness nudges. Tool errors 42 = 12 repeated TASKS.md tick edits + 5 repeated outlet-css edits + 2 test-uuid.js runs + 23 assorted (pnpm path errors, greps with no match, a missing config.json read). Peak context 125135 of 262144, no compaction. mendel-config tap: 40/1 once, then 41/41 twice (documented flake). Worktree left with uncommitted rimraf work in 7 files."
     }
   ],
   "matrix_rows": [
