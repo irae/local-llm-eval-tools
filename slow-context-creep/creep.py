@@ -28,7 +28,7 @@ What this file owns, so that every backend gets it identically:
 - **Memory sampling, wired first.** The runner reads `vm_stat` after
   every step. Wired memory is the meter that cannot lie: free memory
   stays low after the first model load, because the weights sit in the
-  page cache (`research/run1/results/backend-diagnosis.md`). Free and
+  page cache (`hardware/m1-max-32gb/research/run1/results/backend-diagnosis.md`). Free and
   the swap delta ride beside it, and so do the compressor page counts,
   which are what the compression-onset criterion reads.
 - **The stop conditions.** Decode below the floor, an OOM or any request
