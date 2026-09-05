@@ -41,7 +41,10 @@
         "tool_errors": 16,
         "commits": 17,
         "failed_commits": 1,
-        "truncation_pct": 6
+        "truncation_pct": 6,
+        "loop_flag": "ok",
+        "loop_ratio": 0.38,
+        "loop_kind": "tool call"
       },
       "cost_usd": 7.76,
       "cost_basis": "plan",
@@ -248,7 +251,10 @@
         "tool_errors": 22,
         "commits": 20,
         "failed_commits": 0,
-        "truncation_pct": 8
+        "truncation_pct": 8,
+        "loop_flag": "ok",
+        "loop_ratio": 0.42,
+        "loop_kind": "tool call"
       },
       "cost_usd": 0.84,
       "cost_basis": "plan",
@@ -361,7 +367,10 @@
         "tool_errors": 5,
         "commits": 17,
         "failed_commits": 1,
-        "truncation_pct": 62
+        "truncation_pct": 62,
+        "loop_flag": "ok",
+        "loop_ratio": 0.3,
+        "loop_kind": "tool call"
       },
       "cost_usd": 2.08,
       "cost_basis": "metered",
@@ -570,7 +579,10 @@
         "tool_errors": 9,
         "commits": 18,
         "failed_commits": 0,
-        "truncation_pct": 40
+        "truncation_pct": 40,
+        "loop_flag": "ok",
+        "loop_ratio": 0.42,
+        "loop_kind": "text"
       },
       "cost_usd": 1.7,
       "cost_basis": "metered",
@@ -782,7 +794,10 @@
         "tool_errors": 28,
         "commits": 13,
         "failed_commits": 5,
-        "truncation_pct": 27
+        "truncation_pct": 27,
+        "loop_flag": "ok",
+        "loop_ratio": 0.22,
+        "loop_kind": "tool call"
       },
       "cost_usd": 0,
       "cost_basis": "local",
@@ -884,7 +899,10 @@
         "tool_errors": 20,
         "commits": 9,
         "failed_commits": 2,
-        "truncation_pct": 0
+        "truncation_pct": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.45,
+        "loop_kind": "thinking"
       },
       "cost_usd": 0,
       "cost_basis": "local",
@@ -991,7 +1009,10 @@
         "tool_errors": 12,
         "commits": 19,
         "failed_commits": 3,
-        "truncation_pct": 17
+        "truncation_pct": 17,
+        "loop_flag": "ok",
+        "loop_ratio": 0.57,
+        "loop_kind": "tool call"
       },
       "cost_usd": 13.94,
       "cost_basis": "plan",
@@ -1109,7 +1130,10 @@
         "tool_errors": 5,
         "commits": 3,
         "failed_commits": 0,
-        "truncation_pct": 0
+        "truncation_pct": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.38,
+        "loop_kind": "tool call"
       },
       "cost_usd": 0,
       "cost_basis": "local",
@@ -1212,7 +1236,10 @@
         "tool_errors": 12,
         "commits": 6,
         "failed_commits": 0,
-        "truncation_pct": 31
+        "truncation_pct": 31,
+        "loop_flag": "ok",
+        "loop_ratio": 0.75,
+        "loop_kind": "tool call"
       },
       "cost_usd": 0,
       "cost_basis": "local",
@@ -1313,7 +1340,10 @@
         "failed_commits": 0,
         "truncation_pct": 57,
         "nudges_tooling": 10,
-        "nudges_model": 0
+        "nudges_model": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.93,
+        "loop_kind": "tool call"
       },
       "cost_usd": 0,
       "cost_basis": "local",
@@ -1406,7 +1436,10 @@
         "failed_commits": 1,
         "truncation_pct": 60,
         "nudges_tooling": 0,
-        "nudges_model": 1
+        "nudges_model": 1,
+        "loop_flag": "LOOP",
+        "loop_ratio": 0.02,
+        "loop_kind": "text"
       },
       "cost_usd": 0.79,
       "cost_basis": "metered",
@@ -1507,7 +1540,10 @@
         "failed_commits": 0,
         "truncation_pct": 63,
         "nudges_tooling": 0,
-        "nudges_model": 0
+        "nudges_model": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.42,
+        "loop_kind": "tool call"
       },
       "cost_usd": 2.13,
       "cost_basis": "metered",
@@ -1807,7 +1843,10 @@
         "failed_commits": 0,
         "truncation_pct": 49,
         "nudges_tooling": 0,
-        "nudges_model": 0
+        "nudges_model": 0,
+        "loop_flag": "LOOP",
+        "loop_ratio": 0.03,
+        "loop_kind": "thinking"
       },
       "cost_usd": 3.33,
       "cost_basis": "metered",
@@ -1900,7 +1939,10 @@
         "failed_commits": 0,
         "truncation_pct": 3,
         "nudges_tooling": 0,
-        "nudges_model": 0
+        "nudges_model": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.5,
+        "loop_kind": "tool call"
       },
       "cost_usd": 7.29,
       "cost_basis": "plan",
@@ -2013,7 +2055,10 @@
         "failed_commits": 0,
         "truncation_pct": 14,
         "nudges_tooling": 0,
-        "nudges_model": 1
+        "nudges_model": 1,
+        "loop_flag": "ok",
+        "loop_ratio": 0.37,
+        "loop_kind": "tool call"
       },
       "cost_usd": 0.47,
       "cost_basis": "plan",
@@ -2128,7 +2173,10 @@
         "failed_commits": 3,
         "truncation_pct": 13,
         "nudges_tooling": 3,
-        "nudges_model": 1
+        "nudges_model": 1,
+        "loop_flag": "LOOP",
+        "loop_ratio": 0.07,
+        "loop_kind": "thinking"
       },
       "cost_usd": 0,
       "cost_basis": "local",
@@ -2226,7 +2274,10 @@
         "failed_commits": 0,
         "truncation_pct": 21,
         "nudges_tooling": 0,
-        "nudges_model": 0
+        "nudges_model": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.5,
+        "loop_kind": "tool call"
       },
       "cost_usd": 12.11,
       "cost_basis": "plan",
@@ -2447,7 +2498,10 @@
         "failed_commits": 0,
         "truncation_pct": 60,
         "nudges_tooling": 0,
-        "nudges_model": 0
+        "nudges_model": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.3,
+        "loop_kind": "tool call"
       },
       "cost_usd": 0,
       "cost_basis": "local",
@@ -2552,7 +2606,10 @@
         "failed_commits": 0,
         "truncation_pct": 64,
         "nudges_tooling": 0,
-        "nudges_model": 0
+        "nudges_model": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.47,
+        "loop_kind": "tool call"
       },
       "cost_usd": 5.16,
       "cost_basis": "metered",
@@ -2653,7 +2710,10 @@
         "failed_commits": 0,
         "truncation_pct": 100,
         "nudges_tooling": 0,
-        "nudges_model": 3
+        "nudges_model": 3,
+        "loop_flag": "ok",
+        "loop_ratio": 0.93,
+        "loop_kind": "thinking"
       },
       "cost_usd": 0,
       "cost_basis": "local",
@@ -2765,7 +2825,10 @@
         "failed_commits": 4,
         "truncation_pct": 69,
         "nudges_tooling": 0,
-        "nudges_model": 0
+        "nudges_model": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.33,
+        "loop_kind": "tool call"
       },
       "cost_usd": 0,
       "cost_basis": "local",

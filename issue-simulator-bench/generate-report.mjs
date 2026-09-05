@@ -355,21 +355,30 @@ function scoreboardFor(rows) {
             const rerunWhy = r.reruns
                 ? `${r.reruns} re-run${r.reruns === 1 ? '' : 's'}, −${10 * r.reruns}`
                 : null;
-            const why = r.invalid
-                ? `invalid — ${r.invalid_reason}`
-                : done < 8
-                  ? [
-                        cap < raw ? `raw ${raw}` : null,
-                        rerunWhy,
-                        `${done}/8 done`,
-                        endWhy,
-                    ]
-                        .filter(Boolean)
-                        .join(' · ')
-                  : r.best_of
-                    ? `best of ${r.best_of} runs`
-                    : rerunWhy ||
-                      [r.anomaly, negStats].filter(Boolean).join(' · ');
+            const loopWhy =
+                t.loop_flag === 'LOOP'
+                    ? `repetition loop ${t.loop_ratio} on ${t.loop_kind}`
+                    : null;
+            const why = [
+                r.invalid
+                    ? `invalid — ${r.invalid_reason}`
+                    : done < 8
+                      ? [
+                            cap < raw ? `raw ${raw}` : null,
+                            rerunWhy,
+                            `${done}/8 done`,
+                            endWhy,
+                        ]
+                            .filter(Boolean)
+                            .join(' · ')
+                      : r.best_of
+                        ? `best of ${r.best_of} runs`
+                        : rerunWhy ||
+                          [r.anomaly, negStats].filter(Boolean).join(' · '),
+                loopWhy,
+            ]
+                .filter(Boolean)
+                .join(' · ');
             const gauge =
                 `<div class="scorewrap"><span class="scoreval">${Math.round(cap)}</span>` +
                 `<div class="bar${i === 0 ? ' gold' : ''}"><span style="width:${Math.round(cap)}%"></span></div></div>` +
