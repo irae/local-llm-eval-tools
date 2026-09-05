@@ -3,7 +3,7 @@
 //
 //   node run-pi-rpc.mjs --model <id> --prompt <file> --out <prefix> [--cwd <dir>]
 //        [--thinking <level>] [--max-tooling 10] [--max-model 3]
-//        [--stall-min 10] [--wall-min 300] [--allow-bad-config]
+//        [--stall-min 10] [--wall-min 300] [--turn-min 25] [--allow-bad-config]
 //
 // Why: `pi -p` exits on the first `length`/`error` stop, which is a harness
 // limitation, not a model failure. A person in the TUI would type "continue".
@@ -59,6 +59,7 @@ const thinking = args.thinking || null;
 const maxTooling = Number(args['max-tooling'] ?? 10);
 const maxModel = Number(args['max-model'] ?? 3);
 const stallMs = Number(args['stall-min'] ?? 10) * 60_000;
+const turnMs = Number(args['turn-min'] ?? 25) * 60_000;
 const wallMs = Number(args['wall-min'] ?? 300) * 60_000;
 const prompt = readFileSync(promptFile, 'utf8');
 
@@ -76,6 +77,7 @@ const meta = {
         max_model: maxModel,
         stall_min: stallMs / 60_000,
         wall_min: wallMs / 60_000,
+        turn_min: turnMs / 60_000,
         tooling_msg: TOOLING_MSG,
         model_msg: MODEL_MSG,
     },
@@ -83,6 +85,10 @@ const meta = {
     end: null,
     end_reason: null,
     nudges: { tooling: [], model: [] },
+    output_limit_hits: [],
+    reissue_msgs: [],
+    turn_timeout: null,
+    output_limit_stop: null,
     respawns: 0,
     compactions: [],
     retries: [],
@@ -116,6 +122,10 @@ let lastAssistant = null;
 let lastEventAt = Date.now();
 let exited = false;
 let outputTokensTotal = 0;
+let turnStartedAt = null;
+let turnTimeoutHit = false;
+let outputLimitStop = false;
+let atBudgetStreak = [];
 
 // Pinned environment: no operator extensions, skills, or prompt templates.
 // The config directory itself is pinned by run-worker.sh via PI_CODING_AGENT_DIR.
@@ -179,10 +189,18 @@ function handleLine(line) {
         return;
     }
     logEvent({ t: new Date().toISOString(), ...e });
+    if (e.type === 'turn_start' && turnStartedAt === null)
+        turnStartedAt = Date.now();
+    if (e.type === 'message_start' && e.message?.role === 'assistant')
+        turnStartedAt = Date.now();
     if (e.type === 'message_end' && e.message?.role === 'assistant') {
         lastAssistant = e.message;
         outputTokensTotal += e.message.usage?.output ?? 0;
+        accountForStop(e.message);
+        turnStartedAt = null;
     }
+    if (e.type === 'message_end' && e.message?.role === 'toolResult')
+        accountForToolResult(e.message);
     if (e.type === 'compaction_start')
         meta.compactions.push({
             at: new Date().toISOString(),
@@ -213,6 +231,72 @@ function handleLine(line) {
         settledWaiter = null;
         w.resolve('settled');
     }
+}
+
+// ---- output-limit accounting ------------------------------------------------
+const atBudget = (outTok) => {
+    const budget = meta.model_info?.maxTokens ?? 0;
+    return Boolean(budget) && outTok >= 0.8 * budget;
+};
+
+function accountForStop(message) {
+    if (message.stopReason !== 'length') {
+        atBudgetStreak = [];
+        return;
+    }
+    const outTok = message.usage?.output ?? 0;
+    const budget = meta.model_info?.maxTokens ?? null;
+    const seconds = turnStartedAt
+        ? Math.round((Date.now() - turnStartedAt) / 1000)
+        : null;
+    const blocks = [...new Set((message.content || []).map((b) => b.type))];
+    const hit = {
+        at: new Date().toISOString(),
+        output_tokens: outTok,
+        output_budget: budget,
+        at_budget: atBudget(outTok),
+        turn_sec: seconds,
+        blocks,
+    };
+    meta.output_limit_hits.push(hit);
+    say(
+        `ALARM output limit: ${outTok} output tokens, budget ${budget ?? '?'}, ` +
+            `${hit.at_budget ? 'at budget' : 'below budget'}, turn ${seconds ?? '?'} s, ` +
+            `blocks ${blocks.join('+') || 'none'}`
+    );
+    if (!hit.at_budget) {
+        atBudgetStreak = [];
+        return;
+    }
+    atBudgetStreak.push(outTok);
+    if (atBudgetStreak.length >= 2) {
+        meta.output_limit_stop = {
+            at: hit.at,
+            output_tokens: atBudgetStreak.slice(-2),
+            output_budget: budget,
+        };
+        outputLimitStop = true;
+        say(
+            `ALARM two consecutive at-budget stops (${meta.output_limit_stop.output_tokens.join(', ')} output tokens, budget ${budget ?? '?'}), ending the run`
+        );
+    }
+}
+
+function accountForToolResult(message) {
+    const text = (message.content || [])
+        .filter((b) => b?.type === 'text')
+        .map((b) => b.text || '')
+        .join('\n');
+    if (!/hit the output token limit/.test(text)) return;
+    const entry = {
+        at: new Date().toISOString(),
+        tool: message.toolName ?? null,
+        text: text.slice(0, 200),
+    };
+    meta.reissue_msgs.push(entry);
+    say(
+        `ALARM re-issue message: pi discarded a truncated ${entry.tool ?? 'tool'} call`
+    );
 }
 
 const waitSettled = () =>
@@ -287,8 +371,7 @@ function classify(settleKind) {
         return { kind: 'tooling', cause: 'settled with a tool call pending' };
     const outTok = lastAssistant?.usage?.output ?? 0;
     const budget = meta.model_info?.maxTokens ?? 0;
-    const atBudget = budget && outTok >= 0.8 * budget;
-    if (sr === 'length' && !atBudget)
+    if (sr === 'length' && !atBudget(outTok))
         return {
             kind: 'tooling',
             cause: `premature length stop (${outTok} output tokens, budget ${budget || '?'})`,
@@ -305,7 +388,7 @@ function classify(settleKind) {
     // length at budget, real `stop`, or unknown: the model's own stop
     const why = unfinishedWork();
     const label =
-        sr === 'length' || (sr === 'stop' && atBudget)
+        sr === 'length' || (sr === 'stop' && atBudget(outTok))
             ? `output budget hit (${outTok}/${budget}${sr === 'stop' ? ', reported as stop' : ''})`
             : 'model stopped';
     return why.length
@@ -568,6 +651,30 @@ async function main() {
     // stall watchdog
     let stallFlag = false;
     const stallTimer = setInterval(async () => {
+        if (
+            settledWaiter &&
+            turnStartedAt &&
+            Date.now() - turnStartedAt > turnMs &&
+            !exited
+        ) {
+            turnTimeoutHit = true;
+            meta.turn_timeout = {
+                at: new Date().toISOString(),
+                turn_min: turnMs / 60_000,
+                elapsed_min:
+                    Math.round(((Date.now() - turnStartedAt) / 60_000) * 10) /
+                    10,
+            };
+            say(
+                `ALARM turn timeout: one response ran past ${turnMs / 60_000} min, ending the run`
+            );
+            try {
+                await send({ type: 'abort' });
+            } catch {
+                // best effort; the run is ending anyway
+            }
+            return;
+        }
         if (settledWaiter && Date.now() - lastEventAt > stallMs && !exited) {
             // A long prefill emits no events; do not abort while the server
             // says it is still working (llama.cpp /slots; others: no signal).
@@ -592,6 +699,14 @@ async function main() {
         let settleKind = await turn(message);
         if (wallHit) {
             await finish('wall_clock');
+            break;
+        }
+        if (turnTimeoutHit) {
+            await finish('turn_timeout');
+            break;
+        }
+        if (outputLimitStop) {
+            await finish('output_limit');
             break;
         }
         if (settleKind === 'settled' && stallFlag) settleKind = 'stall';

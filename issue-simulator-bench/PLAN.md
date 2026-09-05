@@ -81,7 +81,10 @@ table across versions.
    models in pi, `~/.pi/agent/models.json` must give the model a truthful
    `contextWindow` (the server's real context) and `maxTokens`; without them
    auto-compaction cannot trigger at the right point and `length` stops cannot be
-   classified. Do NOT set `compat.supportsFinishReason: false` unless a normal
+   classified. `maxTokens = min(max(8192, pow2ceil(2 x L)), contextWindow / 4)`,
+   where L is the model's longest healthy output, and pi's `reserveTokens` takes
+   the same value; the sibling project states the rule and the new-model probe in
+   `../choose-a-local-llm/docs/methodology/mendel.md`. Do NOT set `compat.supportsFinishReason: false` unless a normal
    completion from that server is shown to omit `finish_reason`: the flag
    makes pi infer `stop` for every ended stream, which hides real errors. The runner classifies stops fairly
    under either setting (an empty `stop` and a `stop` at the output budget are
@@ -117,6 +120,32 @@ status` shows changes the run itself made — TASKS.md and any dirt that
 TASKS.md for unchecked items and \`git status\` for uncommitted work, then
       continue the workflow from where you stopped.`Budget`--max-model`
       (default 3).
+    - **Output-limit alarms — telemetry only.** Every assistant message that
+      stops on `length` lands in `output_limit_hits` with its output tokens, its
+      budget, the `atBudget` verdict, the turn duration, and the block types of
+      the cut message; every pi tool result that says the response hit the output
+      token limit lands in `reissue_msgs`. Each one writes one alarm line in the
+      runner log.
+    - **Per-turn wall-clock cap.** `--turn-min` (default 25) caps one assistant
+      response. The clock starts at the stream's `message_start`, never at the
+      request, so a stall abort and pi's retries are not counted twice. When one
+      response passes the cap the runner ends the run with `end_reason:
+turn_timeout` and writes the cap into `turn_timeout` in the meta file.
+    - **Two at-budget stops end the run.** Two `length` stops in a row, both with
+      output at 80 percent or more of `maxTokens`, end the run with `end_reason:
+output_limit`; `output_limit_stop` holds both output token counts. A
+      below-budget `length` stop breaks the pair and keeps the tooling-nudge
+      path. The rule holds only while `maxTokens` is at least twice the model's
+      longest healthy output, which the `maxTokens` rule above guarantees; below
+      that line a model can hit the budget with legitimate work, so the run
+      carries a budget problem, not an output-limit stop.
+    - **Repetition-loop verdict at run close.** `run-worker.sh` runs
+      `loop-check.py` on the finished session log and writes the verdict, the
+      worst distinct-shape ratio, and the kind (thinking, text, or tool call)
+      into `<slug>-worker.json` and `<slug>-loop.txt`. It is a flag beside the
+      row, never a stop. The script lives in the sibling project; `LOOP_CHECK`
+      overrides its path, and the default is
+      `../choose-a-local-llm/benchmarks/loop-check.py`.
     - Nothing reads the chat. The runner also forces auto-compaction and
       auto-retry on and records whether they took effect; `--wall-min` (default 300) is the hard stop. Both time budgets are
       absolute minutes and favour fast serving stacks; the runner records
@@ -134,7 +163,8 @@ TASKS.md for unchecked items and \`git status\` for uncommitted work, then
       `<model>-<thinking>-<bench>` (the bench suffix keeps a model's
       blind and guided raw files apart, and lets two workers run in
       parallel without collisions): `<slug>-meta.json` (nudges with causes, compactions,
-      retries, warnings, session stats), `<slug>-session.jsonl` (raw pi session,
+      retries, warnings, output-limit hits, session stats), `<slug>-loop.txt` (the
+      run-close loop verdict), `<slug>-session.jsonl` (raw pi session,
       home path redacted), `<slug>-session.html` (export), `<slug>-events.jsonl`
       and `<slug>-runner.log` (not versioned).
 4. Rules that apply to every run:
@@ -182,7 +212,9 @@ model (`claude-fable-5`), never on a smaller model. Mechanical steps
     - pi: `scratchpad/benchmark/runs/<slug>-meta.json` and
       `…/<slug>-session.jsonl` written by
       `run-pi-rpc.mjs`. Copy the nudge counts into `telemetry.nudges_tooling` and
-      `telemetry.nudges_model`.
+      `telemetry.nudges_model`, and the loop verdict from
+      `<slug>-worker.json` into `telemetry.loop_flag`, `telemetry.loop_ratio`
+      and `telemetry.loop_kind`.
       After scoring, copy the log to `benchmark/runs/<branch>-session.jsonl`,
       redact it (see "Redaction"), and list it in `runs/SESSIONS.md`.
       `benchmark/runs/` holds ONLY committed artifacts (redacted session
@@ -453,7 +485,10 @@ One object per run in a top-level `runs` array:
         "failed_commits": 1,
         "truncation_pct": 6,
         "nudges_tooling": 0,
-        "nudges_model": 0
+        "nudges_model": 0,
+        "loop_flag": "ok",
+        "loop_ratio": 0.37,
+        "loop_kind": "tool call"
     },
     "cost_usd": 7.76,
     "cost_basis": "metered|plan|local"
@@ -464,9 +499,16 @@ For local models, `local` is true and `serving` names the stack (`llama-server`,
 `lmstudio`). `harness_guessed` is true when the harness comes from the pi provider
 config, not from a run record. `thinking` is the pinned thinking level (`null`
 for Claude Code runs and where no record exists). `end_reason` is one of
-`complete`, `wall_clock`, `model_budget_exhausted`, `tooling_budget_exhausted`,
+`complete`, `wall_clock`, `turn_timeout`, `output_limit`,
+`model_budget_exhausted`, `tooling_budget_exhausted`,
 `harness_crash`, `stuck` (a self-inflicted loop the operator closed),
-`operator_stop`, or `null` where no record exists; `libraries_done` is 0-8. The per-criterion `scores` are
+`operator_stop`, or `null` where no record exists. `turn_timeout` means one
+assistant response ran past `--turn-min`: a stop, not a rescue, and the row
+records that the model could not produce a usable turn. `output_limit` means two
+`length` stops in a row spent 80 percent or more of `maxTokens` each: a stop, not
+a rescue, and the row records that the model could not produce a usable turn.
+`telemetry.loop_flag` is the run-close repetition-loop verdict with its worst
+ratio and kind; it never stops a run and it never changes a score. `libraries_done` is 0-8. The per-criterion `scores` are
 the single source of truth for the total: `generate-report.mjs` refuses to render
 when a matrix cell's bold number or `score_total` disagrees with them. `results.csv` is the same data flattened: one row per
 run, `scores.*` and `telemetry.*` as prefixed columns.

@@ -49,6 +49,7 @@ if [ "$harness" = "pi" ] && [ -z "$thinking" ]; then
     exit 1
 fi
 RUNS="$REPO/scratchpad/benchmark/runs"
+LOOP_CHECK="${LOOP_CHECK:-$REPO/../choose-a-local-llm/benchmarks/loop-check.py}"
 slug="$(echo "$model" | tr '/:' '--')"
 [ -n "$thinking" ] && slug="${slug}-${thinking}"
 branch="${slug}${suffix}"
@@ -102,6 +103,40 @@ build_pi_agent_dir() {
     echo "$d"
 }
 
+# Repetition-loop verdict at run close: a flag beside the row, never a stop.
+loop_verdict="unchecked"
+loop_ratio=""
+loop_kind=""
+run_loop_check() {
+    local log="$RUNS/$fslug-session.jsonl"
+    if [ ! -e "$LOOP_CHECK" ]; then
+        echo "warning: no loop-check.py at $LOOP_CHECK; set LOOP_CHECK" >&2
+        return
+    fi
+    if [ ! -e "$log" ]; then
+        echo "warning: no session log at $log; loop verdict skipped" >&2
+        return
+    fi
+    python3 "$LOOP_CHECK" "$log" > "$RUNS/$fslug-loop.txt" 2>&1 || true
+    read -r loop_kind loop_ratio loop_verdict <<< "$(awk '
+        /distinct-shape ratio=/ {
+            for (i = 1; i <= NF; i++)
+                if ($i ~ /^ratio=/) r = substr($i, 7)
+            if (best == "" || r + 0 < best + 0) { best = r; k = $1; v = $NF }
+        }
+        END { if (best != "") print k, best, v }
+    ' "$RUNS/$fslug-loop.txt")"
+    case "$loop_kind" in
+        thinking_delta) loop_kind=thinking ;;
+        text_delta) loop_kind=text ;;
+        toolcall_delta) loop_kind="tool call" ;;
+    esac
+    if [ -z "$loop_verdict" ]; then
+        loop_verdict="unreadable"
+    fi
+    echo "$slug: loop verdict $loop_verdict, worst ratio ${loop_ratio:-none} on ${loop_kind:-none}" >&2
+}
+
 cd "$wt"
 start=$(date -u +%FT%TZ)
 case "$harness" in
@@ -122,10 +157,11 @@ case "$harness" in
         ;;
 esac
 end=$(date -u +%FT%TZ)
+run_loop_check
 node "$BENCH_DIR/probe-plan.mjs" "$plan_provider" --out "$RUNS/$fslug-plan-after.json" > /dev/null \
     || echo "warning: plan probe after the run failed; record the plan share by hand" >&2
 pkill -f "$wt" 2>/dev/null || true
 rm -rf "$REPO/scratchpad/benchmark/.pi-agent-$fslug"
-printf '{"model":"%s","harness":"%s","bench":"%s","thinking":"%s","plan_provider":"%s","branch":"%s","base_commit":"%s","start":"%s","end":"%s","pinned_env":"agents-global v1.0"}\n' \
-    "$model" "$harness" "$bench" "$thinking" "$plan_provider" "$branch" "$(git -C "$REPO" rev-parse --short "$BASE_COMMIT")" "$start" "$end" > "$RUNS/$fslug-worker.json"
+printf '{"model":"%s","harness":"%s","bench":"%s","thinking":"%s","plan_provider":"%s","branch":"%s","base_commit":"%s","start":"%s","end":"%s","pinned_env":"agents-global v1.0","loop_flag":"%s","loop_ratio":"%s","loop_kind":"%s"}\n' \
+    "$model" "$harness" "$bench" "$thinking" "$plan_provider" "$branch" "$(git -C "$REPO" rev-parse --short "$BASE_COMMIT")" "$start" "$end" "$loop_verdict" "$loop_ratio" "$loop_kind" > "$RUNS/$fslug-worker.json"
 echo "$slug: done" >&2
