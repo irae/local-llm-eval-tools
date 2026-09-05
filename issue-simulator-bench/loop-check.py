@@ -31,7 +31,12 @@ the detector useless. Measured values: clean arm 0.20 and 0.67, the three
 loops 0.02, 0.02 and 0.03. There is an order of magnitude between
 them, so 0.10 sits in empty space.
 
-Usage: loop-check.py <events.jsonl> [window] [threshold]
+It reads two log shapes: the runner's events log and a pi session log. Each
+tool call becomes one line, so a repeated command enters the window. The
+kinds are the same for both shapes: thinking_delta, text_delta,
+toolcall_delta.
+
+Usage: loop-check.py <events.jsonl|session.jsonl> [window] [threshold]
 Defaults: window 60 lines, threshold 0.10. Exits 1 on repetition loop.
 """
 
@@ -41,6 +46,11 @@ import sys
 
 DEFAULT_WINDOW = 60
 DEFAULT_THRESHOLD = 0.10
+BLOCK_KINDS = {
+    'thinking': 'thinking_delta',
+    'text': 'text_delta',
+    'toolCall': 'toolcall_delta',
+}
 
 
 def shape(line):
@@ -55,10 +65,26 @@ def read_lines(path):
             record = json.loads(raw)
         except ValueError:
             continue
-        event = record.get('assistantMessageEvent') or {}
-        delta = event.get('delta')
-        if isinstance(delta, str):
-            kinds.setdefault(event.get('type'), []).append(delta)
+        event = record.get('assistantMessageEvent')
+        if event:
+            delta = event.get('delta')
+            if isinstance(delta, str):
+                kinds.setdefault(event.get('type'), []).append(delta)
+            elif event.get('type') == 'toolcall_end':
+                kinds.setdefault('toolcall_delta', []).append('\n')
+            continue
+        message = record.get('message') or {}
+        if record.get('type') != 'message' or message.get('role') != 'assistant':
+            continue
+        for block in message.get('content') or []:
+            kind = BLOCK_KINDS.get(block.get('type'))
+            if kind == 'thinking_delta':
+                kinds.setdefault(kind, []).append(block.get('thinking') or '')
+            elif kind == 'text_delta':
+                kinds.setdefault(kind, []).append(block.get('text') or '')
+            elif kind == 'toolcall_delta':
+                kinds.setdefault(kind, []).append(
+                    json.dumps(block.get('arguments')) + '\n')
     out = {}
     for kind, parts in kinds.items():
         text = ''.join(parts)
