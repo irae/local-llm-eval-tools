@@ -43,6 +43,8 @@ slow-context-creep/
   tests/fixtures/creep-qwen36-gguf-full-q8.tsv        llama, STOP on compaction
   tests/fixtures/creep-qwen38-gguf-full-f16.tsv       llama, no ceiling found
   tests/fixtures/creep-gemma12-lmstudio-131k.tsv      LM Studio, STALL, probes, STOP on swap
+  tests/fixtures/creep-qwen36-mlx-25000.tsv           mlx, STALL and probe lines before the server died
+  tests/fixtures/server-qwen36-mlx-creep.log          the mlx server log of that run, Metal OOM traceback
   tests/fixtures/vm_stat-1.txt, vm_stat-2.txt         real vm_stat output, the fake's format
 ```
 
@@ -94,7 +96,7 @@ Endpoints and reply shapes: `/completion` returns `{"content", "timings": {"pred
 - Usage: `--help` prints the environment variable names and exits 0; no backend exits 2; unknown backend exits 2; `DEPTH_LIST` unset exits 2; `vm_stat` missing from `PATH` exits 2 with the macOS message.
 - Output shape: header line is the backend's; line 2 starts with `start:`; line 3 equals line 3 of the real fixture `creep-qwen38-gguf-short-q8.tsv`; every row has nine tab-separated fields; the last line is `no ceiling found up to 600`; exit 0. A fast pause prints the `WARNING:` line before the rows.
 - Stops: rates that fall under `FLOOR_TOKS` give `STOP: below 8 tok/s at depth D` and exit 0, with the rows before it kept. `fail` gives `STOP: request failed` and exit 42. `empty` gives `STOP: silent halt` and exit 42. A snapshot with more swap gives `STOP: swap grew` and exit 42. Compression deltas at or above `COMPACT_PAGES` on three steps with falling rates give the compaction `STOP:` and exit 42; the same deltas with rates that recover do not stop. The `STOP:` lines must match the same regular expressions that match the STOP lines of the real fixtures.
-- Liveness: a `hang` longer than `STALL_S` with `probe: ok` prints `STALL:`, then the indented "probe answered" line, then the row, and the sweep continues to the end. A `die` with `probe: timeout` prints `STALL:`, "probe 1 of 2 failed", a second `STALL:`, then `STOP: server dead`, exit 42. A death signature appended to `SERVER_LOG` during a run prints `STOP: generation thread died` and exits 42 (mlx backend).
+- Liveness: a `hang` longer than `STALL_S` with `probe: ok` prints `STALL:`, then the indented "probe answered" line, then the row, and the sweep continues to the end. A `die` with `probe: timeout` prints `STALL:`, "probe 1 of 2 failed", a second `STALL:`, then `STOP: server dead`, exit 42. The mlx backend with `SERVER_LOG` set to a copy of lines 1 to 60 of `server-qwen36-mlx-creep.log`, to which the test appends the rest of that log during a `hang`, prints `STOP: generation thread died` and exits 42.
 - Round robin: `N_CONTEXTS=2` gives rows with labels A, B, A, B; in the request log every prompt of a context starts with that context's previous prompt; block numbers of A and B never overlap.
 - Backends: for each of llama (`/completion`), llama chat (`ENDPOINT=chat`), LM Studio and mlx, the request log shows the right path and the rows carry the rate the scenario gave.
 
@@ -115,12 +117,12 @@ Endpoints and reply shapes: `/completion` returns `{"content", "timings": {"pred
 
 **Files:**
 - Create: `slow-context-creep/tests/fixtures/README.md`
-- Create: the four `.tsv` files and the two `vm_stat-*.txt` files listed in the design, copied with `cp` from `/home/irae/code/choose-a-local-llm/hardware/m1-max-32gb/benchmarks/bench9/results/`, `.../bench10/results/` and `/home/irae/code/choose-a-local-llm/tests/fixtures/`.
+- Create: the five `.tsv` files, the mlx server log and the two `vm_stat-*.txt` files listed in the design, copied with `cp` from `/home/irae/code/choose-a-local-llm/hardware/m1-max-32gb/benchmarks/bench9/results/`, `.../bench10/results/`, `.../bench11/results/` and `/home/irae/code/choose-a-local-llm/tests/fixtures/`. The server log holds Homebrew install paths only; check with grep that no home path, machine name or address other than 127.0.0.1 is in any copied file.
 
 **Interfaces:**
 - Produces: the fixture paths every later task reads.
 
-- [ ] Copy the six files. Compare each with `sha256sum` against its source; all must match.
+- [ ] Copy the eight files. Compare each with `sha256sum` against its source; all must match.
 - [ ] Write the README: one entry per file with the source path, the backend, the model and quantization, the date of the run when the file says it, and which lines show the behavior (the STOP line, the STALL block). Say that every file is real output, copied on 2026-09-06, never regenerated.
 - [ ] Commit: "Real sweep outputs and memory readings as the creep tool's test fixtures".
 
