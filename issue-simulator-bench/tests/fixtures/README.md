@@ -5,6 +5,13 @@ trimmed; the trim is named beside the file. Nothing here is synthetic.
 These fixtures moved here from `choose-a-local-llm` on 2026-09-06, with
 their history, and are never regenerated.
 
+## Server logs
+
+- `server-llama-healthy.log`. The whole of
+  `~/.local/share/choose-a-local-llm/evidence/run9/server-gemma26-gguf-short-f16.log`,
+  92 lines. Normal slot and timing lines, no death signature. The loop
+  check reads it as a file with no JSON record.
+
 ## Session and events logs
 
 - `session-loop.jsonl`. Assistant messages 30-90 of
