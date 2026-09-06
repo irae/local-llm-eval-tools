@@ -59,6 +59,32 @@ length` rows, so the tool refuses to guess a budget).
   Peak context 45159 on the `length` turn before the first record, the
   value `count-tool-calls.mjs` prints for the slice. The split-turn
   test reads the first 33 lines, which stop after that first record.
+- `events-loop-calls.jsonl`. Event lines 462 to 526 of
+  `benchmark/runs/prism-ml-Ternary-Bonsai-27B-mlx-2bit-off-guided-v3-issue-13-retry2-events.jsonl`
+  in the Mendel benchmark repository, timestamps dropped: the first six
+  of the 85 assistant messages in a row that each call
+  `ls -la .../.taprc; cat .../.taprc` with the same arguments, the loop
+  of 2026-09-06. The runner must end the run at the fifth.
+- `events-text-cycle.jsonl`. Assistant message 274 of
+  `benchmark/runs/gemma-4-12b-off-guided-v3-issue-13-session.jsonl`,
+  wrapped as one `message_start` and one `message_end`: 45072
+  characters, 1632 lines, no tool call, the "Wait, I'll do that now /
+  Actually, I'll just do that" cycle that stopped on `length`. Shape
+  ratio 0.02 over a 60-line window.
+- `events-flood.jsonl`. Assistant message 45 of
+  `benchmark/runs/google-gemma-4-12b-high-guided-v3-issue-13-session.jsonl`:
+  a thinking block of 5461 characters, 5451 of them newlines, replayed
+  as `thinking_delta` events of 500 characters and then the
+  `message_end`. The runner must end the run on the deltas, before the
+  message ends.
+- `events-healthy.jsonl`. The 25 assistant messages of
+  `session-healthy.jsonl` (above), wrapped as `message_start` and
+  `message_end` pairs. All tool calls distinct; the run completes.
+- `events-healthy-repeats.jsonl`. The first 30 assistant messages of
+  `benchmark/runs/accounts-fireworks-models-deepseek-v4-flash-0731-high-issue-13-session.jsonl`,
+  wrapped the same way: 43 tool calls, one command repeated with other
+  calls between the repeats. The run completes; a repeat with work
+  between it is not a loop.
 - `events-toolcalls.jsonl`. Thirty whole tool calls
   (`toolcall_start`, its deltas, `toolcall_end`) from
   `~/.local/share/choose-a-local-llm/evidence/mendel-issue-13-run7/google-gemma-4-12b-low-guided-events.jsonl`,
