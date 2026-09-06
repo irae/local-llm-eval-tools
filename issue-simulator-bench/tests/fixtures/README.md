@@ -50,6 +50,15 @@ length` rows, so the tool refuses to guess a budget).
 - `session-healthy.jsonl`. The last 25 assistant messages of
   `benchmark/runs/anthropic-claude-opus-5-high-issue-13-session.jsonl`.
   24 tool calls, all different, ratio 0.47, no loop, stop reason `stop`.
+- `session-compaction.jsonl`. Lines 1-45 of
+  `benchmark/runs/google-gemma-4-12b-low-guided-v3-issue-13-session.jsonl`
+  in the Mendel benchmark repository: the header records, 21 assistant
+  messages with 17 tool calls, and the run's first three `compaction`
+  records. The first (line 32) is the split-turn marker whose summary
+  starts with "No prior history"; the two after it are real summaries.
+  Peak context 45159 on the `length` turn before the first record, the
+  value `count-tool-calls.mjs` prints for the slice. The split-turn
+  test reads the first 33 lines, which stop after that first record.
 - `events-toolcalls.jsonl`. Thirty whole tool calls
   (`toolcall_start`, its deltas, `toolcall_end`) from
   `~/.local/share/choose-a-local-llm/evidence/mendel-issue-13-run7/google-gemma-4-12b-low-guided-events.jsonl`,
