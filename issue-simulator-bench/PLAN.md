@@ -162,9 +162,9 @@ repetition_loop`; three in a row are enough when the call already stalled
       `loop-check.py` on the finished session log and writes the verdict, the
       worst distinct-shape ratio, and the kind (thinking, text, or tool call)
       into `<slug>-worker.json` and `<slug>-loop.txt`. It is a flag beside the
-      row, never a stop. The script lives in the sibling project; `LOOP_CHECK`
+      row, never a stop. The script lives beside `run-worker.sh`; `LOOP_CHECK`
       overrides its path, and the default is
-      `../choose-a-local-llm/benchmarks/loop-check.py`.
+      `loop-check.py`.
     - Nothing reads the chat. The runner also forces auto-compaction and
       auto-retry on and records whether they took effect; `--wall-min` (default 300) is the hard stop. Both time budgets are
       absolute minutes and favour fast serving stacks; the runner records

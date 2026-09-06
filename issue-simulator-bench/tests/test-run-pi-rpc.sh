@@ -1,6 +1,6 @@
 #!/bin/bash
 # Tests for the Mendel runner's live loop stop
-# (../mendel-benchmark/benchmark/run-pi-rpc.mjs), through a fake pi on
+# (run-pi-rpc.mjs, beside the tests folder), through a fake pi on
 # PATH that replays a real event fixture and answers the RPC commands.
 # The fixtures are real Mendel logs, trimmed (fixtures/README.md).
 
@@ -8,7 +8,7 @@ set -u
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(dirname "$HERE")"
-RUNNER="${MENDEL_RUNNER:-$ROOT/../mendel-benchmark/benchmark/run-pi-rpc.mjs}"
+RUNNER="${MENDEL_RUNNER:-$ROOT/run-pi-rpc.mjs}"
 FIXTURES="$HERE/fixtures"
 PASS=0
 FAIL=0

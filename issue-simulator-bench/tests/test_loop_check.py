@@ -1,4 +1,4 @@
-"""Tests for benchmarks/loop-check.py, against real logs.
+"""Tests for loop-check.py, against real logs.
 
 Fixtures: tests/fixtures/README.md says where each one came from.
 """
@@ -11,7 +11,7 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 FIXTURES = os.path.join(HERE, "fixtures")
-SCRIPT = os.path.join(ROOT, "benchmarks", "loop-check.py")
+SCRIPT = os.path.join(ROOT, "loop-check.py")
 
 _spec = importlib.util.spec_from_file_location("loop_check", SCRIPT)
 loop_check = importlib.util.module_from_spec(_spec)

@@ -49,7 +49,7 @@ if [ "$harness" = "pi" ] && [ -z "$thinking" ]; then
     exit 1
 fi
 RUNS="$REPO/scratchpad/benchmark/runs"
-LOOP_CHECK="${LOOP_CHECK:-$REPO/../choose-a-local-llm/benchmarks/loop-check.py}"
+LOOP_CHECK="${LOOP_CHECK:-$BENCH_DIR/loop-check.py}"
 slug="$(echo "$model" | tr '/:' '--')"
 [ -n "$thinking" ] && slug="${slug}-${thinking}"
 branch="${slug}${suffix}"
