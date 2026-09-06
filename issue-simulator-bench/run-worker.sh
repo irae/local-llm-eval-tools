@@ -98,7 +98,7 @@ build_pi_agent_dir() {
     for f in models.json auth.json models-store.json; do
         [ -e "$HOME/.pi/agent/$f" ] && cp "$HOME/.pi/agent/$f" "$d/"
     done
-    printf '{"compaction":{"enabled":true},"retry":{"enabled":true}}\n' > "$d/settings.json"
+    printf '{"compaction":{"enabled":true,"reserveTokens":8192},"retry":{"enabled":true}}\n' > "$d/settings.json"
     cp "$BENCH_DIR/agents-global.md" "$d/AGENTS.md"
     echo "$d"
 }

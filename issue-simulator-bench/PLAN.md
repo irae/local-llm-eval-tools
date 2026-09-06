@@ -83,7 +83,9 @@ table across versions.
    auto-compaction cannot trigger at the right point and `length` stops cannot be
    classified. `maxTokens = min(max(8192, pow2ceil(2 x L)), contextWindow / 4)`,
    where L is the model's longest healthy output, and pi's `reserveTokens` takes
-   the same value; the sibling project states the rule and the new-model probe in
+   the same value: `run-worker.sh` pins `reserveTokens` 8192 in the private pi
+   config it builds (since 2026-09-06; rows before that ran at pi's default
+   16384). The sibling project states the rule and the new-model probe in
    `../choose-a-local-llm/docs/methodology/mendel.md`. Do NOT set `compat.supportsFinishReason: false` unless a normal
    completion from that server is shown to omit `finish_reason`: the flag
    makes pi infer `stop` for every ended stream, which hides real errors. The runner classifies stops fairly
