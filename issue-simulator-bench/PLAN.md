@@ -139,6 +139,23 @@ output_limit`; `output_limit_stop` holds both output token counts. A
       longest healthy output, which the `maxTokens` rule above guarantees; below
       that line a model can hit the budget with legitimate work, so the run
       carries a budget problem, not an output-limit stop.
+    - **A live loop ends the run.** Three shapes, none of which reads the
+      chat. The same tool call (same name, same arguments) five times in a
+      row, with no other call between, ends the run with `end_reason:
+repetition_loop`; three in a row are enough when the call already stalled
+      the turn once. One assistant message with no tool call whose text or
+      thinking has 60 lines or more, and a 60-line window where fewer than
+      10 percent of the line shapes are distinct (letters to `W`, digits to
+      `N`, the `loop-check.py` measure), ends the run the same way.
+      `repetition_loop` in the meta file holds the kind, the repeated unit,
+      the count and the time of the first repeat. A stream where 2000
+      characters or more of one message are 90 percent one character or
+      whitespace ends the run with `end_reason: degenerate_output`;
+      `degenerate_output` holds the count, the character and the share. A
+      stop, not a rescue: the row is invalid and records that the model
+      looped. A healthy run that repeats a test command between edits never
+      trips the first rule, because the edit breaks the streak; a message
+      that carries a tool call never trips the second.
     - **Repetition-loop verdict at run close.** `run-worker.sh` runs
       `loop-check.py` on the finished session log and writes the verdict, the
       worst distinct-shape ratio, and the kind (thinking, text, or tool call)
@@ -500,6 +517,7 @@ For local models, `local` is true and `serving` names the stack (`llama-server`,
 config, not from a run record. `thinking` is the pinned thinking level (`null`
 for Claude Code runs and where no record exists). `end_reason` is one of
 `complete`, `wall_clock`, `turn_timeout`, `output_limit`,
+`repetition_loop`, `degenerate_output`,
 `model_budget_exhausted`, `tooling_budget_exhausted`,
 `harness_crash`, `stuck` (a self-inflicted loop the operator closed),
 `operator_stop`, or `null` where no record exists. `turn_timeout` means one

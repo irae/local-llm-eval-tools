@@ -89,6 +89,8 @@ const meta = {
     reissue_msgs: [],
     turn_timeout: null,
     output_limit_stop: null,
+    repetition_loop: null,
+    degenerate_output: null,
     respawns: 0,
     compactions: [],
     retries: [],
@@ -126,6 +128,12 @@ let turnStartedAt = null;
 let turnTimeoutHit = false;
 let outputLimitStop = false;
 let atBudgetStreak = [];
+let repetitionLoop = null;
+let degenerateOutput = null;
+let callStreak = { key: null, count: 0, first_at: null, unit: null };
+let stalledKey = null;
+let streamChars = new Map();
+let streamTotal = 0;
 
 // Pinned environment: no operator extensions, skills, or prompt templates.
 // The config directory itself is pinned by run-worker.sh via PI_CODING_AGENT_DIR.
@@ -191,12 +199,23 @@ function handleLine(line) {
     logEvent({ t: new Date().toISOString(), ...e });
     if (e.type === 'turn_start' && turnStartedAt === null)
         turnStartedAt = Date.now();
-    if (e.type === 'message_start' && e.message?.role === 'assistant')
+    if (e.type === 'message_start' && e.message?.role === 'assistant') {
         turnStartedAt = Date.now();
+        streamChars = new Map();
+        streamTotal = 0;
+    }
+    if (
+        e.type === 'message_update' &&
+        ['text_delta', 'thinking_delta'].includes(e.assistantMessageEvent?.type) &&
+        typeof e.assistantMessageEvent.delta === 'string'
+    )
+        accountForDelta(e.assistantMessageEvent.delta);
     if (e.type === 'message_end' && e.message?.role === 'assistant') {
         lastAssistant = e.message;
         outputTokensTotal += e.message.usage?.output ?? 0;
         accountForStop(e.message);
+        accountForToolCalls(e.message);
+        accountForShape(e.message);
         turnStartedAt = null;
     }
     if (e.type === 'message_end' && e.message?.role === 'toolResult')
@@ -297,6 +316,137 @@ function accountForToolResult(message) {
     say(
         `ALARM re-issue message: pi discarded a truncated ${entry.tool ?? 'tool'} call`
     );
+}
+
+// ---- live loop stop ----------------------------------------------------------
+// Three shapes, from hardware/m1-max-32gb/research/loop-signatures.md in the
+// site repo: the same tool call over and over, a short cycle inside one
+// message, and a one-character flood. Each ends the run; none reads the chat.
+const LOOP_CALLS = 5;
+const LOOP_CALLS_AFTER_STALL = 3;
+const SHAPE_WINDOW = 60;
+const SHAPE_THRESHOLD = 0.1;
+const FLOOD_CHARS = 2000;
+const FLOOD_SHARE = 0.9;
+
+const abortTurn = async () => {
+    try {
+        await send({ type: 'abort' });
+    } catch {
+        // best effort; the run is ending anyway
+    }
+};
+
+function endOnLoop(kind, unit, count, first_at) {
+    if (repetitionLoop) return;
+    repetitionLoop = {
+        at: new Date().toISOString(),
+        kind,
+        unit: redact(String(unit)).slice(0, 200),
+        count,
+        first_at,
+    };
+    meta.repetition_loop = repetitionLoop;
+    say(
+        `ALARM repetition loop (${kind}): ${count} repeats of ${repetitionLoop.unit}, ending the run`
+    );
+    abortTurn();
+}
+
+function accountForToolCalls(message) {
+    for (const b of message.content || []) {
+        if (b?.type !== 'toolCall') continue;
+        const key = `${b.name} ${JSON.stringify(b.arguments ?? {})}`;
+        if (key === callStreak.key) callStreak.count++;
+        else
+            callStreak = {
+                key,
+                count: 1,
+                first_at: new Date().toISOString(),
+                unit: `${b.name} ${JSON.stringify(b.arguments ?? {})}`,
+            };
+        const limit = key === stalledKey ? LOOP_CALLS_AFTER_STALL : LOOP_CALLS;
+        if (callStreak.count >= limit)
+            endOnLoop(
+                'tool call',
+                callStreak.unit,
+                callStreak.count,
+                callStreak.first_at
+            );
+    }
+}
+
+const shape = (line) => line.replace(/[A-Za-z]+/g, 'W').replace(/\d+/g, 'N');
+
+function accountForShape(message) {
+    const blocks = message.content || [];
+    if (blocks.some((b) => b?.type === 'toolCall')) return;
+    const lines = blocks
+        .filter((b) => b?.type === 'text' || b?.type === 'thinking')
+        .flatMap((b) => (b.text || b.thinking || '').split('\n'))
+        .map((l) => l.trim())
+        .filter(Boolean);
+    if (lines.length < SHAPE_WINDOW) return;
+    const shapes = lines.map(shape);
+    const counts = new Map();
+    let distinct = 0;
+    let worst = 1;
+    let worstAt = 0;
+    for (let i = 0; i < shapes.length; i++) {
+        const n = (counts.get(shapes[i]) || 0) + 1;
+        counts.set(shapes[i], n);
+        if (n === 1) distinct++;
+        if (i >= SHAPE_WINDOW) {
+            const old = shapes[i - SHAPE_WINDOW];
+            const m = counts.get(old) - 1;
+            counts.set(old, m);
+            if (m === 0) distinct--;
+        }
+        if (i >= SHAPE_WINDOW - 1) {
+            const ratio = distinct / SHAPE_WINDOW;
+            if (ratio < worst) {
+                worst = ratio;
+                worstAt = i;
+            }
+        }
+    }
+    if (worst < SHAPE_THRESHOLD)
+        endOnLoop(
+            'text cycle',
+            `${lines[worstAt]} (window ratio ${worst.toFixed(2)})`,
+            lines.length,
+            turnStartedAt ? new Date(turnStartedAt).toISOString() : null
+        );
+}
+
+function accountForDelta(delta) {
+    if (degenerateOutput || repetitionLoop) return;
+    for (const ch of delta) {
+        const k = /\s/.test(ch) ? 'whitespace' : ch;
+        streamChars.set(k, (streamChars.get(k) || 0) + 1);
+    }
+    streamTotal += delta.length;
+    if (streamTotal < FLOOD_CHARS) return;
+    let top = null;
+    let topCount = 0;
+    for (const [k, n] of streamChars)
+        if (n > topCount) {
+            top = k;
+            topCount = n;
+        }
+    const share = topCount / streamTotal;
+    if (share < FLOOD_SHARE) return;
+    degenerateOutput = {
+        at: new Date().toISOString(),
+        chars: streamTotal,
+        char: top,
+        share: Math.round(share * 100) / 100,
+    };
+    meta.degenerate_output = degenerateOutput;
+    say(
+        `ALARM degenerate output: ${streamTotal} chars, ${Math.round(share * 100)}% ${JSON.stringify(top)}, ending the run`
+    );
+    abortTurn();
 }
 
 const waitSettled = () =>
@@ -709,7 +859,16 @@ async function main() {
             await finish('output_limit');
             break;
         }
+        if (repetitionLoop) {
+            await finish('repetition_loop');
+            break;
+        }
+        if (degenerateOutput) {
+            await finish('degenerate_output');
+            break;
+        }
         if (settleKind === 'settled' && stallFlag) settleKind = 'stall';
+        if (settleKind === 'stall') stalledKey = callStreak.key;
         const c = classify(settleKind);
         say(`turn settled: ${c.kind} — ${c.cause}`);
         if (c.kind === 'done') {

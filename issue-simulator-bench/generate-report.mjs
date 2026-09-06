@@ -216,6 +216,8 @@ const END_REASON = {
     harness_crash: 'harness crash',
     stuck: 'stuck',
     operator_stop: 'stopped',
+    repetition_loop: 'repetition loop, stopped by the runner',
+    degenerate_output: 'degenerate output, stopped by the runner',
 };
 const partialDetail = (r) => {
     if (!r.partial) return null;
