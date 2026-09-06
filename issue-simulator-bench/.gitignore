@@ -4,3 +4,5 @@ runs/*
 !runs/*-session-1.jsonl
 !runs/*-session-2.jsonl
 !runs/SESSIONS.md
+!runs/*-retry2-events.jsonl
+!runs/*-retry2-summary.md
