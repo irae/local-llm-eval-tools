@@ -1,0 +1,94 @@
+#!/usr/bin/env node
+const { readFileSync } = require('node:fs');
+
+const events = readFileSync(process.env.FAKE_PI_EVENTS, 'utf8')
+    .split('\n')
+    .filter(Boolean)
+    .map((l) => JSON.parse(l));
+const out = (o) => process.stdout.write(JSON.stringify(o) + '\n');
+let aborted = false;
+let inTurn = false;
+let cursor = 0;
+let timer = null;
+
+const state = {
+    sessionFile: '/tmp/fake-pi-session.jsonl',
+    sessionId: 'fake-pi',
+    model: { id: 'fake', maxTokens: 8192, contextWindow: 49152, baseUrl: null },
+    thinkingLevel: 'off',
+    autoCompactionEnabled: true,
+};
+
+const settle = () => {
+    inTurn = false;
+    out({ type: 'agent_settled' });
+};
+
+function replay() {
+    if (aborted) return;
+    if (cursor >= events.length) {
+        out({ type: 'message_start', message: { role: 'assistant' } });
+        out({
+            type: 'message_end',
+            message: {
+                role: 'assistant',
+                content: [{ type: 'text', text: 'fixture replayed to the end' }],
+                stopReason: 'stop',
+                usage: { output: 5 },
+            },
+        });
+        return settle();
+    }
+    const e = events[cursor++];
+    if (e.type === 'message_end' && e.message?.role === 'assistant') {
+        e.message.stopReason =
+            e.message.stopReason === 'toolUse' ? 'toolUse' : e.message.stopReason;
+        e.message.usage = e.message.usage || { output: 50 };
+    }
+    out(e);
+    timer = setTimeout(replay, 5);
+}
+
+let buf = '';
+process.stdin.on('data', (d) => {
+    buf += d;
+    let nl;
+    while ((nl = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, nl);
+        buf = buf.slice(nl + 1);
+        if (!line.trim()) continue;
+        const c = JSON.parse(line);
+        if (c.type === 'get_state')
+            out({ type: 'response', id: c.id, success: true, data: state });
+        else if (c.type === 'get_session_stats')
+            out({
+                type: 'response',
+                id: c.id,
+                success: true,
+                data: { sessionFile: state.sessionFile },
+            });
+        else if (c.type === 'abort') {
+            aborted = true;
+            clearTimeout(timer);
+            out({ type: 'response', id: c.id, success: true });
+            if (inTurn) {
+                out({
+                    type: 'message_end',
+                    message: {
+                        role: 'assistant',
+                        content: [],
+                        stopReason: 'aborted',
+                        usage: { output: 0 },
+                    },
+                });
+                settle();
+            }
+        } else if (c.type === 'prompt') {
+            out({ type: 'response', id: c.id, success: true });
+            inTurn = true;
+            aborted = false;
+            replay();
+        } else out({ type: 'response', id: c.id, success: true });
+    }
+});
+process.stdin.on('end', () => process.exit(0));
