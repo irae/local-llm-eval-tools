@@ -1,0 +1,46 @@
+We have `gh` installed; use it read-only. Fetch https://github.com/irae/mendel/issues/13. Your job is to complete that issue: replace eight npm dependencies with native Node equivalents: uuid, xtend, urlsafe-base64, rimraf, glob, chalk, tmp, shasum. Follow the workflow below exactly, in order. Do not read all the code — read only the files your greps point you to.
+
+Words used below: a "dependency" is one of the eight npm packages you are removing. A "package" is a workspace package of this repo (under packages/, examples/, legacy-packages/, or the repo root). A "file" is one source file that uses a dependency.
+
+As AGENTS.md says, `legacy-packages/` are frozen legacy: change their files when needed, but write no tests and run no tests there.
+
+Direction for chalk: replace it with `util.styleText` and keep Node's defaults. Do not force color on or off — drop the `enableColor` option and the forced color level; that small feature goes away.
+
+SETUP
+
+- Create TASKS.md at the repo root (it is already git-ignored): one `- [ ]` item per dependency, in the issue's order, no sub-items yet.
+
+PER DEPENDENCY — repeat for each of the eight, one at a time
+
+1. Find every use first:
+   a. Grep the whole repo for `require('<dep>')` and every package.json for `"<dep>":`.
+   b. In TASKS.md, add one `- [ ]` sub-item per affected file, grouped by package.
+   c. Trust your grep over the issue's list — the issue misses references.
+2. Rewrite one file at a time:
+   a. If the file has no test covering it: first write a small test that passes WITH the dependency still in place. After your change, the same test must pass WITHOUT it.
+   b. Edit only what the grep found. Minimal diff, match neighboring style, no drive-by cleanups.
+   c. Run the owning package's tests (for example `npx tap packages/<pkg>/test/*.js`). Fix what broke.
+   d. Mark the file's sub-item done in TASKS.md.
+3. Drop the dependency with pnpm — never by hand-editing package.json or the lockfile: `pnpm --filter <pkg> remove <dep>` for each package that declares it, `pnpm remove -w <dep>` if the repo root declares it. Pipe through `tail -5`.
+4. Commit everything the dependency touched, in one or more commits, split per package — each commit carries one package's changes with its share of the lockfile update. The root package.json change may ride with one package's commit or come as its own commit; both are fine. Before every commit, run the full unit suite (`pnpm run unit`, pipe through `tail`).
+5. Check the per-dependency acceptance criteria below. Only when all pass, mark the dependency done in TASKS.md and move to the next one.
+
+ACCEPTANCE CRITERIA — per dependency, before it is marked done
+
+- [ ] Re-grep `require('<dep>')`: zero uses left in code. Test fixture data under `test/fixtures/` is parser input, not a use.
+- [ ] Re-grep `"<dep>":`: no package.json anywhere still declares it — legacy-packages and root included.
+- [ ] `pnpm-lock.yaml` shrank; every removal went through `pnpm remove`.
+- [ ] All changes committed — root package.json included — type `chore`, split per package, exact file paths staged (never `git add -A`), never `--no-verify`.
+- [ ] The full unit suite ran before every commit.
+- [ ] Every sub-item of the dependency is checked in TASKS.md.
+
+ACCEPTANCE CRITERIA — global, after the eighth dependency
+
+- [ ] Run `npx prettier --check .` and `npx eslint .` yourself; both silent after you fix what they flag.
+- [ ] Run the full suite one last time; it matches the baseline failures listed below.
+- [ ] Every TASKS.md item is checked.
+
+KNOWN PITFALLS — each has caused real failures
+
+- rimraf silently no-ops on a missing path. `fs.rmSync` throws unless you pass `{recursive: true, force: true}` — always pass `force: true` where rimraf was used.
+- Pre-existing failures that are NOT yours to fix (they fail the same way before your change): `legacy-packages/**`. Don't run legacy tests at all
