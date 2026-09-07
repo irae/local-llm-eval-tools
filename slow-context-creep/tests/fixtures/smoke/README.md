@@ -80,3 +80,54 @@ cache the way the old tool's append-only growth rule requires, which
 would force much more KV cache churn per step than the reference
 tool causes. Not confirmed; flagging for your own investigation
 rather than guessing further at the cause.
+
+## A/B run: old tool vs. new tool, same live server (2026-09-07)
+
+`ab-old-tool-qwen36-gguf-q8.tsv` and `ab-new-tool-qwen36-gguf-q8.tsv`
+answer the open question above: does the new tool alone cause the
+page-churn blowup, or is it the machine?
+
+- Backend: llama-server
+- Model: `unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-Q4_K_XL` (alias
+  `qwen3.6-35b-a3b`)
+- Server command: same as `qwen36-gguf-q8-c98304.tsv` above, with
+  `--verbose` added.
+- Ladder: `DEPTH_LIST="4096,8192,16384,24576,32768,40960"`
+- The old tool (reconstructed from commit `3a84948`,
+  `creep_llama.py`) ran first, then the new tool
+  (`slow-context-creep/creep.py llama`) ran right after, against the
+  same server process, with no other command run between the two.
+  Both tools faced the same machine state.
+
+Result: **both tools stopped early with the same `mem` verdict, at
+the same depth, 32818.** The old tool is the unmodified pre-refactor
+code. It reproduced the same early stop as the new tool, on this
+machine, today.
+
+| depth | old tool: compress + decompress | new tool: compress + decompress |
+| --- | --- | --- |
+| 4114 | 6741 | 109236 |
+| 8222 | 2787 | 81213 |
+| 16386 | 5147 | 21283 |
+| 24602 | 3503 | 10586 |
+| 32818 | 7329 | 2982 |
+
+Decode speed matched row for row between the two tools (36.26 vs.
+36.33 tok/s at depth 4114, down to 19.56 vs. 19.55 at 32818), so the
+prompt cache worked the same way in both. Only the page-churn columns
+differ, and even the smallest of the six numbers above (2787) is far
+above the reference run's largest number through this depth (1064).
+
+**Verdict: Case A, environmental.** Both tools show large page
+counts on this machine today. The refactor is cleared: the old tool,
+running the exact pre-refactor code, shows the same failure on the
+same hardware. The compressor state left over from other work on
+this machine is the most likely cause, not a defect in
+`slow-context-creep/creep.py`. No code fix is needed.
+
+Reminder for a future runner: `Compressions` and `Decompressions` in
+`vm_stat` are system-wide, cumulative counters. They count every page
+the macOS memory compressor touches for every process, not only the
+sweep's own memory. Any other process awake on the machine during a
+sweep adds to these columns. Read them as a machine-health signal,
+not a per-tool one.
