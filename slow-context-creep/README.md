@@ -66,7 +66,7 @@ One line per backend:
 
 ```
 DEPTH_LIST=4096,8192,16384 python3 creep.py llama > run-creep.tsv 2>&1
-DEPTH_LIST=4096,8192,16384 MODEL=<model id> SERVER_LOG=/tmp/mlx.log python3 creep.py mlx > run-creep.tsv 2>&1
+DEPTH_LIST=4096,8192,16384 MODEL=<model id> SERVER_LOG=~/.local/state/slow-context-creep/mlx.log python3 creep.py mlx > run-creep.tsv 2>&1
 DEPTH_LIST=4096,8192,16384 MODEL=<model key> python3 creep.py lmstudio > run-creep.tsv 2>&1
 ```
 
@@ -158,8 +158,12 @@ ceiling of one server configuration.
 ```
 DEPTH_LIST=4096,8192,16384,24576,32768,49152,65536 \
 MODEL=<the id the server answers to> \
-python3 creep.py llama > /tmp/<config>-creep.tsv 2>&1
+python3 creep.py llama > ~/.local/share/slow-context-creep/<config>-creep.tsv 2>&1
 ```
+
+A sweep run and a server log are both data worth keeping across a
+reboot; write them under `~/.local/share/` or `~/.local/state/`, never
+`/tmp` (see the root `AGENTS.md`).
 
    On mlx_lm.server, add `SERVER_LOG=<the server log>` so the runner
    can see the death signature.
