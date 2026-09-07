@@ -1,11 +1,11 @@
 """creep.py — the shared context-creep runner.
 
 One implementation of the method in `docs/methodology/context-creep.md`,
-used by `creep_llama.py`, `creep_mlx.py` and `creep_lmstudio.py`. Those
-three files hold only what genuinely differs per backend: the endpoint,
-the request shape, how decode speed is read, and the two backend parts
-of the liveness signal (the server-log death signature, and the one real
-completion used as a probe).
+used by `backend_llama.py`, `backend_mlx.py` and `backend_lmstudio.py`.
+Those three files hold only what genuinely differs per backend: the
+endpoint, the request shape, how decode speed is read, and the two
+backend parts of the liveness signal (the server-log death signature,
+and the one real completion used as a probe).
 
 One command, one output file. The runner is also the monitor: it samples
 memory itself and it watches liveness itself, so a sweep needs no second
@@ -60,9 +60,16 @@ Environment, all optional except DEPTH_LIST:
     PROBE_TIMEOUT_S seconds to wait for that probe, default 300
     SWEEP_BASE      server base URL, default http://127.0.0.1:8081
     MODEL           model id the server answers to, where needed
+    SERVER_LOG      path to the backend's server log, where the backend
+                    reads a death signature
 
 Exit codes: 0 the sweep found the floor or reached the last depth, 42 a
 stop that invalidates every number past it, 2 a usage or platform error.
+
+Usage:
+    python3 creep.py <llama|mlx|lmstudio>
+    python3 creep.py --help
+    python3 creep.py <backend> --help
 """
 
 import os
@@ -81,6 +88,7 @@ STALL_S = float(os.environ.get("STALL_S", "600"))
 PROBE_TIMEOUT_S = float(os.environ.get("PROBE_TIMEOUT_S", "300"))
 BASE = os.environ.get("SWEEP_BASE", "http://127.0.0.1:8081")
 MODEL = os.environ.get("MODEL", "")
+SERVER_LOG = os.environ.get("SERVER_LOG", "")
 
 BLOCK = ("def parse_record_%06d(line):\n"
          "    fields = line.strip().split(',')\n"
@@ -111,12 +119,6 @@ class ServerDead(Exception):
 def die(message):
     print(message, file=sys.stderr, flush=True)
     raise SystemExit(2)
-
-
-def usage(doc):
-    if "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
-        print(doc.strip())
-        raise SystemExit(0)
 
 
 def vm_counters():
@@ -403,3 +405,51 @@ def run(step, probe=None):
 
     print("no ceiling found up to %d" % DEPTHS[-1], flush=True)
     return 0
+
+
+def main(argv):
+    """Pick a backend by name and run the sweep against it.
+
+    `argv` is `sys.argv[1:]`. `--help` (or `-h`) prints a docstring and
+    exits 0: the named backend's docstring when a valid backend name is
+    also present, this module's shared docstring otherwise. No backend
+    name, or a name that matches none of `llama`, `mlx`, `lmstudio`,
+    prints usage on stderr and exits 2.
+    """
+    help_wanted = "--help" in argv or "-h" in argv
+    positional = [token for token in argv if not token.startswith("-")]
+    backend_name = positional[0] if positional else None
+
+    if help_wanted and backend_name is None:
+        print(__doc__.strip())
+        raise SystemExit(0)
+
+    import backend_llama
+    import backend_mlx
+    import backend_lmstudio
+    BACKENDS = {"llama": backend_llama, "mlx": backend_mlx,
+                "lmstudio": backend_lmstudio}
+    backend = BACKENDS.get(backend_name)
+
+    if help_wanted:
+        print((backend.__doc__ if backend else __doc__).strip())
+        raise SystemExit(0)
+
+    if backend is None:
+        die("usage: creep.py <llama|mlx|lmstudio>")
+
+    backend.check()
+    print(backend.describe(), flush=True)
+    if backend.SIGNATURES:
+        if SERVER_LOG:
+            watch_server_log(SERVER_LOG, backend.SIGNATURES)
+        else:
+            print("WARNING: SERVER_LOG unset. This backend can die with a "
+                  "green /health, so the sweep loses the fastest half of "
+                  "its liveness signal. The stall probe still runs.",
+                  flush=True)
+    raise SystemExit(run(backend.step, backend.probe))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

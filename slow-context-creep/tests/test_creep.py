@@ -166,6 +166,97 @@ class CreepTestCase(unittest.TestCase):
                 return int(value.strip().rstrip("."))
         raise AssertionError("no 'Pages wired down' line in: %r" % vm_stat_output)
 
+    def test_help_without_backend_prints_env_var_names_and_exits_zero(self):
+        result = subprocess.run([sys.executable, CREEP_PY, "--help"],
+                                capture_output=True, text=True, timeout=10)
+
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("DEPTH_LIST", result.stdout)
+        self.assertIn("STALL_S", result.stdout)
+
+    def test_llama_help_prints_the_llama_docstring_and_exits_zero(self):
+        result = subprocess.run([sys.executable, CREEP_PY, "llama", "--help"],
+                                capture_output=True, text=True, timeout=10)
+
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("llama-server", result.stdout)
+        self.assertIn("ENDPOINT=completion", result.stdout)
+
+    def test_no_backend_exits_two(self):
+        result = subprocess.run([sys.executable, CREEP_PY],
+                                capture_output=True, text=True, timeout=10)
+
+        self.assertEqual(result.returncode, 2)
+
+    def test_unknown_backend_exits_two(self):
+        result = subprocess.run([sys.executable, CREEP_PY, "bogus"],
+                                capture_output=True, text=True, timeout=10)
+
+        self.assertEqual(result.returncode, 2)
+
+    def test_depth_list_unset_exits_two(self):
+        env = dict(os.environ)
+        env.pop("DEPTH_LIST", None)
+        env["SWEEP_BASE"] = self.base_url
+        env["MODEL"] = "fake"
+
+        result = subprocess.run([sys.executable, CREEP_PY, "llama"], env=env,
+                                capture_output=True, text=True, timeout=10)
+
+        self.assertEqual(result.returncode, 2)
+
+    def test_vm_stat_missing_from_path_exits_two_naming_vm_stat(self):
+        env = dict(os.environ)
+        env["DEPTH_LIST"] = "200,400,600"
+        env["SWEEP_BASE"] = self.base_url
+        env["MODEL"] = "fake"
+        env["STEP_PAUSE_S"] = "0"
+        env["PATH"] = "/usr/bin:/bin"
+
+        result = subprocess.run([sys.executable, CREEP_PY, "llama"], env=env,
+                                capture_output=True, text=True, timeout=10)
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("vm_stat", result.stderr)
+
+    def test_default_run_prints_the_llama_shape_and_no_ceiling_found(self):
+        result = self.run_creep("llama")
+
+        self.assertEqual(result.returncode, 0)
+        lines = result.stdout.splitlines()
+        self.assertEqual(
+            lines[0],
+            "llama-server, endpoint=completion thinking=n/a (no template) "
+            "contexts=1 pause=0s")
+        start_index = next(
+            index for index, line in enumerate(lines)
+            if line.startswith("start:"))
+
+        fixture_path = os.path.join(
+            TESTS_DIR, "fixtures", "creep-qwen38-gguf-short-q8.tsv")
+        with open(fixture_path) as handle:
+            fixture_header = handle.read().splitlines()[2]
+        self.assertEqual(lines[start_index + 1], fixture_header)
+
+        self.assertEqual(lines[-1], "no ceiling found up to 600")
+        rows = [line for line in lines[start_index + 2:-1]
+               if line.startswith("A\t")]
+        self.assertTrue(rows)
+        for row in rows:
+            self.assertEqual(len(row.split("\t")), 9)
+
+    def test_fast_pause_prints_warning_before_the_first_row(self):
+        result = self.run_creep("llama")
+
+        lines = result.stdout.splitlines()
+        warning_index = next(
+            index for index, line in enumerate(lines)
+            if line.startswith("WARNING:"))
+        first_row_index = next(
+            index for index, line in enumerate(lines)
+            if line.startswith("A\t"))
+        self.assertLess(warning_index, first_row_index)
+
 
 if __name__ == "__main__":
     unittest.main()

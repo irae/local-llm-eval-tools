@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""creep_llama.py — context creep against llama-server.
+"""backend_llama.py — context creep against llama-server.
 
 The method lives in `creep.py`; this file holds only what is specific to
 llama-server.
@@ -29,7 +29,7 @@ has no silent-death signature worth grepping, so this file passes no
 server log.
 
 Usage:
-    DEPTH_LIST=4096,8192,16384 MODEL=gemma-4-12b-it creep_llama.py \\
+    DEPTH_LIST=4096,8192,16384 MODEL=gemma-4-12b-it python3 creep.py llama \\
     > results/<config>-creep.tsv 2>&1
 """
 
@@ -44,6 +44,8 @@ import creep
 
 ENDPOINT = os.environ.get("ENDPOINT", "completion")
 THINKING = os.environ.get("THINKING", "off")
+
+SIGNATURES = ()
 
 
 def post(path, payload, timeout=3600):
@@ -98,16 +100,15 @@ def step_chat(prompt, _label):
     return (produced / elapsed if elapsed else 0.0), text
 
 
-def main():
-    creep.usage(__doc__)
+def check():
     if ENDPOINT == "chat" and not creep.MODEL:
         creep.die("chat endpoint needs MODEL set")
-    print("llama-server, endpoint=%s thinking=%s contexts=%d pause=%.0fs"
-          % (ENDPOINT, THINKING if ENDPOINT == "chat" else "n/a (no template)",
-             creep.N_CONTEXTS, creep.STEP_PAUSE_S), flush=True)
-    step = step_chat if ENDPOINT == "chat" else step_completion
-    raise SystemExit(creep.run(step, probe))
 
 
-if __name__ == "__main__":
-    main()
+def describe():
+    return ("llama-server, endpoint=%s thinking=%s contexts=%d pause=%.0fs"
+            % (ENDPOINT, THINKING if ENDPOINT == "chat" else "n/a (no template)",
+               creep.N_CONTEXTS, creep.STEP_PAUSE_S))
+
+
+step = step_chat if ENDPOINT == "chat" else step_completion

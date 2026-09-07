@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""creep_mlx.py — context creep against mlx_lm.server.
+"""backend_mlx.py — context creep against mlx_lm.server.
 
 The method lives in `creep.py`; this file holds only what is specific to
 upstream mlx-lm.
@@ -25,7 +25,7 @@ reports no timings of its own.
 
 Usage:
     DEPTH_LIST=4096,8192 MODEL=mlx-community/Qwen3.8-27B-4bit \\
-    SERVER_LOG=/tmp/mlx-server.log creep_mlx.py \\
+    SERVER_LOG=/tmp/mlx-server.log python3 creep.py mlx \\
     > results/<config>-creep.tsv 2>&1
 """
 
@@ -38,11 +38,9 @@ import urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import creep
 
-SERVER_LOG = os.environ.get("SERVER_LOG", "")
-
-DEATH_SIGNATURES = ("Insufficient Memory",
-                    "Command buffer execution failed",
-                    "Traceback (most recent call last)")
+SIGNATURES = ("Insufficient Memory",
+             "Command buffer execution failed",
+             "Traceback (most recent call last)")
 
 
 def probe(timeout):
@@ -81,23 +79,14 @@ def step(prompt, _label):
     return ((len(stamps) - 1) / span if span else 0.0), "".join(pieces)
 
 
-def main():
-    creep.usage(__doc__)
+def check():
     if not creep.MODEL:
         creep.die("MODEL must be the repo id the server was started with")
-    if SERVER_LOG:
-        creep.watch_server_log(SERVER_LOG, DEATH_SIGNATURES)
-    else:
-        print("WARNING: SERVER_LOG unset. This backend can die with a green "
-              "/health, so the sweep loses the fastest half of its liveness "
-              "signal. The stall probe still runs.", flush=True)
     if creep.N_CONTEXTS > 1:
         print("NOTE: start the server with --prompt-cache-size >= %d"
               % creep.N_CONTEXTS, flush=True)
-    print("mlx_lm.server, contexts=%d pause=%.0fs"
-          % (creep.N_CONTEXTS, creep.STEP_PAUSE_S), flush=True)
-    raise SystemExit(creep.run(step, probe))
 
 
-if __name__ == "__main__":
-    main()
+def describe():
+    return "mlx_lm.server, contexts=%d pause=%.0fs" % (
+        creep.N_CONTEXTS, creep.STEP_PAUSE_S)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""creep_lmstudio.py — context creep against LM Studio.
+"""backend_lmstudio.py — context creep against LM Studio.
 
 The method lives in `creep.py`; this file holds only what is specific to
 LM Studio.
@@ -14,7 +14,7 @@ Two consequences worth carrying when comparing against llama-server:
 
 - This path goes THROUGH the chat template, so it is not the same shape
   as llama's raw `/completion` curve. Compare like with like: use
-  `ENDPOINT=chat` on `creep_llama.py`.
+  `ENDPOINT=chat` on `python3 creep.py llama`.
 - Thinking on this backend is whatever the model entry defaults to. For
   `gemma-4-12b-it-mlx` it is off and cannot be turned on (probed
   2026-09-04). There is no toggle to set here.
@@ -30,7 +30,7 @@ Studio writes its log through the app, so this file passes no server
 log.
 
 Usage:
-    DEPTH_LIST=4096,8192 MODEL=gemma-4-12b-it-mlx creep_lmstudio.py \\
+    DEPTH_LIST=4096,8192 MODEL=gemma-4-12b-it-mlx python3 creep.py lmstudio \\
     > results/<config>-creep.tsv 2>&1
 """
 
@@ -42,6 +42,8 @@ import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import creep
+
+SIGNATURES = ()
 
 
 def probe(timeout):
@@ -85,15 +87,12 @@ def step(prompt, _label):
     return ((len(stamps) - 1) / span if span else 0.0), "".join(pieces)
 
 
-def main():
-    creep.usage(__doc__)
+def check():
     if not creep.MODEL:
         creep.die("MODEL must be the key from `lms ls`, "
                   "e.g. gemma-4-12b-it-mlx")
-    print("LM Studio, chat endpoint, contexts=%d pause=%.0fs"
-          % (creep.N_CONTEXTS, creep.STEP_PAUSE_S), flush=True)
-    raise SystemExit(creep.run(step, probe))
 
 
-if __name__ == "__main__":
-    main()
+def describe():
+    return "LM Studio, chat endpoint, contexts=%d pause=%.0fs" % (
+        creep.N_CONTEXTS, creep.STEP_PAUSE_S)
