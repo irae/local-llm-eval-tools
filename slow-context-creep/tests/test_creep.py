@@ -3,6 +3,7 @@
 import json
 import os
 import re
+import shutil
 import socket
 import subprocess
 import sys
@@ -89,7 +90,7 @@ class CreepTestCase(unittest.TestCase):
     def tearDown(self):
         self.server_process.kill()
         self.server_process.wait()
-        subprocess.run(["rm", "-rf", self.tmp])
+        shutil.rmtree(self.tmp, ignore_errors=True)
 
     def restart_server(self, scenario):
         """Restart the fake server with a new scenario on the same port.
@@ -227,6 +228,12 @@ class CreepTestCase(unittest.TestCase):
 
     def test_unknown_backend_exits_two(self):
         result = subprocess.run([sys.executable, CREEP_PY, "bogus"],
+                                capture_output=True, text=True, timeout=10)
+
+        self.assertEqual(result.returncode, 2)
+
+    def test_unknown_backend_with_help_still_exits_two(self):
+        result = subprocess.run([sys.executable, CREEP_PY, "bogus", "--help"],
                                 capture_output=True, text=True, timeout=10)
 
         self.assertEqual(result.returncode, 2)
@@ -497,6 +504,8 @@ class CreepTestCase(unittest.TestCase):
 
             process.wait(timeout=15)
         finally:
+            if process.poll() is None:
+                process.kill()
             reader.join(timeout=5)
             process.stdout.close()
 
@@ -563,7 +572,7 @@ class CreepTestCase(unittest.TestCase):
         self.assertEqual(float(first_row.split("\t")[2]), 30.0)
 
     def test_lmstudio_backend_hits_chat_path_and_paces_the_rate_from_chunk_gaps(self):
-        self.restart_server({"rates": [20, 20, 20], "flavor": "lmstudio",
+        self.restart_server({"rates": [10, 10, 10], "flavor": "lmstudio",
                              "probe": "ok"})
 
         result = self.run_creep("lmstudio")
@@ -578,10 +587,10 @@ class CreepTestCase(unittest.TestCase):
         first_row = next(line for line in result.stdout.splitlines()
                          if line.startswith("A\t"))
         measured = float(first_row.split("\t")[2])
-        self.assertLess(abs(measured - 20) / 20, 0.25)
+        self.assertLess(abs(measured - 10) / 10, 0.25)
 
     def test_mlx_backend_hits_completions_path_and_warns_without_server_log(self):
-        self.restart_server({"rates": [20, 20, 20], "flavor": "mlx",
+        self.restart_server({"rates": [10, 10, 10], "flavor": "mlx",
                              "probe": "ok"})
 
         result = self.run_creep("mlx", env={"SERVER_LOG": ""})
@@ -597,7 +606,7 @@ class CreepTestCase(unittest.TestCase):
         first_row = next(line for line in result.stdout.splitlines()
                          if line.startswith("A\t"))
         measured = float(first_row.split("\t")[2])
-        self.assertLess(abs(measured - 20) / 20, 0.25)
+        self.assertLess(abs(measured - 10) / 10, 0.25)
 
     def test_stop_lines_match_the_real_fixtures_stop_grammar(self):
         fixture_names = [

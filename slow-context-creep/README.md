@@ -89,6 +89,9 @@ The tool writes stdout only. Layout, in order:
    occur.
 5. A last line: either a `STOP:` line, or `no ceiling found up to D`.
 
+The preamble before the first row can also carry `NOTE:` and `WARNING:`
+lines, for example a fast pause or an unset `SERVER_LOG` on mlx.
+
 The nine columns of each row:
 
 | Column | Meaning |

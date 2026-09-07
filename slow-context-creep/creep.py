@@ -410,11 +410,11 @@ def run(step, probe=None):
 def main(argv):
     """Pick a backend by name and run the sweep against it.
 
-    `argv` is `sys.argv[1:]`. `--help` (or `-h`) prints a docstring and
-    exits 0: the named backend's docstring when a valid backend name is
-    also present, this module's shared docstring otherwise. No backend
-    name, or a name that matches none of `llama`, `mlx`, `lmstudio`,
-    prints usage on stderr and exits 2.
+    `argv` is `sys.argv[1:]`. With no backend name, `--help` (or `-h`)
+    prints this module's shared docstring and exits 0. With a backend
+    name, an unknown name always exits 2 with usage on stderr, `--help`
+    or not. A known name with `--help` prints that backend's docstring
+    and exits 0.
     """
     help_wanted = "--help" in argv or "-h" in argv
     positional = [token for token in argv if not token.startswith("-")]
@@ -431,12 +431,12 @@ def main(argv):
                 "lmstudio": backend_lmstudio}
     backend = BACKENDS.get(backend_name)
 
-    if help_wanted:
-        print((backend.__doc__ if backend else __doc__).strip())
-        raise SystemExit(0)
-
     if backend is None:
         die("usage: creep.py <llama|mlx|lmstudio>")
+
+    if help_wanted:
+        print(backend.__doc__.strip())
+        raise SystemExit(0)
 
     backend.check()
     print(backend.describe(), flush=True)

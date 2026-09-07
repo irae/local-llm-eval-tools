@@ -4,6 +4,8 @@ Every file is real output from the sweep tool. These files are never regenerated
 
 When a later test needs a different payload, add a new file with a new entry here.
 
+No fixture yet holds a `STOP: generation thread died` or `STOP: server dead` line, because the mlx run was cut by the crash before its STOP line could print. Until a real one exists, the tests anchor those two branches on the fake server.
+
 ## Fixtures
 
 ### creep-qwen38-gguf-short-q8.tsv
