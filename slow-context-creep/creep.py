@@ -452,4 +452,11 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    # The backends do `import creep`, which loads this file a second time
+    # under the name `creep`. Hand the run to that copy, so the sweep and
+    # the backends share one module state: a backend's `creep.beat()` must
+    # write the same `LAST_BEAT` that `take_step` reads, or a streaming
+    # backend looks stalled while it still sends tokens.
+    import creep
+
+    creep.main(sys.argv[1:])
