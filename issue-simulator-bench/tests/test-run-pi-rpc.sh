@@ -88,5 +88,38 @@ assert_eq "end reason" "$(meta_field repeats end_reason)" "complete"
 assert_eq "no loop record" "$(meta_field repeats repetition_loop)" ""
 assert_eq "no flood record" "$(meta_field repeats degenerate_output)" ""
 
+echo -e "# tasks\n- [ ] one thing" > "$WORK/repo/TASKS.md"
+
+echo "test-run-pi-rpc: with --task the model nudge uses the task's own text"
+FAKE_PI_EVENTS="$FIXTURES/events-healthy.jsonl" PATH="$WORK/bin:$PATH" \
+    timeout 60 node "$RUNNER" --model fake --prompt "$WORK/prompt.txt" \
+    --out "$WORK/out-tasknudge" --cwd "$WORK/repo" --allow-bad-config \
+    --task "$HERE/helpers/tiny-task" \
+    > "$WORK/out-tasknudge.log" 2>&1
+assert_eq "model nudge text" "$(meta_field tasknudge policy.model_msg)" "Tiny task: continue."
+
+echo "test-run-pi-rpc: --max-model 1 with a task ends the run at the model budget"
+FAKE_PI_EVENTS="$FIXTURES/events-healthy.jsonl" PATH="$WORK/bin:$PATH" \
+    timeout 60 node "$RUNNER" --model fake --prompt "$WORK/prompt.txt" \
+    --out "$WORK/out-taskbudget" --cwd "$WORK/repo" --allow-bad-config \
+    --task "$HERE/helpers/tiny-task" --max-model 1 \
+    > "$WORK/out-taskbudget.log" 2>&1
+assert_eq "end reason" "$(meta_field taskbudget end_reason)" "model_budget_exhausted"
+
+echo "test-run-pi-rpc: without --task the model nudge keeps today's default text"
+DEFAULT_MODEL_MSG='You are not done. Check TASKS.md for unchecked items and `git status` for uncommitted work, then continue the workflow from where you stopped.'
+run_fixture events-healthy.jsonl defaultnudge
+assert_eq "model nudge text" "$(meta_field defaultnudge policy.model_msg)" "$DEFAULT_MODEL_MSG"
+
+echo "test-run-pi-rpc: tool_version is recorded with and without --task"
+case "$(meta_field tasknudge tool_version)" in
+    "") bad "tool_version present with --task" ;;
+    *) ok "tool_version present with --task" ;;
+esac
+case "$(meta_field defaultnudge tool_version)" in
+    "") bad "tool_version present without --task" ;;
+    *) ok "tool_version present without --task" ;;
+esac
+
 echo "test-run-pi-rpc: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ]
