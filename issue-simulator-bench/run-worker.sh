@@ -311,21 +311,23 @@ rpc_args+=(--reserve-tokens "$ISB_RESERVE_TOKENS")
 [ -n "${ISB_WALL_MIN:-}" ] && rpc_args+=(--wall-min "$ISB_WALL_MIN")
 [ -n "${ISB_TURN_MIN:-}" ] && rpc_args+=(--turn-min "$ISB_TURN_MIN")
 
-runner_log="$ISB_DATA_DIR/runs/$fslug-runner.log"
-: > "$runner_log"
-
-# The server log offset is read before the runner starts, and the slice
-# after it ends, so the capture is exactly the run's own window. A missing
-# or unreadable path only warns; a log that shrank (rotated or truncated)
-# falls back to the whole file, silently.
+# The server log offset is read before the runner log file exists, so no
+# later step can change the file's size between this read and the run's own
+# start. A missing or unreadable path only warns; a log that shrank (rotated
+# or truncated) falls back to the whole file, silently.
 server_log_offset=""
+server_log_warning=""
 if [ -n "${ISB_SERVER_LOG:-}" ]; then
     if [ -r "$ISB_SERVER_LOG" ]; then
         server_log_offset="$(wc -c < "$ISB_SERVER_LOG" | tr -d ' ')"
     else
-        echo "warning: --server-log path $ISB_SERVER_LOG is missing or unreadable; the run continues with no capture" >> "$runner_log"
+        server_log_warning="warning: --server-log path $ISB_SERVER_LOG is missing or unreadable; the run continues with no capture"
     fi
 fi
+
+runner_log="$ISB_DATA_DIR/runs/$fslug-runner.log"
+: > "$runner_log"
+[ -n "$server_log_warning" ] && echo "$server_log_warning" >> "$runner_log"
 
 cd "$checkout"
 start=$(date -u +%FT%TZ)
