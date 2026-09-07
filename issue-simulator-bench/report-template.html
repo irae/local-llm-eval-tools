@@ -116,6 +116,25 @@
     tr:last-child td {
         border-bottom: none;
     }
+    details {
+        margin: 8px 0;
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        background: var(--surface);
+        padding: 6px 10px;
+    }
+    details summary {
+        cursor: pointer;
+        color: var(--ink-soft);
+        font-size: 13px;
+    }
+    details pre {
+        overflow-x: auto;
+        font-size: 12px;
+        color: var(--ink);
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
 </style>
 
 <h1>issue-simulator-bench report</h1>
@@ -132,4 +151,8 @@
 
 <div id="plan">
 {{PLAN}}
+</div>
+
+<div id="server-logs">
+{{SERVERLOGS}}
 </div>

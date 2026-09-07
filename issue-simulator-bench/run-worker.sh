@@ -311,12 +311,40 @@ rpc_args+=(--reserve-tokens "$ISB_RESERVE_TOKENS")
 [ -n "${ISB_WALL_MIN:-}" ] && rpc_args+=(--wall-min "$ISB_WALL_MIN")
 [ -n "${ISB_TURN_MIN:-}" ] && rpc_args+=(--turn-min "$ISB_TURN_MIN")
 
+runner_log="$ISB_DATA_DIR/runs/$fslug-runner.log"
+: > "$runner_log"
+
+# The server log offset is read before the runner starts, and the slice
+# after it ends, so the capture is exactly the run's own window. A missing
+# or unreadable path only warns; a log that shrank (rotated or truncated)
+# falls back to the whole file, silently.
+server_log_offset=""
+if [ -n "${ISB_SERVER_LOG:-}" ]; then
+    if [ -r "$ISB_SERVER_LOG" ]; then
+        server_log_offset="$(wc -c < "$ISB_SERVER_LOG" | tr -d ' ')"
+    else
+        echo "warning: --server-log path $ISB_SERVER_LOG is missing or unreadable; the run continues with no capture" >> "$runner_log"
+    fi
+fi
+
 cd "$checkout"
 start=$(date -u +%FT%TZ)
 PI_CODING_AGENT_DIR="$agentdir" \
 node "$BENCH_DIR/run-pi-rpc.mjs" "${rpc_args[@]}" \
-    2> "$ISB_DATA_DIR/runs/$fslug-runner.log"
+    2>> "$runner_log"
 end=$(date -u +%FT%TZ)
+
+server_log_rel=""
+if [ -n "$server_log_offset" ] && [ -r "$ISB_SERVER_LOG" ]; then
+    server_log_dest="$ISB_DATA_DIR/runs/$fslug-server.log"
+    server_log_size="$(wc -c < "$ISB_SERVER_LOG" | tr -d ' ')"
+    if [ "$server_log_size" -lt "$server_log_offset" ]; then
+        cp "$ISB_SERVER_LOG" "$server_log_dest"
+    else
+        tail -c "+$((server_log_offset + 1))" "$ISB_SERVER_LOG" > "$server_log_dest"
+    fi
+    server_log_rel="runs/$fslug-server.log"
+fi
 
 # --- repetition-loop verdict at run close: a flag beside the row, never a stop
 loop_verdict="unchecked"
@@ -389,17 +417,17 @@ node -e '
     const fs = require("fs");
     const [model, harness, bench, thinking, plan_provider, branch, base_commit,
         start, end, pinned_env, loop_flag, loop_ratio, loop_kind, task, mode,
-        checkout, artifacts, tool_version, outFile] = process.argv.slice(1);
+        checkout, artifacts, tool_version, server_log, outFile] = process.argv.slice(1);
     const obj = {
         model, harness, bench, thinking, plan_provider, branch, base_commit,
         start, end, pinned_env, loop_flag, loop_ratio, loop_kind, task, mode,
-        checkout, artifacts, tool_version,
+        checkout, artifacts, tool_version, server_log: server_log || null,
     };
     fs.writeFileSync(outFile, JSON.stringify(obj, null, 2) + "\n");
 ' "$model" pi "$ISB_VARIANT" "$ISB_THINKING" "$plan_provider" "$branch" \
     "$base_commit_short" "$start" "$end" "$pinned_env" "$loop_verdict" \
     "$loop_ratio" "$loop_kind" "$ISB_TASK_DIR" "$mode" "$checkout" \
-    "$artifacts_dir" "$ISB_TOOL_VERSION" "$ISB_DATA_DIR/runs/$fslug-worker.json"
+    "$artifacts_dir" "$ISB_TOOL_VERSION" "$server_log_rel" "$ISB_DATA_DIR/runs/$fslug-worker.json"
 
 if [ "$mode" = "clone" ] && [ "$keep" != "1" ]; then
     rm -rf "$checkout"

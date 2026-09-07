@@ -90,7 +90,8 @@ function toolVersion() {
 // Sort and rank happen per prompt_version group (see groupByPromptVersion):
 // different prompt versions are not comparable, so a global rank would be
 // meaningless across them.
-function processRuns(runs, unit, errors) {
+const SERVER_LOG_TAIL_MAX = 65536;
+function processRuns(runs, unit, errors, logsDir) {
     return runs.map((row) => {
         const scores = row.scores || {};
         const sum = Object.values(scores).reduce((a, b) => a + (Number(b) || 0), 0);
@@ -127,6 +128,19 @@ function processRuns(runs, unit, errors) {
         const dimmed = invalid || (unit ? row[unit.field] < unit.max : row.resolved === false);
         const processedRow = { ...row, raw, capped, invalid, dimmed };
         processedRow.score_line = scoreLine(processedRow, unit);
+        if (row.server_log) {
+            try {
+                const buf = readFileSync(join(logsDir, row.server_log));
+                processedRow.server_log_bytes = buf.length;
+                processedRow.server_log_tail =
+                    buf.length > SERVER_LOG_TAIL_MAX
+                        ? buf.subarray(buf.length - SERVER_LOG_TAIL_MAX).toString('utf8')
+                        : buf.toString('utf8');
+            } catch {
+                // The captured file may be missing (a shared results.json
+                // travelled without it); the row reports with no log block.
+            }
+        }
         return processedRow;
     });
 }
@@ -195,8 +209,8 @@ function buildPlan(rows) {
         .map((r) => ({ model: r.model, thinking: r.thinking ?? null, plan_provider: r.plan_provider }));
 }
 
-function buildTaskEntry({ instanceId, variantName, version, unit, runs, errors }) {
-    const flat = processRuns(runs, unit, errors);
+function buildTaskEntry({ instanceId, variantName, version, unit, runs, errors, logsDir }) {
+    const flat = processRuns(runs, unit, errors, logsDir);
     return {
         instance_id: instanceId,
         variant: variantName,
@@ -267,6 +281,7 @@ if (scanDir) {
                 unit: null,
                 runs: loadRuns(f.path),
                 errors,
+                logsDir: dirname(dirname(f.path)),
             })
         );
     }
@@ -314,6 +329,7 @@ if (scanDir) {
                 unit,
                 runs: loadRuns(resultsPath),
                 errors,
+                logsDir: dataDir,
             })
         );
     }
@@ -360,6 +376,9 @@ function csvCell(v) {
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 const DERIVED = ['rank', 'capped', 'raw', 'dimmed', 'score_line'];
+// server_log_bytes/server_log_tail are report-model fields for html/md only;
+// csv carries the server_log path (a base field) and never the log text.
+const CSV_OMIT = ['server_log_bytes', 'server_log_tail'];
 function buildCsvColumns(rows) {
     const base = new Set();
     const scoreKeys = new Set();
@@ -374,7 +393,7 @@ function buildCsvColumns(rows) {
                 Object.keys(r.telemetry || {}).forEach((x) => telemetryKeys.add(x));
                 continue;
             }
-            if (DERIVED.includes(k)) continue;
+            if (DERIVED.includes(k) || CSV_OMIT.includes(k)) continue;
             base.add(k);
         }
     }
@@ -450,6 +469,11 @@ function renderMd(rmodel) {
                 parts.push(`| ${p.model} | ${p.thinking ?? '—'} | ${p.plan_provider} |`);
             parts.push('');
         }
+        const serverLogRows = flattenEntryRows(entry).filter((r) => r.server_log_bytes != null);
+        if (serverLogRows.length) {
+            parts.push('## Server logs', '');
+            for (const r of serverLogRows) parts.push(serverLogBlock(r), '');
+        }
     }
     return parts.join('\n') + '\n';
 }
@@ -511,6 +535,20 @@ ${body}
         </tbody>
       </table></div>`;
 }
+function serverLogBlock(r) {
+    const thinking = r.thinking != null ? String(r.thinking) : '—';
+    const dropped = r.server_log_bytes - Buffer.byteLength(r.server_log_tail, 'utf8');
+    const droppedLine = dropped > 0 ? `${dropped} bytes dropped\n` : '';
+    return `<details>
+        <summary>${esc(r.model)} · ${esc(thinking)} · ${r.server_log_bytes} bytes</summary>
+        <pre>${esc(droppedLine + r.server_log_tail)}</pre>
+      </details>`;
+}
+function serverLogsHtml(entry) {
+    const rows = flattenEntryRows(entry).filter((r) => r.server_log_bytes != null);
+    if (!rows.length) return '';
+    return `<h2>Server logs</h2>\n${rows.map(serverLogBlock).join('\n')}`;
+}
 function planHtml(entry) {
     if (!entry.plan.length) return '';
     const body = entry.plan
@@ -532,7 +570,7 @@ ${body}
         </tbody>
       </table></div>`;
 }
-function renderPage(template, { nav, generated, scoreboard, cost, plan }) {
+function renderPage(template, { nav, generated, scoreboard, cost, plan, serverlogs }) {
     // A function replacer, not a string, so a literal "$&"/"$`"/"$1" etc. in
     // row-derived text (invalid_reason, anomaly, judge notes) is inserted as
     // written, never interpreted as a String.replace substitution pattern.
@@ -541,7 +579,8 @@ function renderPage(template, { nav, generated, scoreboard, cost, plan }) {
         .replace('{{GENERATED}}', () => esc(generated))
         .replace('{{SCOREBOARD}}', () => scoreboard)
         .replace('{{COST}}', () => cost)
-        .replace('{{PLAN}}', () => plan);
+        .replace('{{PLAN}}', () => plan)
+        .replace('{{SERVERLOGS}}', () => serverlogs);
 }
 function navAll(entries, current) {
     return (
@@ -602,6 +641,7 @@ if (format === 'json') {
             scoreboard: scoreboardHtml(entry),
             cost: costHtml(entry),
             plan: planHtml(entry),
+            serverlogs: serverLogsHtml(entry),
         });
         for (const d of destinations) written.push(writeOut(d, html));
     } else if (navMode === 'all') {
@@ -612,6 +652,7 @@ if (format === 'json') {
                 scoreboard: scoreboardHtml(entry),
                 cost: costHtml(entry),
                 plan: planHtml(entry),
+                serverlogs: serverLogsHtml(entry),
             });
             const p = join(reportsDir(), `${entry.instance_id}-${entry.variant}.html`);
             written.push(writeOut(p, html));
@@ -624,6 +665,7 @@ if (format === 'json') {
                 scoreboard: scoreboardHtml(entry),
                 cost: costHtml(entry),
                 plan: planHtml(entry),
+                serverlogs: serverLogsHtml(entry),
             });
             const p = join(scanDir, `${entry.instance_id}-${entry.variant}.html`);
             written.push(writeOut(p, html));
@@ -635,6 +677,7 @@ if (format === 'json') {
             scoreboard: indexScoreboard(taskEntries),
             cost: '',
             plan: '',
+            serverlogs: '',
         });
         written.push(writeOut(indexOut, indexPage));
     }

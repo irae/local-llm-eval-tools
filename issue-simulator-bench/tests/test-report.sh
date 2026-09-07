@@ -110,6 +110,11 @@ if grep -qF '@import' "$WORK/report.html"; then
 else
     ok "html has no @import"
 fi
+if grep -qF '<details' "$WORK/report.html"; then
+    bad "no server log block when no row has server_log"
+else
+    ok "no server log block when no row has server_log"
+fi
 
 echo "test-report: --format md and --format csv render without error"
 code=0
@@ -407,6 +412,81 @@ code=0
 assert_eq "exit code is 0" "$code" "0"
 score_line="$(row_by_model "$WORK/lists.json" list-model score_line)"
 assert_eq "score line is 'resolved', not doubled" "$score_line" "resolved"
+
+# ---- a captured server log renders a closed <details> block, escaped -------
+
+echo "test-report: a captured server log renders a closed, escaped <details> block; csv carries the path only"
+task_serverlog="$WORK/task-serverlog"
+mkdir -p "$task_serverlog"
+cat > "$task_serverlog/task.json" <<'EOF'
+{
+  "instance_id": "report-serverlog-1",
+  "unit": { "field": "libraries_done", "max": 8, "label": "libraries" },
+  "variants": {
+    "default": { "version": "v1", "results": "results-serverlog.json" }
+  },
+  "defaults": { "variant": "default" }
+}
+EOF
+mkdir -p "$WORK/data-serverlog/results" "$WORK/data-serverlog/runs"
+cat > "$WORK/data-serverlog/results/results-serverlog.json" <<'EOF'
+{
+  "runs": [
+    {
+      "model": "model-small-log",
+      "thinking": "off",
+      "libraries_done": 8,
+      "score_total": 10,
+      "scores": { "completion": 10 },
+      "telemetry": {},
+      "server_log": "runs/model-small-log-server.log"
+    },
+    {
+      "model": "model-big-log",
+      "thinking": "high",
+      "libraries_done": 8,
+      "score_total": 10,
+      "scores": { "completion": 10 },
+      "telemetry": {},
+      "server_log": "runs/model-big-log-server.log"
+    }
+  ]
+}
+EOF
+printf 'server startup ok\n<tag> & stuff SHOULD-NOT-APPEAR-IN-CSV\n' \
+    > "$WORK/data-serverlog/runs/model-small-log-server.log"
+node -e '
+    const fs = require("fs");
+    fs.writeFileSync(process.argv[1], "a".repeat(70000));
+' "$WORK/data-serverlog/runs/model-big-log-server.log"
+code=0
+"$ISB" --task "$task_serverlog" --data-dir "$WORK/data-serverlog" report --format html "$WORK/serverlog.html" \
+    > /dev/null 2>"$WORK/serverlog.err" || code=$?
+assert_eq "exit code is 0" "$code" "0"
+if grep -qF '<details open' "$WORK/serverlog.html"; then
+    bad "the <details> block is closed by default"
+else
+    ok "the <details> block is closed by default"
+fi
+grep -qF '&lt;tag&gt; &amp; stuff' "$WORK/serverlog.html" && ok "the log text is HTML-escaped" || bad "the log text is HTML-escaped"
+grep -qF '4464' "$WORK/serverlog.html" && ok "the block states the dropped byte count (70000 - 65536)" || bad "the block states the dropped byte count (70000 - 65536)"
+
+code=0
+"$ISB" --task "$task_serverlog" --data-dir "$WORK/data-serverlog" report --format md "$WORK/serverlog.md" \
+    > /dev/null 2>"$WORK/serverlogmd.err" || code=$?
+assert_eq "md exit code is 0" "$code" "0"
+grep -qF '<details' "$WORK/serverlog.md" && ok "md also renders a <details> block" || bad "md also renders a <details> block"
+
+code=0
+"$ISB" --task "$task_serverlog" --data-dir "$WORK/data-serverlog" report --format csv "$WORK/serverlog.csv" \
+    > /dev/null 2>"$WORK/serverlogcsv.err" || code=$?
+assert_eq "csv exit code is 0" "$code" "0"
+grep -qF "runs/model-small-log-server.log" "$WORK/serverlog.csv" && ok "csv carries the server_log path" || bad "csv carries the server_log path"
+if grep -qF "SHOULD-NOT-APPEAR-IN-CSV" "$WORK/serverlog.csv"; then
+    bad "csv never carries the log text"
+else
+    ok "csv never carries the log text"
+fi
 
 rm -rf "$WORK"
 

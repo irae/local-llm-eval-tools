@@ -454,6 +454,7 @@ function buildRow() {
         partial: meta.end_reason !== 'complete',
         end_reason: meta.end_reason,
         tool_version: worker.tool_version,
+        server_log: worker.server_log ?? null,
         defects: [],
         telemetry,
         cost_usd: null,

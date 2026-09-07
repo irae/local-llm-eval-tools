@@ -150,6 +150,20 @@ tool_version="$(row_field "$results" tool_version)"
 [ -n "$tool_version" ] && ok "tool_version is present on the row" || bad "tool_version is present on the row"
 [ -f "$WORK/data/results/results-default.csv" ] && ok "csv regenerated" || bad "csv regenerated"
 
+echo "test-score: server_log copies through from the worker file, null when the run captured none"
+assert_eq "server_log is null on a run with no --server-log" "$(row_field "$results" server_log)" "null"
+worker_file="$WORK/data/runs/$fslug-worker.json"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const w = JSON.parse(fs.readFileSync(p, "utf8"));
+    w.server_log = "runs/some-model-off-default-server.log";
+    fs.writeFileSync(p, JSON.stringify(w, null, 2));
+' "$worker_file"
+"$ISB" --task "$task" --data-dir "$WORK/data" score "$fslug" > /dev/null 2>&1
+assert_eq "server_log copies through from the worker file" \
+    "$(row_field "$results" server_log)" "runs/some-model-off-default-server.log"
+
 echo "test-score: no matching variant refuses before writing the evidence pack"
 task_novariant="$WORK/task-novariant"
 cp -r "$task" "$task_novariant"

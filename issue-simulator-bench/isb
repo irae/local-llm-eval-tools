@@ -56,7 +56,7 @@ while [ "$i" -lt "$n" ]; do
             kv="${args[$i]:-}"
             cli_set["${kv%%=*}"]="${kv#*=}"
             ;;
-        --variant|--mode|--thinking|--max-tooling|--max-model|--stall-min|--wall-min|--turn-min|--context-window|--reserve-tokens|--keep-recent-tokens)
+        --variant|--mode|--thinking|--max-tooling|--max-model|--stall-min|--wall-min|--turn-min|--context-window|--reserve-tokens|--keep-recent-tokens|--server-log)
             key="${a#--}"
             key="${key//-/_}"
             i=$((i + 1))
@@ -148,9 +148,22 @@ ISB_RESERVE_TOKENS="$(resolve_setting ISB_RESERVE_TOKENS reserve_tokens)"
 [ -z "$ISB_RESERVE_TOKENS" ] && ISB_RESERVE_TOKENS=8192
 ISB_KEEP_RECENT_TOKENS="$(resolve_setting ISB_KEEP_RECENT_TOKENS keep_recent_tokens)"
 
+# server_log names one machine's own log file; a task folder is shared across
+# machines through the target repository, so this key skips the task's
+# defaults and reads only the command line and config.json.
+resolve_machine_setting() {
+    local cli_key="$1"
+    if [ -n "${cli_set[$cli_key]+x}" ]; then
+        echo "${cli_set[$cli_key]}"
+        return
+    fi
+    json_get "$CONFIG_FILE" "$cli_key"
+}
+ISB_SERVER_LOG="$(resolve_machine_setting server_log)"
+
 export ISB_TASK_DIR ISB_DATA_DIR ISB_TOOL_VERSION ISB_VARIANT ISB_MODE ISB_THINKING \
     ISB_MAX_TOOLING ISB_MAX_MODEL ISB_STALL_MIN ISB_WALL_MIN ISB_TURN_MIN \
-    ISB_CONTEXT_WINDOW ISB_RESERVE_TOKENS ISB_KEEP_RECENT_TOKENS
+    ISB_CONTEXT_WINDOW ISB_RESERVE_TOKENS ISB_KEEP_RECENT_TOKENS ISB_SERVER_LOG
 
 case "$subcommand" in
     run)
@@ -199,6 +212,7 @@ case "$subcommand" in
         echo "context_window: $ISB_CONTEXT_WINDOW"
         echo "reserve_tokens: $ISB_RESERVE_TOKENS"
         echo "keep_recent_tokens: $ISB_KEEP_RECENT_TOKENS"
+        echo "server_log: $ISB_SERVER_LOG"
         exit 0
         ;;
     version)

@@ -146,11 +146,13 @@ all of those; the import only gets you started.
 (a task name under `tasks/`, or a path), `data_dir`, and one key per setting
 — `variant`, `mode`, `thinking`, `max_tooling`, `max_model`, `stall_min`,
 `wall_min`, `turn_min`, `context_window`, `reserve_tokens`,
-`keep_recent_tokens`.
+`keep_recent_tokens`, `server_log`.
 
 Every setting resolves the same way, for every sub-command: the command
 line, then the task's `defaults`, then `config.json`, then a built-in
-default (only `reserve_tokens` has one: 8192).
+default (only `reserve_tokens` has one: 8192). `server_log` is the one
+exception: it resolves from the command line, then `config.json`, and never
+from a task's `defaults` — see "The server log of a local model" below.
 
 Task resolution, for every sub-command: `--task <dir>`; else
 `.issue-simulator-bench/` at the git root of the current directory; else
@@ -167,7 +169,7 @@ isb run <model> [--task <dir>] [--variant <name>] [--thinking <level>]
     [--mode worktree|clone] [--data-dir <dir>] [--keep] [--allow-bad-config]
     [--max-tooling N] [--max-model N] [--stall-min N] [--wall-min N]
     [--turn-min N] [--context-window N] [--reserve-tokens N]
-    [--keep-recent-tokens N]
+    [--keep-recent-tokens N] [--server-log <path>]
 isb run --cleanup <slug>
 ```
 
@@ -199,6 +201,24 @@ per-run copy of `models.json`, and `--reserve-tokens` and
 (`compaction.reserveTokens`, `compaction.keepRecentTokens`, only written
 when given). The run's meta file records all three under `harness_window`.
 The operator's own pi configuration is never edited.
+
+### The server log of a local model
+
+A local model runs behind a server the operator starts —
+`llama-server`, `mlx_lm.server`, LM Studio, or another. `--server-log
+<path>` names that server's own log file; the tool never starts, stops, or
+configures the server, it only keeps a copy of the run's own slice. It is a
+settings flag, key `server_log` in `config.json`, exported as
+`ISB_SERVER_LOG`. It resolves from the command line, then from
+`config.json` — never from a task's `defaults`, because the path names one
+machine and a task folder is committed to the target repository and shared
+across machines. There is no environment variable for it. `isb config`
+prints `server_log` with the other settings.
+
+With no `--server-log` and no `server_log` in `config.json`, nothing is
+captured and the run is normal — the case for every remote API run. When a
+path is given and the file cannot be read at run start, the worker prints
+one warning line to the runner log and the run continues with no capture.
 
 ### The pinned environment
 
@@ -249,12 +269,21 @@ Under `runs/<fslug>-*`: `meta.json` (the run's own record: end reason,
 nudges, warnings, harness window), `session.jsonl` and `events.jsonl` (the
 raw session), `session.html` (an HTML export), `runner.log`, `loop.txt` (the
 repetition-loop check's own output), `worker.json` (the worker file),
-`plan-before.json` / `plan-after.json` (the plan probes), and `install.log`
-when the task defines an install command. The worker file carries `model`,
-`harness`, `bench` (the variant name), `thinking`, `plan_provider`,
-`branch`, `base_commit`, `start`, `end`, `pinned_env`, `loop_flag`,
-`loop_ratio`, `loop_kind`, `task`, `mode`, `checkout`, `artifacts`, and
-`tool_version`.
+`plan-before.json` / `plan-after.json` (the plan probes), `install.log`
+when the task defines an install command, and `server.log` when
+`--server-log` was given. The worker file carries `model`, `harness`,
+`bench` (the variant name), `thinking`, `plan_provider`, `branch`,
+`base_commit`, `start`, `end`, `pinned_env`, `loop_flag`, `loop_ratio`,
+`loop_kind`, `task`, `mode`, `checkout`, `artifacts`, `tool_version`, and
+`server_log`.
+
+`runs/<fslug>-server.log` is one run's own slice of the operator's server
+log: everything written to the log from the moment the run started, byte
+for byte. When the server rotated or truncated its log during the run — the
+file is smaller at the end than the offset the worker recorded at the start
+— the worker falls back to copying the whole file as it stands. With no
+`--server-log`, no file is written and the worker file's `server_log` is
+`null`.
 
 The artifact pack, `artifacts/<fslug>/`: `patches/` (`git format-patch
 <base>..HEAD`), `<slug>.bundle` (when there are commits), `diff.patch`
@@ -402,3 +431,5 @@ smoke runs stay comparable to a full `isb run`.
 - A Docker image per task, for full environment pinning.
 - A full SWE-bench import over many instances, not just one record at a
   time.
+- Compress a captured server log.
+- Read a plan-provider server log the same way.

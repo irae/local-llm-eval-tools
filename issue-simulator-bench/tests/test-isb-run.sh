@@ -115,6 +115,21 @@ out="$("$ISB" --task "$task" --set variant=from-cli config)"
 assert_eq "--set beats task defaults" "$(echo "$out" | grep '^variant: ')" "variant: from-cli"
 rm -rf "$WORK"
 
+echo "test-isb-run: server_log resolves from the command line then config.json, never the task's defaults"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+task="$WORK/server-log-task"
+mkdir -p "$task"
+printf '{"instance_id": "server-log-task", "defaults": {"server_log": "/from-task-defaults.log"}}\n' > "$task/task.json"
+mkdir -p "$XDG_CONFIG_HOME/issue-simulator-bench"
+printf '{"server_log": "/from-config.log"}\n' > "$XDG_CONFIG_HOME/issue-simulator-bench/config.json"
+out="$("$ISB" --task "$task" config)"
+assert_eq "config.json wins over the task's defaults for server_log" \
+    "$(echo "$out" | grep '^server_log: ')" "server_log: /from-config.log"
+out="$("$ISB" --task "$task" --server-log /from-cli.log config)"
+assert_eq "--server-log wins over config.json" "$(echo "$out" | grep '^server_log: ')" "server_log: /from-cli.log"
+rm -rf "$WORK"
+
 echo "test-isb-run: reserve_tokens falls back to the built-in default of 8192"
 WORK="$(mktemp -d)"
 new_home "$WORK"
@@ -122,12 +137,12 @@ out="$("$ISB" --task "$TINY_TASK" config)"
 assert_eq "reserve_tokens defaults to 8192" "$(echo "$out" | grep '^reserve_tokens: ')" "reserve_tokens: 8192"
 rm -rf "$WORK"
 
-echo "test-isb-run: isb config prints all 15 required lines"
+echo "test-isb-run: isb config prints all 16 required lines"
 WORK="$(mktemp -d)"
 new_home "$WORK"
 out="$("$ISB" --task "$TINY_TASK" config)"
 for key in task data_dir tool_version variant mode thinking max_tooling max_model \
-    stall_min wall_min turn_min context_window reserve_tokens keep_recent_tokens; do
+    stall_min wall_min turn_min context_window reserve_tokens keep_recent_tokens server_log; do
     if echo "$out" | grep -q "^$key: "; then
         ok "config prints $key"
     else
@@ -253,6 +268,10 @@ assert_eq "the checkout in the worker file is keyed by fslug, not just the slug"
 for f in log.txt patches status.txt diff.patch predictions.jsonl; do
     [ -e "$artifacts/$f" ] && ok "artifact pack has $f" || bad "artifact pack has $f"
 done
+assert_eq "server_log is empty when no --server-log is given" "$(json_field "$worker_file" server_log)" ""
+[ -f "$WORK/data/runs/some-model-off-default-server.log" ] \
+    && bad "no server log capture file when no --server-log is given" \
+    || ok "no server log capture file when no --server-log is given"
 pred_keys="$(node -e '
     const fs = require("fs");
     const o = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
@@ -461,6 +480,131 @@ checkout="$WORK/cwd/relative-data-dir/clones/some-model-off-default"
 [ -e "$checkout/relative-data-dir" ] \
     && bad "no path resolved relative to the checkout instead of the launch directory" \
     || ok "no path resolved relative to the checkout instead of the launch directory"
+rm -rf "$WORK"
+
+# ---- --server-log: capture, missing path, rotation fallback -----------------
+# The offset is recorded right before the fake pi starts, and the slice is
+# written right after it ends; both happen fast, so each block backgrounds
+# the run and waits for the runner log file to appear (the offset is always
+# recorded before that file exists) before touching the server log file.
+
+wait_for_runner_log() {
+    local log="$1" i
+    for i in $(seq 1 250); do
+        [ -f "$log" ] && return 0
+        sleep 0.02
+    done
+    return 1
+}
+
+echo "test-isb-run: --server-log captures only the lines written during the run"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+server_log="$WORK/server.log"
+printf 'line-before-the-run\n' > "$server_log"
+runner_log="$WORK/data/runs/some-model-off-default-runner.log"
+(
+    PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir "$WORK/data" --thinking off run some-model \
+        --allow-bad-config --server-log "$server_log" > "$WORK/run.log" 2>&1
+) &
+run_pid=$!
+wait_for_runner_log "$runner_log" && printf 'line-during-the-run\n' >> "$server_log"
+code=0
+wait "$run_pid" || code=$?
+assert_eq "run with --server-log exits 0" "$code" "0"
+capture="$WORK/data/runs/some-model-off-default-server.log"
+[ -f "$capture" ] && ok "server log capture file exists" || bad "server log capture file exists"
+grep -qF "line-during-the-run" "$capture" && ok "capture holds the line written during the run" || bad "capture holds the line written during the run"
+if grep -qF "line-before-the-run" "$capture"; then
+    bad "capture excludes the line written before the run"
+else
+    ok "capture excludes the line written before the run"
+fi
+worker_file="$WORK/data/runs/some-model-off-default-worker.json"
+assert_eq "worker file names the server log capture, relative to the data directory" \
+    "$(json_field "$worker_file" server_log)" "runs/some-model-off-default-server.log"
+rm -rf "$WORK"
+
+echo "test-isb-run: a --server-log path that does not exist warns and does not fail the run"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+code=0
+PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir "$WORK/data" --thinking off run some-model \
+    --allow-bad-config --server-log "$WORK/no-such-server.log" > "$WORK/run.log" 2>&1 || code=$?
+assert_eq "run with a missing --server-log path still exits 0" "$code" "0"
+runner_log="$WORK/data/runs/some-model-off-default-runner.log"
+grep -qi "no capture" "$runner_log" && ok "runner log names the missing path as a warning" || bad "runner log names the missing path as a warning"
+worker_file="$WORK/data/runs/some-model-off-default-worker.json"
+assert_eq "server_log is empty when the path could not be read" "$(json_field "$worker_file" server_log)" ""
+[ -f "$WORK/data/runs/some-model-off-default-server.log" ] \
+    && bad "no server log capture file when the path could not be read" \
+    || ok "no server log capture file when the path could not be read"
+rm -rf "$WORK"
+
+echo "test-isb-run: a server log truncated during the run falls back to the whole file, silently"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+server_log="$WORK/server.log"
+printf 'a-long-line-before-the-run-that-is-much-longer-than-the-rotated-file\n' > "$server_log"
+runner_log="$WORK/data/runs/some-model-off-default-runner.log"
+(
+    PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir "$WORK/data" --thinking off run some-model \
+        --allow-bad-config --server-log "$server_log" > "$WORK/run.log" 2>&1
+) &
+run_pid=$!
+if wait_for_runner_log "$runner_log"; then
+    : > "$server_log"
+    printf 'rotated\n' >> "$server_log"
+fi
+code=0
+wait "$run_pid" || code=$?
+assert_eq "run with a rotated server log still exits 0" "$code" "0"
+capture="$WORK/data/runs/some-model-off-default-server.log"
+assert_eq "the whole rotated file is copied as the fallback" "$(cat "$capture" 2>/dev/null)" "rotated"
+if grep -qi "no capture" "$runner_log"; then
+    bad "the rotation fallback is silent, no warning line"
+else
+    ok "the rotation fallback is silent, no warning line"
+fi
 rm -rf "$WORK"
 
 echo "test-isb-run: $PASS passed, $FAIL failed"
