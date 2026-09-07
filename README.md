@@ -8,5 +8,9 @@ in [`choose-a-local-llm`](https://github.com/irae/choose-a-local-llm).
   a prompt step by step against a served model and records decode
   speed, memory, and the stop verdict. Backends: llama-server,
   mlx_lm.server, LM Studio.
+- [`issue-simulator-bench`](issue-simulator-bench/): runs several models
+  against the same real repository issue through pi, nudges a run past
+  harness hiccups, scores it objectively from a battery and telemetry,
+  and takes a judge's verdict as an option.
 
 Licence: MIT, see [LICENSE](LICENSE).
