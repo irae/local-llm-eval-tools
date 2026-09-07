@@ -15,7 +15,7 @@ line that carries the verdict.
 
 What this file owns, so that every backend gets it identically:
 
-- **Slow creep by default.** `STEP_PAUSE_S` defaults to 25 seconds. A
+- **Slow creep by default.** `STEP_PAUSE_S` defaults to 60 seconds. A
   faster sweep must be asked for explicitly and is announced in the
   output, because macOS needs time to move GPU memory and a no-pause
   sweep understates the ceiling.
@@ -32,14 +32,16 @@ What this file owns, so that every backend gets it identically:
   the swap delta ride beside it, and so do the compressor page counts,
   which are what the compression-onset criterion reads.
 - **The stop conditions.** Decode below the floor, an OOM or any request
-  failure, a silent halt, swap growth, sustained material compaction,
-  and a dead server. Compaction counts only when it is material
-  (COMPACT_PAGES, hundreds of pages, not the machine's idle noise of
-  about 12 per tick), persists for MAX_COMPACTING_STEPS steps, and
-  speed does not recover against the PREVIOUS step. A depth sweep
-  declines by design, so recovery against the best step of the run
-  can never be met; an earlier rule did that and truncated a healthy
-  sweep at 196618 on 2026-09-04.
+  failure, a silent halt, swap growth, sustained memory compression,
+  and a dead server. This rule reads macOS memory compression, not pi's
+  own context compaction — a different subsystem the creep tool never
+  touches. Compression counts only when it is material (COMPRESS_PAGES,
+  thousands of pages, not the machine's idle noise of about 12 per
+  tick), persists for MAX_COMPRESSING_STEPS steps, and speed does not
+  recover against the PREVIOUS step. A depth sweep declines by design,
+  so recovery against the best step of the run can never be met; an
+  earlier rule did that and truncated a healthy sweep at 196618 on
+  2026-09-04.
 - **Liveness, one signal.** A server can answer `/health` after its
   generation thread died, so `/health` is never used. The runner watches
   the server log for the backend's death signature, and, when a step
@@ -51,10 +53,18 @@ Environment, all optional except DEPTH_LIST:
 
     DEPTH_LIST      comma-separated target depths, required
     N_CONTEXTS      round-robin contexts, default 1
-    STEP_PAUSE_S    seconds between steps, default 25
+    STEP_PAUSE_S    seconds between steps, default 60
     FLOOR_TOKS      usability floor, default 8
-    COMPACT_PAGES   pages compressed or decompressed in one step that
-                    count as material compaction, default 200
+    COMPRESS_PAGES  pages compressed or decompressed in one step that
+                    count as material memory compression, default 5000
+                    (COMPACT_PAGES also works, for one release)
+    RECOVERY_FRACTION
+                    a step recovers when its rate is at least this
+                    fraction of the step before, default 0.75
+    MAX_COMPRESSING_STEPS
+                    steps of material compression with no recovery
+                    before the sweep stops, default 6
+                    (MAX_COMPACTING_STEPS also works, for one release)
     STALL_S         seconds of silence before one liveness probe,
                     default 600
     PROBE_TIMEOUT_S seconds to wait for that probe, default 300
@@ -81,9 +91,10 @@ import time
 DEPTHS = [int(x) for x in
           os.environ.get("DEPTH_LIST", "").replace(" ", "").split(",") if x]
 N_CONTEXTS = int(os.environ.get("N_CONTEXTS", "1"))
-STEP_PAUSE_S = float(os.environ.get("STEP_PAUSE_S", "25"))
+STEP_PAUSE_S = float(os.environ.get("STEP_PAUSE_S", "60"))
 FLOOR_TOKS = float(os.environ.get("FLOOR_TOKS", "8"))
-COMPACT_PAGES = int(os.environ.get("COMPACT_PAGES", "200"))
+COMPRESS_PAGES = int(os.environ.get(
+    "COMPRESS_PAGES", os.environ.get("COMPACT_PAGES", "5000")))
 STALL_S = float(os.environ.get("STALL_S", "600"))
 PROBE_TIMEOUT_S = float(os.environ.get("PROBE_TIMEOUT_S", "300"))
 BASE = os.environ.get("SWEEP_BASE", "http://127.0.0.1:8081")
@@ -98,8 +109,9 @@ BLOCK = ("def parse_record_%06d(line):\n"
 # share a prefix, which would make the server's cache treat them as one.
 RANGE_SPAN = 200000
 
-RECOVERY_FRACTION = float(os.environ.get("RECOVERY_FRACTION", "0.85"))
-MAX_COMPACTING_STEPS = int(os.environ.get("MAX_COMPACTING_STEPS", "3"))
+RECOVERY_FRACTION = float(os.environ.get("RECOVERY_FRACTION", "0.75"))
+MAX_COMPRESSING_STEPS = int(os.environ.get(
+    "MAX_COMPRESSING_STEPS", os.environ.get("MAX_COMPACTING_STEPS", "6")))
 
 # A probe queued behind a live step on a one-slot server fails exactly
 # like a probe to a dead one. So one failure is a suspicion and two are
@@ -312,8 +324,8 @@ def run(step, probe=None):
     """
     if not DEPTHS:
         die("DEPTH_LIST must be set, e.g. DEPTH_LIST=4096,8192,16384")
-    if STEP_PAUSE_S < 25:
-        print("WARNING: pause %.0fs is below the documented 25s. A fast "
+    if STEP_PAUSE_S < 60:
+        print("WARNING: pause %.0fs is below the documented 60s. A fast "
               "sweep understates the ceiling." % STEP_PAUSE_S, flush=True)
 
     contexts = []
@@ -329,7 +341,7 @@ def run(step, probe=None):
     swap_start = swap_used_mb()
     compressions = start.get("Compressions", 0)
     decompressions = start.get("Decompressions", 0)
-    compacting_steps = 0
+    compressing_steps = 0
     previous_toks = 0.0
 
     print("start: wired %.0f MB, free %.0f MB, swap used %.0f MB"
@@ -380,19 +392,19 @@ def run(step, probe=None):
                       % (swap_delta, ctx["depth"]), flush=True)
                 return 42
 
-            compacting = compress_delta + decompress_delta >= COMPACT_PAGES
+            compressing = compress_delta + decompress_delta >= COMPRESS_PAGES
             recovered = previous_toks == 0 or tok_s >= RECOVERY_FRACTION * previous_toks
-            if compacting and not recovered:
-                compacting_steps += 1
-                if compacting_steps >= MAX_COMPACTING_STEPS:
-                    print("STOP: %d or more pages compressed or decompressed "
-                          "on %d steps in a row, and speed did not come back, "
-                          "by depth %d"
-                          % (COMPACT_PAGES, compacting_steps, ctx["depth"]),
+            if compressing and not recovered:
+                compressing_steps += 1
+                if compressing_steps >= MAX_COMPRESSING_STEPS:
+                    print("STOP: memory compression, %d or more pages "
+                          "compressed or decompressed on %d steps in a row, "
+                          "and speed did not come back, by depth %d"
+                          % (COMPRESS_PAGES, compressing_steps, ctx["depth"]),
                           flush=True)
                     return 42
             else:
-                compacting_steps = 0
+                compressing_steps = 0
 
             previous_toks = tok_s
 
