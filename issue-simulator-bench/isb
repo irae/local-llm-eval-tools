@@ -162,6 +162,9 @@ case "$subcommand" in
     judge-pack)
         exec node "$HERE/score.mjs" --judge-pack "${rest[@]:1}"
         ;;
+    report)
+        exec node "$HERE/report.mjs" "${rest[@]:1}"
+        ;;
     config)
         if [ -z "$ISB_TASK_DIR" ]; then
             echo "error: no task resolved. Give one of: --task <dir>, a .issue-simulator-bench/ folder at the root of the current git repository, or a \"task\" key in $CONFIG_FILE" >&2

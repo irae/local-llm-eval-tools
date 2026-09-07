@@ -64,3 +64,13 @@ their history, and are never regenerated.
   the smallest run of thirty in that log. It holds repeated `ls -F`
   commands, so it tests the 2026-09-05 fix: every tool call must end its
   own line.
+
+## Results rows
+
+- `results-two-rows.json`. Two whole `runs` entries, byte-for-byte, from
+  `issue-simulator-bench/results-guided.json` at commit
+  `350e8188cbe4d0d67c321e1d86e0636448f68082^` (the parent of the commit
+  that deleted the file; that commit's own tree no longer has it). The
+  models are `claude-sonnet-5` (`score_total` 98.5) and
+  `claude-haiku-4.5` (`score_total` 68), both prompt version `v2.1`, so
+  a rank test has a clear order.

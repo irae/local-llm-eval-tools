@@ -1,7 +1,6 @@
 #!/bin/bash
 # Runs every test in this folder: the moved fixture-based runner tests,
-# the loop-check unit tests, every tests/test-isb-*.sh script, and
-# tests/test-score.sh.
+# the loop-check unit tests, and every tests/test-*.sh script.
 set -u
 
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
@@ -17,8 +16,9 @@ echo "== python3 -m unittest tests.test_loop_check =="
 python3 -m unittest tests.test_loop_check -v
 [ "$?" = "0" ] || overall=1
 
-for t in tests/test-isb-*.sh tests/test-score.sh; do
+for t in tests/test-*.sh; do
     [ -f "$t" ] || continue
+    [ "$t" = "tests/test-run-pi-rpc.sh" ] && continue
     echo "== $t =="
     bash "$t"
     [ "$?" = "0" ] || overall=1
