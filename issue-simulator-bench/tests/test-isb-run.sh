@@ -157,5 +157,311 @@ case "$first_line" in
 esac
 rm -rf "$WORK"
 
+# ---- isb run: task folder, worktree/clone modes, artifact pack -------------
+# A real local git repository stands in for the target: git init, one
+# commit, tag base. No test ever points repo_url or repo_path outside a
+# mktemp -d directory.
+
+FIXTURES="$HERE/fixtures"
+
+json_field() {
+    node -e "const m=require(process.argv[1]); console.log(process.argv[2].split('.').reduce((o,k)=>o==null?'':o[k],m) ?? '')" "$1" "$2"
+}
+
+setup_fake_pi() {
+    local base="$1"
+    mkdir -p "$base/bin"
+    ln -s "$HERE/helpers/fake-pi" "$base/bin/pi"
+    echo "$base/bin"
+}
+
+make_target_repo() {
+    local dir="$1"
+    mkdir -p "$dir"
+    git -C "$dir" init -q
+    git -C "$dir" config user.email a@test
+    git -C "$dir" config user.name test
+    echo hi > "$dir/file.txt"
+    git -C "$dir" add -A
+    git -C "$dir" commit -qm init
+    git -C "$dir" tag base
+}
+
+# fake-pi's session file path is fixed; the healthy fixture goes there so
+# run-pi-rpc.mjs's session copy, and so the loop check, has real content.
+healthy_run() {
+    cp "$FIXTURES/session-healthy.jsonl" /tmp/fake-pi-session.jsonl
+    export FAKE_PI_EVENTS="$FIXTURES/events-healthy.jsonl"
+}
+
+echo "test-isb-run: isb run without a thinking level anywhere refuses"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+code=0
+err="$("$ISB" --task "$TINY_TASK" --data-dir "$WORK/data" run some-model 2>&1 1>/dev/null)" || code=$?
+assert_eq "exit code is 2" "$code" "2"
+case "$err" in
+    *thinking*) ok "stderr names the thinking requirement" ;;
+    *) bad "stderr names the thinking requirement"; echo "        got: $err" ;;
+esac
+rm -rf "$WORK"
+
+echo "test-isb-run: isb run refuses when a parent directory carries an AGENTS.md"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/parent/target"
+make_target_repo "$WORK/parent/target"
+cp -r "$TINY_TASK" "$WORK/parent/target/.isb-task"
+echo "leak" > "$WORK/parent/AGENTS.md"
+code=0
+err="$("$ISB" --task "$WORK/parent/target/.isb-task" --data-dir "$WORK/data" --thinking off --mode worktree run some-model --allow-bad-config 2>&1 1>/dev/null)" || code=$?
+assert_eq "exit code is 1" "$code" "1"
+case "$err" in
+    *"AGENTS.md"*"leak"*) ok "stderr names the leaking file" ;;
+    *) bad "stderr names the leaking file"; echo "        got: $err" ;;
+esac
+rm -rf "$WORK"
+
+echo "test-isb-run: clone mode with the healthy fixture writes the worker file, the meta and the artifact pack"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+code=0
+PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir "$WORK/data" --thinking off run some-model --allow-bad-config \
+    > "$WORK/run.log" 2>&1 || code=$?
+assert_eq "isb run exits 0" "$code" "0"
+worker_file="$WORK/data/runs/some-model-off-default-worker.json"
+meta_file="$WORK/data/runs/some-model-off-default-meta.json"
+[ -f "$worker_file" ] && ok "worker file exists" || bad "worker file exists"
+assert_eq "worker file records clone mode" "$(json_field "$worker_file" mode)" "clone"
+assert_eq "meta end_reason is complete" "$(json_field "$meta_file" end_reason)" "complete"
+artifacts="$WORK/data/artifacts/some-model-off-default"
+assert_eq "the checkout in the worker file is keyed by fslug, not just the slug" \
+    "$(basename "$(json_field "$worker_file" checkout)")" "some-model-off-default"
+for f in log.txt patches status.txt diff.patch predictions.jsonl; do
+    [ -e "$artifacts/$f" ] && ok "artifact pack has $f" || bad "artifact pack has $f"
+done
+pred_keys="$(node -e '
+    const fs = require("fs");
+    const o = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    console.log(Object.keys(o).sort().join(","));
+' "$artifacts/predictions.jsonl")"
+assert_eq "predictions.jsonl has exactly the three keys" "$pred_keys" "instance_id,model_name_or_path,model_patch"
+pred_patch_type="$(node -e '
+    const fs = require("fs");
+    const o = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    console.log(typeof o.model_patch);
+' "$artifacts/predictions.jsonl")"
+assert_eq "model_patch is a string" "$pred_patch_type" "string"
+[ -d "$WORK/data/clones/some-model-off-default" ] && bad "clone directory removed after the run" || ok "clone directory removed after the run"
+rm -rf "$WORK"
+
+echo "test-isb-run: --keep keeps the clone directory"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir "$WORK/data" --thinking off run some-model --allow-bad-config --keep \
+    > "$WORK/run.log" 2>&1
+[ -d "$WORK/data/clones/some-model-off-default" ] && ok "clone directory kept with --keep" || bad "clone directory kept with --keep"
+rm -rf "$WORK"
+
+echo "test-isb-run: worktree mode creates the branch and the sibling worktree, and refuses a second run"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/parent/target"
+make_target_repo "$WORK/parent/target"
+cp -r "$TINY_TASK" "$WORK/parent/target/.isb-task"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+PATH="$pi_bin:$PATH" "$ISB" --task "$WORK/parent/target/.isb-task" --data-dir "$WORK/data" --thinking off --mode worktree run some-model --allow-bad-config \
+    > "$WORK/run.log" 2>&1
+case "$(git -C "$WORK/parent/target" branch --list some-model-off-tiny)" in
+    *some-model-off-tiny*) ok "branch was created in the target repository" ;;
+    *) bad "branch was created in the target repository" ;;
+esac
+[ -d "$WORK/parent/tiny-bench-some-model-off" ] && ok "sibling worktree exists" || bad "sibling worktree exists"
+code=0
+err="$(PATH="$pi_bin:$PATH" "$ISB" --task "$WORK/parent/target/.isb-task" --data-dir "$WORK/data" --thinking off --mode worktree run some-model --allow-bad-config 2>&1 1>/dev/null)" || code=$?
+assert_eq "second run refuses" "$code" "1"
+case "$err" in
+    *"branch"*"exists"*) ok "stderr names the existing branch" ;;
+    *) bad "stderr names the existing branch"; echo "        got: $err" ;;
+esac
+rm -rf "$WORK"
+
+echo "test-isb-run: the loop verdict from the session lands in the worker file"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir "$WORK/data" --thinking off run some-model --allow-bad-config \
+    > "$WORK/run.log" 2>&1
+worker_file="$WORK/data/runs/some-model-off-default-worker.json"
+assert_eq "loop_flag reflects the healthy session" "$(json_field "$worker_file" loop_flag)" "ok"
+rm -rf "$WORK"
+
+echo "test-isb-run: the pinned pi config directory is gone once the run returns"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir "$WORK/data" --thinking off run some-model --allow-bad-config \
+    > "$WORK/run.log" 2>&1
+shopt -s nullglob
+pinned=("$WORK/data/runs/.pi-agent-"*)
+shopt -u nullglob
+[ "${#pinned[@]}" = "0" ] && ok "pinned pi config directory is gone" || bad "pinned pi config directory is gone"
+rm -rf "$WORK"
+
+echo "test-isb-run: --context-window and --reserve-tokens land in meta.harness_window"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir "$WORK/data" --thinking off run some-model --allow-bad-config \
+    --context-window 40000 --reserve-tokens 4096 > "$WORK/run.log" 2>&1
+meta_file="$WORK/data/runs/some-model-off-default-meta.json"
+assert_eq "harness_window.context_window" "$(json_field "$meta_file" harness_window.context_window)" "40000"
+assert_eq "harness_window.reserve_tokens" "$(json_field "$meta_file" harness_window.reserve_tokens)" "4096"
+rm -rf "$WORK"
+
+echo "test-isb-run: isb run --cleanup removes a worktree, the branch stays"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/parent/target"
+make_target_repo "$WORK/parent/target"
+cp -r "$TINY_TASK" "$WORK/parent/target/.isb-task"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+PATH="$pi_bin:$PATH" "$ISB" --task "$WORK/parent/target/.isb-task" --data-dir "$WORK/data" --thinking off --mode worktree run some-model --allow-bad-config \
+    > "$WORK/run.log" 2>&1
+"$ISB" --task "$WORK/parent/target/.isb-task" --data-dir "$WORK/data" run --cleanup some-model-off-default > "$WORK/cleanup.log" 2>&1
+[ -d "$WORK/parent/tiny-bench-some-model-off" ] && bad "worktree removed by --cleanup" || ok "worktree removed by --cleanup"
+case "$(git -C "$WORK/parent/target" branch --list some-model-off-tiny)" in
+    *some-model-off-tiny*) ok "branch stays after --cleanup" ;;
+    *) bad "branch stays after --cleanup" ;;
+esac
+rm -rf "$WORK"
+
+echo "test-isb-run: install runs before the harness and leaves a log"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    t.install = "touch INSTALLED_MARKER";
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir "$WORK/data" --thinking off run some-model --allow-bad-config --keep \
+    > "$WORK/run.log" 2>&1
+[ -e "$WORK/data/clones/some-model-off-default/INSTALLED_MARKER" ] && ok "install command ran in the checkout" || bad "install command ran in the checkout"
+[ -e "$WORK/data/runs/some-model-off-default-install.log" ] && ok "install log exists" || bad "install log exists"
+rm -rf "$WORK"
+
+echo "test-isb-run: an unknown flag to isb run exits 2 and names the flag"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+code=0
+err="$("$ISB" --task "$TINY_TASK" --data-dir "$WORK/data" --thinking off run some-model --bogus-flag x 2>&1 1>/dev/null)" || code=$?
+assert_eq "exit code is 2" "$code" "2"
+case "$err" in
+    *"--bogus-flag"*) ok "stderr names --bogus-flag" ;;
+    *) bad "stderr names --bogus-flag"; echo "        got: $err" ;;
+esac
+rm -rf "$WORK"
+
+echo "test-isb-run: a relative --data-dir resolves before the checkout cd, not inside it"
+WORK="$(mktemp -d)"
+new_home "$WORK"
+mkdir -p "$WORK/target" "$WORK/cwd"
+make_target_repo "$WORK/target"
+task="$WORK/task"
+cp -r "$TINY_TASK" "$task"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.repo_url = process.argv[2];
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task/task.json" "$WORK/target"
+pi_bin="$(setup_fake_pi "$WORK")"
+healthy_run
+(cd "$WORK/cwd" && PATH="$pi_bin:$PATH" "$ISB" --task "$task" --data-dir ./relative-data-dir --thinking off run some-model --allow-bad-config --keep \
+    > "$WORK/run.log" 2>&1)
+[ -f "$WORK/cwd/relative-data-dir/runs/some-model-off-default-worker.json" ] \
+    && ok "the worker file lands under the resolved data directory" \
+    || bad "the worker file lands under the resolved data directory"
+checkout="$WORK/cwd/relative-data-dir/clones/some-model-off-default"
+[ -d "$checkout" ] && ok "the checkout itself lands under the resolved data directory" || bad "the checkout itself lands under the resolved data directory"
+[ -e "$checkout/relative-data-dir" ] \
+    && bad "no path resolved relative to the checkout instead of the launch directory" \
+    || ok "no path resolved relative to the checkout instead of the launch directory"
+rm -rf "$WORK"
+
 echo "test-isb-run: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ]

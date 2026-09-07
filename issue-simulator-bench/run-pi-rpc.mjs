@@ -123,6 +123,11 @@ const meta = {
     compactions: [],
     retries: [],
     warnings: [],
+    harness_window: {
+        context_window: args['context-window'] ?? null,
+        reserve_tokens: args['reserve-tokens'] ?? null,
+        keep_recent_tokens: args['keep-recent-tokens'] ?? null,
+    },
     session_file: null,
     session_id: null,
     stats: null,

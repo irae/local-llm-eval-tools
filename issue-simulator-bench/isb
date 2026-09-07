@@ -34,7 +34,7 @@ json_get() {
 
 cli_task=""
 declare -A cli_set
-declare -a cli_positional
+declare -a rest
 cli_data_dir=""
 
 args=("$@")
@@ -56,18 +56,24 @@ while [ "$i" -lt "$n" ]; do
             kv="${args[$i]:-}"
             cli_set["${kv%%=*}"]="${kv#*=}"
             ;;
+        --variant|--mode|--thinking|--max-tooling|--max-model|--stall-min|--wall-min|--turn-min|--context-window|--reserve-tokens|--keep-recent-tokens)
+            key="${a#--}"
+            key="${key//-/_}"
+            i=$((i + 1))
+            cli_set["$key"]="${args[$i]:-}"
+            ;;
         -h|--help)
             usage
             exit 2
             ;;
         *)
-            cli_positional+=("$a")
+            rest+=("$a")
             ;;
     esac
     i=$((i + 1))
 done
 
-subcommand="${cli_positional[0]:-}"
+subcommand="${rest[0]:-}"
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
@@ -147,6 +153,9 @@ export ISB_TASK_DIR ISB_DATA_DIR ISB_TOOL_VERSION ISB_VARIANT ISB_MODE ISB_THINK
     ISB_CONTEXT_WINDOW ISB_RESERVE_TOKENS ISB_KEEP_RECENT_TOKENS
 
 case "$subcommand" in
+    run)
+        exec "$HERE/run-worker.sh" "${rest[@]:1}"
+        ;;
     config)
         if [ -z "$ISB_TASK_DIR" ]; then
             echo "error: no task resolved. Give one of: --task <dir>, a .issue-simulator-bench/ folder at the root of the current git repository, or a \"task\" key in $CONFIG_FILE" >&2
