@@ -7,6 +7,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 import urllib.request
@@ -389,6 +390,116 @@ class CreepTestCase(unittest.TestCase):
         lines = result.stdout.splitlines()
         self.assertFalse(any(line.startswith("STOP:") for line in lines))
         self.assertEqual(lines[-1], "no ceiling found up to 800")
+
+    def test_stall_then_probe_answers_and_the_sweep_continues(self):
+        self.restart_server({"rates": [30, 28, 26], "flavor": "llama",
+                             "probe": "ok", "at": {"1": "hang"}, "hang_s": 3})
+
+        result = self.run_creep("llama")
+
+        self.assertEqual(result.returncode, 0)
+        lines = result.stdout.splitlines()
+        stall_index = next(
+            index for index, line in enumerate(lines)
+            if line.startswith("STALL: no output for"))
+        probe_index = next(
+            index for index, line in enumerate(lines)
+            if index > stall_index and "the probe answered" in line
+            and "alive" in line)
+        row_index = next(
+            index for index, line in enumerate(lines)
+            if index > probe_index and line.startswith("A\t"))
+
+        self.assertTrue(lines[probe_index].startswith("  "))
+        self.assertEqual(lines[-1], "no ceiling found up to 600")
+        self.assertGreater(row_index, probe_index)
+
+    def test_dead_server_after_failed_probes_stops_the_sweep(self):
+        self.restart_server({"rates": [30, 28, 26], "flavor": "llama",
+                             "probe": "timeout", "at": {"1": "die"}})
+
+        result = self.run_creep("llama", timeout=15)
+
+        self.assertEqual(result.returncode, 42)
+        lines = result.stdout.splitlines()
+        stall_indexes = [index for index, line in enumerate(lines)
+                         if line.startswith("STALL: no output for")]
+        self.assertEqual(len(stall_indexes), 2)
+        failed_probe_index = next(
+            index for index, line in enumerate(lines)
+            if "probe 1 of 2 failed" in line)
+        self.assertGreater(failed_probe_index, stall_indexes[0])
+        self.assertLess(failed_probe_index, stall_indexes[1])
+        stop_line = lines[-1]
+        self.assertIn("STOP: server dead", stop_line)
+        self.assertRegex(stop_line, STOP_LINE_RE)
+
+    def test_death_signature_in_server_log_stops_the_sweep(self):
+        self.restart_server({"rates": [30, 28, 26], "flavor": "mlx",
+                             "probe": "ok", "at": {"1": "hang"}, "hang_s": 4})
+
+        fixture_path = os.path.join(
+            FIXTURES_DIR, "server-qwen36-mlx-creep.log")
+        with open(fixture_path) as handle:
+            fixture_lines = handle.readlines()
+
+        server_log_path = os.path.join(self.tmp, "mlx_server.log")
+        with open(server_log_path, "w") as handle:
+            handle.writelines(fixture_lines[:60])
+
+        index_path = os.path.join(self.tmp, "mem_index")
+        if os.path.exists(index_path):
+            os.remove(index_path)
+
+        env = dict(os.environ)
+        env["PATH"] = self.bin_dir + os.pathsep + env.get("PATH", "")
+        env["SWEEP_BASE"] = self.base_url
+        env["DEPTH_LIST"] = "200,400,600"
+        env["STEP_PAUSE_S"] = "0"
+        env["STALL_S"] = "1"
+        env["PROBE_TIMEOUT_S"] = "1"
+        env["MODEL"] = "fake"
+        env["SERVER_LOG"] = server_log_path
+        env["FAKE_MEM_SCENARIO"] = self.mem_scenario_path
+        env["FAKE_MEM_INDEX"] = index_path
+
+        process = subprocess.Popen(
+            [sys.executable, CREEP_PY, "mlx"], env=env,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, bufsize=1)
+
+        output_lines = []
+        first_row_seen = threading.Event()
+
+        def read_output():
+            for line in process.stdout:
+                output_lines.append(line.rstrip("\n"))
+                if line.startswith("A\t"):
+                    first_row_seen.set()
+
+        reader = threading.Thread(target=read_output, daemon=True)
+        reader.start()
+
+        try:
+            self.assertTrue(first_row_seen.wait(10),
+                            "no row appeared before the wait timed out")
+            time.sleep(1.5)
+
+            with open(server_log_path, "a") as handle:
+                handle.writelines(fixture_lines[60:])
+
+            process.wait(timeout=15)
+        finally:
+            reader.join(timeout=5)
+            process.stdout.close()
+
+        self.assertEqual(process.returncode, 42)
+        stop_lines = [line for line in output_lines
+                     if line.startswith("STOP:")]
+        self.assertEqual(len(stop_lines), 1)
+        self.assertIn("generation thread died in %s" % server_log_path,
+                      stop_lines[0])
+        self.assertRegex(stop_lines[0], STOP_LINE_RE)
 
     def test_stop_lines_match_the_real_fixtures_stop_grammar(self):
         fixture_names = [
