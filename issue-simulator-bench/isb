@@ -1,0 +1,179 @@
+#!/bin/bash
+# Entry point for issue-simulator-bench. Resolves the task folder and the
+# ISB_* settings (command line, task defaults, config.json, built-in
+# default), then runs the requested sub-command.
+set -u
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+
+SUBCOMMANDS="run score judge-pack report loop-check count probe-plan estimate-plan import-swebench config version"
+
+usage() {
+    echo "usage: isb <subcommand> [options]"
+    for c in $SUBCOMMANDS; do
+        echo "  $c"
+    done
+}
+
+json_get() {
+    # json_get <file> <dotted.key> -> prints the value or empty string.
+    local file="$1" key="$2"
+    [ -f "$file" ] || return 0
+    node -e '
+        const fs = require("fs");
+        let v;
+        try { v = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); }
+        catch (e) { process.exit(0); }
+        for (const k of process.argv[2].split(".")) {
+            if (v == null) break;
+            v = v[k];
+        }
+        if (v != null && typeof v !== "object") console.log(v);
+    ' "$file" "$key"
+}
+
+cli_task=""
+declare -A cli_set
+declare -a cli_positional
+cli_data_dir=""
+
+args=("$@")
+i=0
+n=${#args[@]}
+while [ "$i" -lt "$n" ]; do
+    a="${args[$i]}"
+    case "$a" in
+        --task)
+            i=$((i + 1))
+            cli_task="${args[$i]:-}"
+            ;;
+        --data-dir)
+            i=$((i + 1))
+            cli_data_dir="${args[$i]:-}"
+            ;;
+        --set)
+            i=$((i + 1))
+            kv="${args[$i]:-}"
+            cli_set["${kv%%=*}"]="${kv#*=}"
+            ;;
+        -h|--help)
+            usage
+            exit 2
+            ;;
+        *)
+            cli_positional+=("$a")
+            ;;
+    esac
+    i=$((i + 1))
+done
+
+subcommand="${cli_positional[0]:-}"
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+CONFIG_FILE="$XDG_CONFIG_HOME/issue-simulator-bench/config.json"
+
+# Task resolution: --task, then .issue-simulator-bench/ at the git root of
+# the current directory, then config.json's "task" key.
+ISB_TASK_DIR=""
+if [ -n "$cli_task" ]; then
+    ISB_TASK_DIR="$cli_task"
+else
+    git_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    if [ -n "$git_root" ] && [ -d "$git_root/.issue-simulator-bench" ]; then
+        ISB_TASK_DIR="$git_root/.issue-simulator-bench"
+    else
+        cfg_task="$(json_get "$CONFIG_FILE" task)"
+        if [ -n "$cfg_task" ]; then
+            case "$cfg_task" in
+                /*) ISB_TASK_DIR="$cfg_task" ;;
+                */*) ISB_TASK_DIR="$cfg_task" ;;
+                *) ISB_TASK_DIR="$XDG_CONFIG_HOME/issue-simulator-bench/tasks/$cfg_task" ;;
+            esac
+        fi
+    fi
+fi
+
+ISB_TOOL_VERSION="$(git -C "$HERE" describe --tags --always 2>/dev/null || echo unknown)"
+
+instance_id=""
+task_json=""
+if [ -n "$ISB_TASK_DIR" ]; then
+    task_json="$ISB_TASK_DIR/task.json"
+    instance_id="$(json_get "$task_json" instance_id)"
+    [ -z "$instance_id" ] && instance_id="$(basename "$ISB_TASK_DIR")"
+fi
+
+# Data directory.
+ISB_DATA_DIR=""
+if [ -n "$cli_data_dir" ]; then
+    ISB_DATA_DIR="$cli_data_dir"
+elif [ -n "$ISB_TASK_DIR" ]; then
+    data_base="$(json_get "$CONFIG_FILE" data_dir)"
+    [ -z "$data_base" ] && data_base="$XDG_DATA_HOME/issue-simulator-bench"
+    ISB_DATA_DIR="$data_base/$instance_id"
+fi
+
+# Settings: command line (--set), then the task's defaults, then
+# config.json, then empty.
+resolve_setting() {
+    local key="$1" cli_key="$2"
+    if [ -n "${cli_set[$cli_key]+x}" ]; then
+        echo "${cli_set[$cli_key]}"
+        return
+    fi
+    if [ -n "$task_json" ] && [ -f "$task_json" ]; then
+        v="$(json_get "$task_json" "defaults.$cli_key")"
+        [ -n "$v" ] && { echo "$v"; return; }
+    fi
+    json_get "$CONFIG_FILE" "$cli_key"
+}
+
+ISB_VARIANT="$(resolve_setting ISB_VARIANT variant)"
+ISB_MODE="$(resolve_setting ISB_MODE mode)"
+ISB_THINKING="$(resolve_setting ISB_THINKING thinking)"
+ISB_MAX_TOOLING="$(resolve_setting ISB_MAX_TOOLING max_tooling)"
+ISB_MAX_MODEL="$(resolve_setting ISB_MAX_MODEL max_model)"
+ISB_STALL_MIN="$(resolve_setting ISB_STALL_MIN stall_min)"
+ISB_WALL_MIN="$(resolve_setting ISB_WALL_MIN wall_min)"
+ISB_TURN_MIN="$(resolve_setting ISB_TURN_MIN turn_min)"
+ISB_CONTEXT_WINDOW="$(resolve_setting ISB_CONTEXT_WINDOW context_window)"
+ISB_RESERVE_TOKENS="$(resolve_setting ISB_RESERVE_TOKENS reserve_tokens)"
+[ -z "$ISB_RESERVE_TOKENS" ] && ISB_RESERVE_TOKENS=8192
+ISB_KEEP_RECENT_TOKENS="$(resolve_setting ISB_KEEP_RECENT_TOKENS keep_recent_tokens)"
+
+export ISB_TASK_DIR ISB_DATA_DIR ISB_TOOL_VERSION ISB_VARIANT ISB_MODE ISB_THINKING \
+    ISB_MAX_TOOLING ISB_MAX_MODEL ISB_STALL_MIN ISB_WALL_MIN ISB_TURN_MIN \
+    ISB_CONTEXT_WINDOW ISB_RESERVE_TOKENS ISB_KEEP_RECENT_TOKENS
+
+case "$subcommand" in
+    config)
+        if [ -z "$ISB_TASK_DIR" ]; then
+            echo "error: no task resolved. Give one of: --task <dir>, a .issue-simulator-bench/ folder at the root of the current git repository, or a \"task\" key in $CONFIG_FILE" >&2
+            exit 2
+        fi
+        echo "task: $ISB_TASK_DIR"
+        echo "data_dir: $ISB_DATA_DIR"
+        echo "tool_version: $ISB_TOOL_VERSION"
+        echo "variant: $ISB_VARIANT"
+        echo "mode: $ISB_MODE"
+        echo "thinking: $ISB_THINKING"
+        echo "max_tooling: $ISB_MAX_TOOLING"
+        echo "max_model: $ISB_MAX_MODEL"
+        echo "stall_min: $ISB_STALL_MIN"
+        echo "wall_min: $ISB_WALL_MIN"
+        echo "turn_min: $ISB_TURN_MIN"
+        echo "context_window: $ISB_CONTEXT_WINDOW"
+        echo "reserve_tokens: $ISB_RESERVE_TOKENS"
+        echo "keep_recent_tokens: $ISB_KEEP_RECENT_TOKENS"
+        exit 0
+        ;;
+    version)
+        echo "$ISB_TOOL_VERSION"
+        exit 0
+        ;;
+    *)
+        usage
+        exit 2
+        ;;
+esac
