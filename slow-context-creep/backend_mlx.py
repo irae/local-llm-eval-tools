@@ -25,7 +25,7 @@ reports no timings of its own.
 
 Usage:
     DEPTH_LIST=4096,8192 MODEL=mlx-community/Qwen3.8-27B-4bit \\
-    SERVER_LOG=/tmp/mlx-server.log python3 creep.py mlx \\
+    SERVER_LOG=~/.local/state/slow-context-creep/mlx-server.log python3 creep.py mlx \\
     > results/<config>-creep.tsv 2>&1
 """
 

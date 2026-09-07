@@ -208,18 +208,31 @@ paths in anything you commit.
    ```
    Save the output. You compare against it later.
 
-### 6.1 Reconstruct the old tool
+### 6.1 A work directory that survives a reboot
+
+Every file this section writes goes under one work directory outside
+`/tmp`, per this project's convention (see the root `AGENTS.md`):
 
 ```
-mkdir -p /tmp/creep-old
-git show 3a84948:slow-context-creep/creep.py       > /tmp/creep-old/creep.py
-git show 3a84948:slow-context-creep/creep_llama.py > /tmp/creep-old/creep_llama.py
-python3 -c "import py_compile,sys; py_compile.compile('/tmp/creep-old/creep.py', doraise=True); py_compile.compile('/tmp/creep-old/creep_llama.py', doraise=True)"
+export WORKDIR=~/.local/share/local-llm-eval-tools/creep-debug
+mkdir -p "$WORKDIR"
 ```
 
-The old tool is run as `python3 /tmp/creep-old/creep_llama.py`.
+Never write a run output, a server log, or the reconstructed old tool
+to `/tmp`. A `/tmp` file does not survive a reboot, and this Mac
+sometimes needs one.
 
-### 6.2 Start the server, once, for both tools
+### 6.2 Reconstruct the old tool
+
+```
+git show 3a84948:slow-context-creep/creep.py       > "$WORKDIR/creep.py"
+git show 3a84948:slow-context-creep/creep_llama.py > "$WORKDIR/creep_llama.py"
+python3 -c "import py_compile,sys; py_compile.compile('$WORKDIR/creep.py', doraise=True); py_compile.compile('$WORKDIR/creep_llama.py', doraise=True)"
+```
+
+The old tool is run as `python3 "$WORKDIR/creep_llama.py"`.
+
+### 6.3 Start the server, once, for both tools
 
 Start it once and leave it up for the whole A/B. Both tools must face
 the same server process and the same warm cache state.
@@ -232,7 +245,7 @@ llama-server -hf unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-Q4_K_XL \
   --cache-type-k q8_0 --cache-type-v q8_0 \
   --jinja --port 8081 --offline \
   --verbose \
-  > /tmp/llama-server-ab.log 2>&1 &
+  > "$WORKDIR/llama-server-ab.log" 2>&1 &
 ```
 
 `--verbose` matters. It makes the server print one prompt-processing
@@ -245,7 +258,7 @@ curl -s http://127.0.0.1:8081/completion \
   -d '{"prompt":"ok","n_predict":1,"temperature":0}' > /dev/null
 ```
 
-### 6.3 The decisive A/B run
+### 6.4 The decisive A/B run
 
 Use a short ladder. It reaches the depth where both new runs stopped
 and it costs about 15 minutes per tool, not an hour.
@@ -258,12 +271,12 @@ export SWEEP_BASE=http://127.0.0.1:8081
 
 Run the OLD tool first:
 ```
-python3 /tmp/creep-old/creep_llama.py > /tmp/ab-old.tsv 2>&1
+python3 "$WORKDIR/creep_llama.py" > "$WORKDIR/ab-old.tsv" 2>&1
 ```
 
 Then, immediately after, the NEW tool against the same live server:
 ```
-python3 slow-context-creep/creep.py llama > /tmp/ab-new.tsv 2>&1
+python3 slow-context-creep/creep.py llama > "$WORKDIR/ab-new.tsv" 2>&1
 ```
 
 Do not touch the machine between the two runs. Do not open apps. Do not
@@ -272,11 +285,11 @@ machine state; that is the whole point of the test.
 
 Then look at both:
 ```
-column -t -s$'\t' /tmp/ab-old.tsv
-column -t -s$'\t' /tmp/ab-new.tsv
+column -t -s$'\t' "$WORKDIR/ab-old.tsv"
+column -t -s$'\t' "$WORKDIR/ab-new.tsv"
 ```
 
-### 6.4 Read the verdict
+### 6.5 Read the verdict
 
 Compare the `compress_pages` and `decompress_pages` columns of the two
 files at the same depths.
@@ -298,9 +311,9 @@ more than 10x. Judge the pattern across all rows, not one row.
 
 Also confirm the prompt cache directly, for both files. The methodology
 requires `.timings.prompt_n` to be the delta, not the total. In
-`/tmp/llama-server-ab.log`, look for the prompt-processing lines:
+`"$WORKDIR/llama-server-ab.log"`, look for the prompt-processing lines:
 ```
-grep -nE "prompt processing|n_past|n_tokens|prompt_n|cache" /tmp/llama-server-ab.log | tail -60
+grep -nE "prompt processing|n_past|n_tokens|prompt_n|cache" "$WORKDIR/llama-server-ab.log" | tail -60
 ```
 A cache hit shows a small token count per step (a few thousand at most,
 the new tail). A cold reprocess shows the full depth (for example
@@ -308,7 +321,7 @@ the new tail). A cold reprocess shows the full depth (for example
 new-tool half. If both halves are small, the cache works for both tools
 and the compaction is not a prefill problem.
 
-### 6.5 Case B only — isolate the regression
+### 6.6 Case B only — isolate the regression
 
 Allow **at most 3 rounds** of hypothesis-then-test. Mac time is scarce.
 After the third round, stop and report to the owner with your evidence,
@@ -326,7 +339,7 @@ Round tools, in order of cost:
    print("REQ bytes=%d tail=%r" % (len(prompt), prompt[-80:]),
          file=sys.stderr, flush=True)
    ```
-   Add the matching print to `/tmp/creep-old/creep_llama.py`. Run both
+   Add the matching print to `"$WORKDIR/creep_llama.py"`. Run both
    tools for two depths only (`DEPTH_LIST="4096,8192"`). The byte
    counts and the tails must match step for step. Remove the prints
    afterwards. Never commit them.
@@ -360,7 +373,7 @@ Then run the whole suite before you push:
 python3 -m unittest discover -s slow-context-creep/tests -v
 ```
 
-### 6.6 Write the outcome
+### 6.7 Write the outcome
 
 Append a new section to `slow-context-creep/tests/fixtures/smoke/README.md`.
 **Append. Do not remove or edit the entries that are already there.**
@@ -372,8 +385,8 @@ relative paths only.
 
 Add the two A/B files to the same directory:
 ```
-cp /tmp/ab-old.tsv slow-context-creep/tests/fixtures/smoke/ab-old-tool-qwen36-gguf-q8.tsv
-cp /tmp/ab-new.tsv slow-context-creep/tests/fixtures/smoke/ab-new-tool-qwen36-gguf-q8.tsv
+cp "$WORKDIR/ab-old.tsv" slow-context-creep/tests/fixtures/smoke/ab-old-tool-qwen36-gguf-q8.tsv
+cp "$WORKDIR/ab-new.tsv" slow-context-creep/tests/fixtures/smoke/ab-new-tool-qwen36-gguf-q8.tsv
 ```
 
 The new section must state, in plain sentences:
