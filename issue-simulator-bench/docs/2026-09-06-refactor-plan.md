@@ -24,6 +24,7 @@
 - House rules stay in force and go into the README: sibling worktree first, never nested; no bare stash; one run per plan provider at a time; credit exhaustion is a pause, never a teardown; a judge, when used, runs on a strong model; the task's `agents.md` is frozen, a new version is a new results epoch.
 - No home paths, machine names or credentials in the tree or in test output that gets committed.
 - Commit messages name the behavior, never a task number. Every commit ends with the two trailer lines the coordinator gives.
+- A local model server is the operator's, never the tool's. `isb run` never starts, stops or configures a server. It only copies the run's slice of a server log the operator already writes, when the operator names it. Every run works with no server log at all.
 
 ---
 
@@ -123,6 +124,18 @@ The last three are the harness window parameters. They are run-time inputs, neve
 
 The worker file `<slug>-worker.json` keeps `model`, `harness`, `bench` (the variant name), `thinking`, `plan_provider`, `branch`, `base_commit`, `start`, `end`, `pinned_env`, `loop_flag`, `loop_ratio`, `loop_kind`, and adds `task`, `mode`, `artifacts`, `tool_version`.
 
+### The server log of a local model
+
+A local model runs behind a server the operator starts: `llama-server`, `mlx_lm.server`, LM Studio, or another. That server writes a log, and for a local run that log holds the answer to why a run slowed, stalled or died. The tool does not own the server, so it does not read the server's console. It takes a path and keeps a copy.
+
+`--server-log <path>` names the operator's live server log. It is a settings flag of `isb`, key `server_log`, exported as `ISB_SERVER_LOG`. It resolves from the command line, then from `config.json`; it is not a task `defaults` key, because the path belongs to one machine and a task folder is committed to the target repository. There is no environment variable for it. `isb config` prints `server_log` with the other settings.
+
+The worker records the size of the file in bytes before the runner starts. After the runner ends, it writes the bytes from that offset to the end of the file to `runs/<fslug>-server.log`, verbatim. The slice is the run's own window, so a log that many runs share gives one file per run. Byte offsets, not timestamps: log formats differ per server and the tool stays backend-agnostic. When the file is smaller at the end than the offset at the start, the server rotated or truncated it; the worker then copies the whole file as it stands and adds nothing else.
+
+With no `--server-log` and no `server_log` in `config.json`, nothing is captured, nothing is printed, and the run is normal. This is the case for every remote API run. When a path is given and the file cannot be read at run start, the worker prints one warning line to the runner log and the run continues with no capture.
+
+The worker file gains `server_log`: `runs/<fslug>-server.log` when a slice was written, or `null`. The path is relative to the data directory, so a data directory stays portable. `score.mjs` copies the same value into the objective row under the same name; the report model reads it from the row.
+
 ### Runner
 
 `run-pi-rpc.mjs` gains `--task <dir>`. With it, the unfinished-work check reads `done_check.tasks_file` and the model nudge text comes from `model_nudge`; the meta records `task` and `tool_version`. Nothing else changes.
@@ -152,6 +165,7 @@ The worker file `<slug>-worker.json` keeps `model`, `harness`, `bench` (the vari
 - `--all`: every variant of the task, one file each, cross-linked in a navigation block.
 - `--scan <dir>`: every `results/*.json` under a data directory (or a checkout of a results branch), grouped by task and variant, one index page plus one page per group, all cross-linked. This is how `choose-a-local-llm` builds its overview.
 - The refusal on a `score_total` that disagrees with `scores.*` stays; the completion cap uses `unit.max`; the score line prints `<done>/<max> <label>` and `resolved` when the task has lists.
+- A row whose `server_log` is set gets `server_log_bytes` (the size of the captured file) and `server_log_tail` (the last 65536 bytes of it, or the whole file when it is smaller) in the report model. `html` renders the tail per run row inside a `<details>` block that is closed by default; the `<summary>` names the model, the thinking level and the size, and the text sits in a `<pre>`, HTML-escaped. When bytes were dropped, the first line inside the block states how many. The block is embedded, never a link, so the page stays self-contained. `md` uses the same `<details>` block. `csv` carries the `server_log` path only, never the text. A row with no `server_log` gets no block.
 
 ### Tests
 
@@ -169,12 +183,12 @@ Functional tests through the real commands, fake pi on `PATH`, real fixtures, `X
 
 1. What it does: several models each implement one issue of a real repository through pi; the tool keeps the run honest (nudges, budgets, loop stop, evidence), scores objectively from a battery and telemetry, takes a judge's verdict as an option, and generates reports from data. The fixed nudge policy in one list. Why the scoring is thorough: fewer runs per local model, so the rows must tell models apart.
 2. Install: node, pi with the models configured (`contextWindow`, `maxTokens` rule), python3, git.
-3. Run: the task folder layout, every `task.json` key with the SWE-bench fields marked, the two places a task can live, `config.json`, the precedence rule, `isb run` and its options, the two modes, the harness window inputs, the pinned environment, the data directory, the house rules, `import-swebench`.
-4. Output: the run files, the artifact pack and `predictions.jsonl`, the evidence pack, the report model and the four formats, single, `--all`, `--scan`.
+3. Run: the task folder layout, every `task.json` key with the SWE-bench fields marked, the two places a task can live, `config.json`, the precedence rule, `isb run` and its options, the two modes, the harness window inputs, `--server-log` and the `config.json` `server_log` key with the rule that it is machine-local and never a task key, the pinned environment, the data directory, the house rules, `import-swebench`.
+4. Output: the run files, `runs/<fslug>-server.log` (what the slice covers, the rotation fallback), the artifact pack and `predictions.jsonl`, the evidence pack, the report model and the four formats, single, `--all`, `--scan`.
 5. Scoring: its own section, 100 percent objective, no rubric mentioned. Every field in the results row and exactly how it is computed from the battery and the telemetry (`resolved`, the unit count, `scores.*`, `score_total`, `scored_by`), the completion cap, the retry penalty, invalid rows. Then, separately, one paragraph on the judge option: `isb judge-pack` and `--judge`, and that a rubric is task-owned, judge-only, and never read by this section's logic.
 6. Tests: `bash issue-simulator-bench/tests/run.sh`; the fake pi and the fixtures.
 7. Example: Mendel issue 13, eight small dependencies to replace, in prose: the `llm-benchmark` branch with `.issue-simulator-bench/`, the two variants and their base tags, the traps, the battery and its unit, the commands for one run, one score, one judge pack and one report, and how the owner's smoke gate calls `isb loop-check` and copies the pinned config layout.
-8. Future goals and ideas: issues and tests stored in this repository; static outcome checks for known traps (the iterator trap of issue 13) so a judge is not needed for them; Docker images per task for full environment pinning; a full SWE-bench import over many instances.
+8. Future goals and ideas: issues and tests stored in this repository; static outcome checks for known traps (the iterator trap of issue 13) so a judge is not needed for them; Docker images per task for full environment pinning; a full SWE-bench import over many instances; compress a captured server log; read a plan-provider server log the same way.
 
 ### Decisions for the owner
 
@@ -235,6 +249,8 @@ Functional tests through the real commands, fake pi on `PATH`, real fixtures, `X
 - [ ] Implement. The pinned config builder, the parent-directory scan, the loop verdict and the plan probes stay; the prompt, the base commit, the suffix, the prefix, the agents file, the install and cleanup commands come from the task; the data directory replaces `$REPO/scratchpad/benchmark/runs`.
 - [ ] Run `bash tests/run.sh`. Commit: "The worker runs any task, in a sibling worktree or in a clone, and collects an artifact pack".
 
+Addendum, after review: the worker also captures the server log slice per "The server log of a local model". This is the only later change to `run-worker.sh`. It is additive: the offset is read before the runner starts, the slice is written after the runner ends, and every existing output and field is untouched. Done in Task 11.
+
 ### Task 5: objective scoring and the judge merge
 
 **Files:**
@@ -289,3 +305,25 @@ Functional tests through the real commands, fake pi on `PATH`, real fixtures, `X
 Outside this repository, in the scratch directory: clone `git@github.com:irae/mendel.git`, create branch `llm-benchmark` from `master`, build `.issue-simulator-bench/` from this repository's history (`git show` of the files deleted in Task 8 plus `docs/mendel-battery.mjs` from Task 5): `task.json` with `instance_id` `irae__mendel-13`, `repo` `irae/mendel`, the `guided` and `blind` variants (`prompts/guided.txt` v3.0 at `benchmark-guided-base`, suffix `-guided-v3-issue-13`, prefix `mendel-bench-guided-`; `prompts/blind.txt` v1.1 at `benchmark-blind-base`, suffix `-issue-13`, prefix `mendel-bench-`), `install` `pnpm install`, `done_check.tasks_file` `TASKS.md`, today's `model_nudge`, `battery` `node battery.mjs`, `plan_providers`, `unit` `libraries_done` 8 `libraries`, `rubric` `rubric.md`; `README.md` with the Mendel parts of `PLAN.md`.
 
 Split the inherited `RUBRIC.md` on the way in: it mixes fully mechanical rows (node_modules pruned, lint clean, test discipline counts) with judged rows (bugs remaining, commit craft quality, house conventions) under one heading. The mechanical rows are already logic, not prose — `battery.mjs` (from Task 5's `docs/mendel-battery.mjs`) computes them, so they need no file at all; drop them from the text. `rubric.md` keeps only the criteria a judge answers: bugs remaining (1), right the first time (6), house conventions (8), task list built progressively (9), the "Scorer discipline" pitfalls section, and the per-prompt-version notes for the judged criteria. State this split in one sentence at the top of `rubric.md`, so a reader is not confused about why the point table looks shorter than the original. Commit it there; do not push. Then `isb run gpt-5.6-luna --task <clone>/.issue-simulator-bench --variant guided --thinking low --mode clone`, `isb score <slug>`, `isb judge-pack <slug>`, and `isb report --all` with the historic results placed under `results/`. Report to the owner: the worker command, the telemetry fields of the meta, the evidence pack keys, the objective row, the report model for the historic rows (same rows, same capped scores and ranks as the historic HTML), and the path of the `llm-benchmark` patch. Delete `docs/` in this repository.
+
+### Task 11: the server log of a local model, captured and shown
+
+Runs after Task 6, so `report.mjs` and the generic template exist. When Task 9's README is already written, this task adds the README lines named in Task 9's outline; when it is not, Task 9 writes them.
+
+**Files:**
+- Modify: `issue-simulator-bench/isb`: `--server-log <path>` as a named settings flag, key `server_log`, export `ISB_SERVER_LOG`, resolved from the command line then `config.json` and never from the task's `defaults`; `isb config` prints it.
+- Modify: `run-worker.sh`: the offset before the runner, the slice after it, `runs/<fslug>-server.log`, the rotation fallback, the warning on an unreadable path, `server_log` in the worker file.
+- Modify: `score.mjs`: copy `server_log` from the worker file into the objective row.
+- Modify: `report.mjs` and `report-template.html`: `server_log_bytes` and `server_log_tail` in the model, the closed `<details>` block in `html` and `md`, the path only in `csv`.
+- Modify: `README.md`, the three places Task 9's outline names.
+- Test: `tests/test-isb-run.sh`, `tests/test-score.sh`, `tests/test-report.sh`, new blocks.
+
+**Interfaces:**
+- Produces: `ISB_SERVER_LOG`; `runs/<fslug>-server.log`; the worker file key `server_log`; the results row field `server_log`; the report model fields `server_log_bytes` and `server_log_tail`.
+
+- [ ] Write the test blocks. Run them; they fail.
+      `test-isb-run.sh`: a fake-pi run with `--server-log` pointed at a log file the test writes to before and during the run captures only the lines written after the run started, and the worker file names the file; the same run with no `--server-log` writes no file and sets `server_log` to `null`; a `--server-log` path that does not exist warns and does not fail the run; a log truncated during the run falls back to the whole file. The test writes its own log file in the temporary directory; no new file goes under `tests/fixtures/`, so the fixture manifest does not change.
+      `test-score.sh`: the objective row carries `server_log` from the worker file, and `null` when the run captured none.
+      `test-report.sh`: a row with a captured log renders one `<details>` block that is closed by default, holds the escaped log text, and states the dropped bytes when the log is over 65536 bytes; a row with no log renders no block; `csv` holds the path and never the text; the page still has no `<script src`, no `<link` and no `@import`.
+- [ ] Implement. Run `bash tests/run.sh`. Verify the fixture checksums.
+- [ ] Commit: "A local model server log is captured with the run and shown, collapsed, in the report".
