@@ -11,4 +11,4 @@ for arg in "$@"; do
     fi
 done
 
-printf '{"tiny_battery": {"args": [%s]}, "resolved": true, "files_done": 2, "scores": {"completion": 10, "lint": 5}}\n' "$args_json"
+printf '{"tiny_battery": {"args": [%s]}, "resolved": true, "files_done": 2, "scores": {"completion": 10, "lint": 5}, "tests": {"t_fix": true, "t_keep": true}}\n' "$args_json"
