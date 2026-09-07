@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""fake-vm_stat prints one vm_stat snapshot and advances FAKE_MEM_INDEX.
+
+It reads FAKE_MEM_SCENARIO for the snapshot list and FAKE_MEM_INDEX for
+the current position.
+"""
+
+import json
+import os
+
+SCENARIO_PATH = os.environ["FAKE_MEM_SCENARIO"]
+INDEX_PATH = os.environ["FAKE_MEM_INDEX"]
+
+FIXED_LINES = [
+    ("Pages active", 245583),
+    ("Pages inactive", 159049),
+    ("Pages speculative", 125671),
+    ("Pages throttled", 0),
+    ("Pages purgeable", 10391),
+    ('"Translation faults"', 566097415),
+    ("Pages copy-on-write", 36089964),
+    ("Pages zero filled", 370934643),
+    ("Pages reactivated", 7298088),
+    ("Pages purged", 636208),
+    ("File-backed pages", 302551),
+    ("Anonymous pages", 227752),
+    ("Pages stored in compressor", 171111),
+    ("Pages occupied by compressor", 12936),
+    ("Pageins", 24712473),
+    ("Pageouts", 247220),
+    ("Swapins", 64200),
+    ("Swapouts", 127956),
+]
+
+
+def read_index():
+    try:
+        with open(INDEX_PATH) as handle:
+            return int(handle.read().strip())
+    except (OSError, ValueError):
+        return 0
+
+
+def write_index(value):
+    with open(INDEX_PATH, "w") as handle:
+        handle.write(str(value))
+
+
+def line(label, value):
+    width = max(1, 41 - len(label) - 1)
+    return "%s:%*d." % (label, width, value)
+
+
+def main():
+    with open(SCENARIO_PATH) as handle:
+        snapshots = json.load(handle)["snapshots"]
+    index = read_index()
+    snapshot = snapshots[min(index, len(snapshots) - 1)]
+
+    print("Mach Virtual Memory Statistics: (page size of 16384 bytes)")
+    print(line("Pages free", snapshot["free"]))
+    print(line("Pages active", FIXED_LINES[0][1]))
+    print(line("Pages inactive", FIXED_LINES[1][1]))
+    print(line("Pages speculative", FIXED_LINES[2][1]))
+    print(line("Pages throttled", FIXED_LINES[3][1]))
+    print(line("Pages wired down", snapshot["wired"]))
+    print(line("Pages purgeable", FIXED_LINES[4][1]))
+    for label, value in FIXED_LINES[5:14]:
+        print(line(label, value))
+    print(line("Decompressions", snapshot["decompressions"]))
+    print(line("Compressions", snapshot["compressions"]))
+    for label, value in FIXED_LINES[14:]:
+        print(line(label, value))
+
+    write_index(index + 1)
+
+
+if __name__ == "__main__":
+    main()
