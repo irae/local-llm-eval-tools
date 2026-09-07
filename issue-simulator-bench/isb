@@ -165,6 +165,18 @@ case "$subcommand" in
     report)
         exec node "$HERE/report.mjs" "${rest[@]:1}"
         ;;
+    loop-check)
+        exec python3 "$HERE/loop-check.py" "${rest[@]:1}"
+        ;;
+    count)
+        exec node "$HERE/count-tool-calls.mjs" "${rest[@]:1}"
+        ;;
+    probe-plan)
+        exec node "$HERE/probe-plan.mjs" "${rest[@]:1}"
+        ;;
+    estimate-plan)
+        exec node "$HERE/estimate-plan-share.mjs" "${rest[@]:1}"
+        ;;
     import-swebench)
         exec node "$HERE/import-swebench.mjs" "${rest[@]:1}"
         ;;
