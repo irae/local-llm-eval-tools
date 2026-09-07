@@ -1,0 +1,14 @@
+WARNING: SERVER_LOG unset. This backend can die with a green /health, so the sweep loses the fastest half of its liveness signal. The stall probe still runs.
+mlx_lm.server, contexts=1 pause=25s
+start: wired 20180 MB, free 56 MB, swap used 517 MB
+context	depth_tokens	decode_toks	wired_mb	free_mb	swap_delta_mb	compress_pages	decompress_pages	step_seconds
+A	4114	55.09	21383	2213	0	0	46	6
+A	8222	53.84	22102	2434	0	0	21	7
+A	16386	47.78	22835	1897	0	0	16	13
+A	24602	42.95	22696	3270	0	0	87	14
+A	32818	38.34	24057	2064	0	0	760	16
+A	36874	38.95	24590	2053	0	0	939	10
+A	40982	37.38	24075	2999	0	0	64	11
+STALL: no output for 600 s at depth 45090 on context A
+  the probe did not come back: timed out
+  probe 1 of 2 failed. A queued probe behind a live step fails the same way, so the sweep waits another 600 s of silence and probes again.

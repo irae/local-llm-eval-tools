@@ -1,0 +1,95 @@
+/opt/homebrew/Cellar/mlx-lm/0.31.3_2/libexec/lib/python3.14/site-packages/mlx_lm/server.py:1723: UserWarning: mlx_lm.server is not recommended for production as it only implements basic security checks.
+  warnings.warn(
+2026-09-06 14:22:06,335 - INFO - Starting httpd at 127.0.0.1 on port 8081...
+2026-09-06 14:22:06,519 - INFO - HTTP Request: GET https://huggingface.co/api/models/mlx-community/Qwen3.6-35B-A3B-4bit/revision/main "HTTP/1.1 200 OK"
+Fetching 15 files:   0%|          | 0/15 [00:00<?, ?it/s]Fetching 15 files: 100%|██████████| 15/15 [00:00<00:00, 142987.64it/s]
+127.0.0.1 - - [06/Sep/2026 14:28:33] "GET /v1/models HTTP/1.1" 200 -
+2026-09-06 14:28:40,182 - INFO - Prompt Cache: 0 sequences, 0.00 GB
+2026-09-06 14:28:40,182 - INFO - - assistant: 0 sequences, 0.00 GB
+2026-09-06 14:28:40,182 - INFO - - user: 0 sequences, 0.00 GB
+2026-09-06 14:28:40,182 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [06/Sep/2026 14:28:40] "POST /v1/completions HTTP/1.1" 200 -
+2026-09-06 14:28:42,834 - INFO - Prompt processing progress: 2048/3878
+2026-09-06 14:28:45,199 - INFO - Prompt processing progress: 3877/3878
+2026-09-06 14:28:45,254 - INFO - Prompt processing progress: 3878/3878
+2026-09-06 14:29:11,465 - INFO - Prompt Cache: 2 sequences, 0.29 GB
+2026-09-06 14:29:11,465 - INFO - - assistant: 2 sequences, 0.29 GB
+2026-09-06 14:29:11,465 - INFO - - user: 0 sequences, 0.00 GB
+2026-09-06 14:29:11,466 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [06/Sep/2026 14:29:11] "POST /v1/completions HTTP/1.1" 200 -
+2026-09-06 14:29:14,298 - INFO - Prompt processing progress: 2048/3935
+2026-09-06 14:29:16,854 - INFO - Prompt processing progress: 3934/3935
+2026-09-06 14:29:16,898 - INFO - Prompt processing progress: 3935/3935
+2026-09-06 14:29:43,158 - INFO - Prompt Cache: 2 sequences, 0.45 GB
+2026-09-06 14:29:43,158 - INFO - - assistant: 2 sequences, 0.45 GB
+2026-09-06 14:29:43,158 - INFO - - user: 0 sequences, 0.00 GB
+2026-09-06 14:29:43,158 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [06/Sep/2026 14:29:43] "POST /v1/completions HTTP/1.1" 200 -
+2026-09-06 14:29:46,163 - INFO - Prompt processing progress: 2048/7693
+2026-09-06 14:29:49,078 - INFO - Prompt processing progress: 4096/7693
+2026-09-06 14:29:52,083 - INFO - Prompt processing progress: 6144/7693
+2026-09-06 14:29:54,496 - INFO - Prompt processing progress: 7692/7693
+2026-09-06 14:29:54,547 - INFO - Prompt processing progress: 7693/7693
+2026-09-06 14:30:20,974 - INFO - Prompt Cache: 2 sequences, 0.77 GB
+2026-09-06 14:30:20,974 - INFO - - assistant: 2 sequences, 0.77 GB
+2026-09-06 14:30:20,974 - INFO - - user: 0 sequences, 0.00 GB
+2026-09-06 14:30:20,974 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [06/Sep/2026 14:30:20] "POST /v1/completions HTTP/1.1" 200 -
+2026-09-06 14:30:24,340 - INFO - Prompt processing progress: 2048/7742
+2026-09-06 14:30:27,606 - INFO - Prompt processing progress: 4096/7742
+2026-09-06 14:30:30,971 - INFO - Prompt processing progress: 6144/7742
+2026-09-06 14:30:33,744 - INFO - Prompt processing progress: 7741/7742
+2026-09-06 14:30:33,800 - INFO - Prompt processing progress: 7742/7742
+2026-09-06 14:31:00,384 - INFO - Prompt Cache: 2 sequences, 1.09 GB
+2026-09-06 14:31:00,384 - INFO - - assistant: 2 sequences, 1.09 GB
+2026-09-06 14:31:00,384 - INFO - - user: 0 sequences, 0.00 GB
+2026-09-06 14:31:00,384 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [06/Sep/2026 14:31:00] "POST /v1/completions HTTP/1.1" 200 -
+2026-09-06 14:31:04,100 - INFO - Prompt processing progress: 2048/7742
+2026-09-06 14:31:07,791 - INFO - Prompt processing progress: 4096/7742
+2026-09-06 14:31:11,531 - INFO - Prompt processing progress: 6144/7742
+2026-09-06 14:31:14,604 - INFO - Prompt processing progress: 7741/7742
+2026-09-06 14:31:14,667 - INFO - Prompt processing progress: 7742/7742
+2026-09-06 14:31:41,354 - INFO - Prompt Cache: 2 sequences, 1.41 GB
+2026-09-06 14:31:41,354 - INFO - - assistant: 2 sequences, 1.41 GB
+2026-09-06 14:31:41,354 - INFO - - user: 0 sequences, 0.00 GB
+2026-09-06 14:31:41,354 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [06/Sep/2026 14:31:41] "POST /v1/completions HTTP/1.1" 200 -
+2026-09-06 14:31:45,606 - INFO - Prompt processing progress: 2048/3883
+2026-09-06 14:31:49,481 - INFO - Prompt processing progress: 3882/3883
+2026-09-06 14:31:49,543 - INFO - Prompt processing progress: 3883/3883
+2026-09-06 14:32:16,294 - INFO - Prompt Cache: 2 sequences, 1.57 GB
+2026-09-06 14:32:16,294 - INFO - - assistant: 2 sequences, 1.57 GB
+2026-09-06 14:32:16,294 - INFO - - user: 0 sequences, 0.00 GB
+2026-09-06 14:32:16,294 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [06/Sep/2026 14:32:16] "POST /v1/completions HTTP/1.1" 200 -
+2026-09-06 14:32:21,015 - INFO - Prompt processing progress: 2048/3871
+2026-09-06 14:32:25,162 - INFO - Prompt processing progress: 3870/3871
+2026-09-06 14:32:25,222 - INFO - Prompt processing progress: 3871/3871
+2026-09-06 14:32:52,046 - INFO - Prompt Cache: 2 sequences, 1.73 GB
+2026-09-06 14:32:52,046 - INFO - - assistant: 2 sequences, 1.73 GB
+2026-09-06 14:32:52,046 - INFO - - user: 0 sequences, 0.00 GB
+2026-09-06 14:32:52,046 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [06/Sep/2026 14:32:52] "POST /v1/completions HTTP/1.1" 200 -
+Exception in thread Thread-1 (_generate):
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/mlx-lm/0.31.3_2/libexec/lib/python3.14/site-packages/mlx_lm/server.py", line 853, in _generate
+    prompt_responses, gen_responses = batch_generator.next()
+                                      ~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/mlx-lm/0.31.3_2/libexec/lib/python3.14/site-packages/mlx_lm/generate.py", line 1855, in next
+    return self._next()
+           ~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/mlx-lm/0.31.3_2/libexec/lib/python3.14/site-packages/mlx_lm/generate.py", line 1841, in _next
+    self._prompt_batch.prompt(prompts)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/opt/homebrew/Cellar/mlx-lm/0.31.3_2/libexec/lib/python3.14/site-packages/mlx_lm/generate.py", line 1161, in prompt
+    mx.eval([c.state for c in self.prompt_cache])
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: [METAL] Command buffer execution failed: Insufficient Memory (00000008:kIOGPUCommandBufferCallbackErrorOutOfMemory).
+127.0.0.1 - - [06/Sep/2026 14:49:17] "GET /v1/models HTTP/1.1" 200 -

@@ -1,0 +1,9 @@
+LM Studio, chat endpoint, contexts=1 pause=25s
+start: wired 7887 MB, free 72 MB, swap used 893 MB
+context	depth_tokens	decode_toks	wired_mb	free_mb	swap_delta_mb	compress_pages	decompress_pages	step_seconds
+A	4114	35.49	11404	158	0	0	16	24
+STALL: no output for 600 s at depth 131098 on context A
+  the probe did not come back: timed out
+  probe 1 of 2 failed. A queued probe behind a live step fails the same way, so the sweep waits another 600 s of silence and probes again.
+A	131098	24.36	17249	6724	443	318559	250301	1013
+STOP: swap grew 443 MB by depth 131098; the machine is timing the swap file, not the model.
