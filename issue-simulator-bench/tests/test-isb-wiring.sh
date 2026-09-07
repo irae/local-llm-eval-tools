@@ -97,6 +97,15 @@ case "$out" in
     *) bad "the anchor from b.json was found (both files were read, not just the first)"; echo "        got: $out" ;;
 esac
 
+echo "test-isb-wiring: isb estimate-plan <model> <results.json> resolves a relative path against the caller's cwd"
+code=0
+out="$(cd "$data_dir/results" && "$ISB" --data-dir "$data_dir" estimate-plan target-model b.json)" || code=$?
+assert_eq "exit code is 0" "$code" "0"
+case "$out" in
+    *"anchor: target-model"*) ok "a relative results-file path resolves against the caller's cwd, not the tool's own directory" ;;
+    *) bad "a relative results-file path resolves against the caller's cwd, not the tool's own directory"; echo "        got: $out" ;;
+esac
+
 rm -rf "$WORK"
 
 echo "test-isb-wiring: $PASS passed, $FAIL failed"

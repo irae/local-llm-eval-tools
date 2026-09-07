@@ -23,12 +23,10 @@
 // writes a config_note naming the anchor.
 
 import { readFileSync, existsSync, readdirSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { join, resolve } from 'path';
 
 const TOLERANCE_USD = 0.05;
 
-const dir = dirname(fileURLToPath(import.meta.url));
 const [model, ...files] = process.argv.slice(2);
 if (!model) {
     console.error('usage: estimate-plan-share.mjs <model> [results.json ...]');
@@ -37,7 +35,7 @@ if (!model) {
 
 let filePaths;
 if (files.length) {
-    filePaths = files.map((f) => join(dir, f));
+    filePaths = files.map((f) => resolve(process.cwd(), f));
 } else {
     const dataDir = process.env.ISB_DATA_DIR || '';
     const resultsDir = dataDir ? join(dataDir, 'results') : '$ISB_DATA_DIR/results';

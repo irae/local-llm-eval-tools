@@ -1,7 +1,7 @@
 #!/bin/bash
 # One run of the pi harness on the task isb resolved.
 # Usage: run-worker.sh <model> [--keep] [--allow-bad-config]
-#        run-worker.sh --cleanup <slug>
+#        run-worker.sh --cleanup <fslug>
 # Called by isb (never directly): isb exports ISB_TASK_DIR, ISB_DATA_DIR and
 # every ISB_* setting before this script starts. This script reads task.json
 # for the manifest fields (repo, base_commit, variants, install, agents_file,

@@ -160,7 +160,7 @@ The worker file gains `server_log`: `runs/<fslug>-server.log` when a slice was w
 
 `isb report [--task <dir>] [--data-dir <dir>] [--variant <name>] [--all] [--scan <dir>] [--format json|csv|md|html] [--out <file>]`.
 
-- The report model is JSON: `{ "generated", "tool_version", "tasks": [ { "instance_id", "variant", "version", "unit", "rows": [ ...results rows with derived fields: capped score, rank, score line... ], "cost": [...], "plan": [...] } ] }`. `--format json` writes it; `csv` flattens the rows; `md` and `html` render it. The HTML uses `report-template.html`, one generic page with styles and placeholders, no task prose; a task adds prose through the judge notes, not through templates.
+- The report model is JSON: `{ "generated", "tool_version", "tasks": [ { "instance_id", "variant", "version", "unit", "rows": [ { "prompt_version", "rows": [ ...results rows with derived fields: capped score, rank, score line... ] } ], "cost": [...], "plan": [...] } ] }`. Each task's `rows` groups the results rows by `prompt_version`. `--format json` writes it; `csv` flattens the rows; `md` and `html` render it. The HTML uses `report-template.html`, one generic page with styles and placeholders, no task prose; a task adds prose through the judge notes, not through templates.
 - Default: one task, one variant, one file at `reports/<instance_id>-<variant>.html`.
 - `--all`: every variant of the task, one file each, cross-linked in a navigation block.
 - `--scan <dir>`: every `results/*.json` under a data directory (or a checkout of a results branch), grouped by task and variant, one index page plus one page per group, all cross-linked. This is how `choose-a-local-llm` builds its overview.

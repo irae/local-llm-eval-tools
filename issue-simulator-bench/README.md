@@ -170,7 +170,7 @@ isb run <model> [--task <dir>] [--variant <name>] [--thinking <level>]
     [--max-tooling N] [--max-model N] [--stall-min N] [--wall-min N]
     [--turn-min N] [--context-window N] [--reserve-tokens N]
     [--keep-recent-tokens N] [--server-log <path>]
-isb run --cleanup <slug>
+isb run --cleanup <fslug>
 ```
 
 `<model>` is the one argument every run needs. A thinking level is required
@@ -183,7 +183,7 @@ Two modes:
   `<worktree_prefix><slug>` beside `repo_path`, on branch
   `<slug><branch_suffix>` at the base commit. The branch and the worktree
   stay after the run, so the owner can adopt the branch; `isb run --cleanup
-  <slug>` removes the worktree later. The run refuses to start if an
+  <fslug>` removes the worktree later. The run refuses to start if an
   `AGENTS.md`, `AGENTS.override.md`, or `CLAUDE.md` sits in any directory
   above the worktree — such a file would leak into the run.
 - `clone`: `git clone` into `clones/<fslug>` under the data directory, then
@@ -197,9 +197,11 @@ Two modes:
 newest measurement of a model's real behavior sets them at run time. The
 worker writes `--context-window` into the model's entry of a private,
 per-run copy of `models.json`, and `--reserve-tokens` and
-`--keep-recent-tokens` into a private `settings.json`
-(`compaction.reserveTokens`, `compaction.keepRecentTokens`, only written
-when given). The run's meta file records all three under `harness_window`.
+`--keep-recent-tokens` into a private `settings.json`:
+`compaction.reserveTokens` is always written, with its built-in default
+(8192) when nothing else sets it; `compaction.keepRecentTokens` is written
+only when given. The run's meta file records all three under
+`harness_window`.
 The operator's own pi configuration is never edited.
 
 ### The server log of a local model
@@ -299,10 +301,12 @@ prints, battery keys winning on a clash.
 
 The report model, from `isb report`, is one JSON object: `{ "generated",
 "tool_version", "tasks": [ { "instance_id", "variant", "version", "unit",
-"rows", "cost", "plan" } ] }`, with each row carrying its derived rank,
-capped score, and score line. `--format json` writes the model as-is; `csv`
-flattens the rows; `md` and `html` render it, `html` through the one generic
-`report-template.html`. By default, one task and variant renders to
+"rows", "cost", "plan" } ] }`. Each task's `rows` groups the results rows by
+`prompt_version`, as `{ "prompt_version", "rows" }` objects, with each row
+carrying its derived rank, capped score, and score line. `--format json`
+writes the model as-is; `csv` flattens the rows; `md` and `html` render it,
+`html` through the one generic `report-template.html`. By default, one task
+and variant renders to
 `reports/<instance_id>-<variant>.<ext>`; `--all` renders every variant of
 the task, cross-linked; `--scan <dir>` walks every `results/*.json` under a
 data directory, grouped by task and variant, with an index page plus one
@@ -310,7 +314,7 @@ page per group, all cross-linked.
 
 ## Scoring
 
-Scoring is 100 percent objective. Nothing below reads a rubric.
+Scoring is 100 percent objective. Nothing in this pass reads a rubric.
 
 Every field of a results row, and how it is computed:
 
@@ -319,7 +323,8 @@ Every field of a results row, and how it is computed:
   `harness_guessed` is always `false`.
 - `provider`, `local`, `serving`: filled in by hand today; nothing
   detects them automatically yet.
-- `branch`, `base_commit`, `thinking`: copied from the worker file.
+- `branch`, `base_commit`, `thinking`, `plan_provider`: copied from the
+  worker file.
 - `prompt_version`: the matched variant's own `version`.
 - `partial`: `true` unless the meta's `end_reason` is `complete`.
 - `end_reason`, `tool_version`: copied from the meta and the worker file.

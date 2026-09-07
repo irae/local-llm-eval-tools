@@ -143,14 +143,14 @@ ISB_MAX_MODEL="$(resolve_setting ISB_MAX_MODEL max_model)"
 ISB_STALL_MIN="$(resolve_setting ISB_STALL_MIN stall_min)"
 ISB_WALL_MIN="$(resolve_setting ISB_WALL_MIN wall_min)"
 ISB_TURN_MIN="$(resolve_setting ISB_TURN_MIN turn_min)"
-ISB_CONTEXT_WINDOW="$(resolve_setting ISB_CONTEXT_WINDOW context_window)"
 ISB_RESERVE_TOKENS="$(resolve_setting ISB_RESERVE_TOKENS reserve_tokens)"
 [ -z "$ISB_RESERVE_TOKENS" ] && ISB_RESERVE_TOKENS=8192
 ISB_KEEP_RECENT_TOKENS="$(resolve_setting ISB_KEEP_RECENT_TOKENS keep_recent_tokens)"
 
-# server_log names one machine's own log file; a task folder is shared across
-# machines through the target repository, so this key skips the task's
-# defaults and reads only the command line and config.json.
+# server_log names one machine's own log file, and context_window names a
+# model's own real behavior; a task folder is shared across machines through
+# the target repository, so these two keys skip the task's defaults and read
+# only the command line and config.json.
 resolve_machine_setting() {
     local cli_key="$1"
     if [ -n "${cli_set[$cli_key]+x}" ]; then
@@ -159,6 +159,7 @@ resolve_machine_setting() {
     fi
     json_get "$CONFIG_FILE" "$cli_key"
 }
+ISB_CONTEXT_WINDOW="$(resolve_machine_setting context_window)"
 ISB_SERVER_LOG="$(resolve_machine_setting server_log)"
 
 export ISB_TASK_DIR ISB_DATA_DIR ISB_TOOL_VERSION ISB_VARIANT ISB_MODE ISB_THINKING \

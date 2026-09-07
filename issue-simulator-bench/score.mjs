@@ -455,6 +455,7 @@ function buildRow() {
         end_reason: meta.end_reason,
         tool_version: worker.tool_version,
         server_log: worker.server_log ?? null,
+        plan_provider: worker.plan_provider ?? null,
         defects: [],
         telemetry,
         cost_usd: null,
@@ -497,7 +498,9 @@ function saveRow(row) {
     mkdirSync(resultsDir, { recursive: true });
     const resultsPath = join(resultsDir, variant.results);
     const store = loadResults(resultsPath);
-    const idx = store.runs.findIndex((r) => r.branch === row.branch);
+    const idx = store.runs.findIndex(
+        (r) => r.branch === row.branch && r.prompt_version === row.prompt_version
+    );
     if (idx >= 0) {
         // A human sets reruns by hand on the row being replaced; it must
         // survive a re-score, so carry it forward before the final

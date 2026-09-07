@@ -148,6 +148,7 @@ assert_eq "reruns is 0 on a fresh row" "$(row_field "$results" reruns)" "0"
 assert_eq "resolved_by is lists (the task declares FAIL_TO_PASS/PASS_TO_PASS)" "$(row_field "$results" resolved_by)" "lists"
 tool_version="$(row_field "$results" tool_version)"
 [ -n "$tool_version" ] && ok "tool_version is present on the row" || bad "tool_version is present on the row"
+assert_eq "plan_provider copies through from the worker file" "$(row_field "$results" plan_provider)" "none"
 [ -f "$WORK/data/results/results-default.csv" ] && ok "csv regenerated" || bad "csv regenerated"
 
 echo "test-score: server_log copies through from the worker file, null when the run captured none"
@@ -206,6 +207,22 @@ assert_eq "resolved_by is lists" \
 echo "test-score: a second isb score replaces the row, not duplicates it"
 "$ISB" --task "$task" --data-dir "$WORK/data" score "$fslug" > /dev/null 2>&1
 assert_eq "exactly one row for the branch" "$(row_count_for_branch "$results" some-model-off-tiny)" "1"
+
+echo "test-score: a new prompt_version starts a new epoch, does not overwrite the old version's row"
+task_v2="$WORK/task-v2"
+cp -r "$task" "$task_v2"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const t = JSON.parse(fs.readFileSync(p, "utf8"));
+    t.variants.default.version = "v2";
+    fs.writeFileSync(p, JSON.stringify(t, null, 2));
+' "$task_v2/task.json"
+"$ISB" --task "$task_v2" --data-dir "$WORK/data" score "$fslug" > /dev/null 2>&1
+assert_eq "both prompt-version rows survive for the same branch" \
+    "$(row_count_for_branch "$results" some-model-off-tiny)" "2"
+assert_eq "the v1 row is untouched" \
+    "$(row_field_by_branch "$results" some-model-off-tiny prompt_version)" "v1"
 
 echo "test-score: --judge merges a new criterion cleanly"
 verdict="$WORK/verdict-new.json"
