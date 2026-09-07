@@ -131,3 +131,99 @@ the macOS memory compressor touches for every process, not only the
 sweep's own memory. Any other process awake on the machine during a
 sweep adds to these columns. Read them as a machine-health signal,
 not a per-tool one.
+
+## Follow-up: the Case A verdict above was too quick (2026-09-07, later the same day)
+
+The table above shows two rows over the plan's own 10x match rule
+(depth 4114: 16x; depth 8222: 29x). A stricter read of that same
+evidence leans toward a tool difference at low depth, not a clean
+environmental clearance. The rest of this section holds what a
+same-day retest found, and narrows the picture further.
+
+**The compaction stop condition itself makes false positives likely
+at this depth range.** `creep.py`'s stop logic
+(`slow-context-creep/creep.py`, around line 383) needs two things
+together for 3 steps in a row: page churn at or above `COMPACT_PAGES`
+(200 pages), and decode speed that fell more than 15% from the step
+before (`RECOVERY_FRACTION`, 0.85). Decode speed falls naturally as
+context grows — bigger KV cache, more expensive attention — with no
+memory problem involved. In the 16K-32K depth range on this model,
+that natural fall alone regularly exceeds 15% step to step. So the
+stop fires whenever ordinary speed decay lines up with any background
+compressor noise, which is close to certain once wired memory sits
+near 25-26 GB on a 32 GB machine. `RECOVERY_FRACTION` and
+`MAX_COMPACTING_STEPS` were hardcoded before this session; commit
+`02a63df` makes them read from the environment, the same way
+`COMPACT_PAGES` already did, so a runner can widen the tolerance
+without editing the file.
+
+**A real, separate signal turned up: swap growth under sustained
+back-to-back sweeps.** Four sweeps run back to back with no recovery
+gap between them, at wired 25000, q8_0 KV, `-c 98304`,
+`COMPACT_PAGES=5000 RECOVERY_FRACTION=0.75 MAX_COMPACTING_STEPS=6`
+(files: `loosened-old-run1-q8-w25000.tsv`,
+`loosened-old-run2-q8-w25000-swapstop.tsv`,
+`loosened-new-run1-q8-w25000-swapstop.tsv`,
+`loosened-new-run2-q8-w25000-swapstop.tsv`). The first sweep (old
+tool) reached the full ladder to depth 98338 on the speed floor alone
+(loosened thresholds cleared the earlier false-positive stop). The
+next three sweeps, run right after with no gap, each stopped on
+`swap_delta_mb > 1` — real, positive swap growth, not a page-churn
+false positive. Swap climbed across the sequence: 0 to 626 MB to 698
+MB to roughly 825 MB, monotonically, never draining between sweeps.
+No run 8, 9, or 10 in `choose-a-local-llm` recorded a swap-growth stop
+on this exact q8_0 KV config; the two swap-growth stops on record
+there were both on f16 KV configs. This pattern — swap growth only
+after several sweeps stacked with no recovery pause, at wired 25000 —
+has no precedent in this repository's history and is not yet
+explained. It looks tied to sustained wired memory near 25-26 GB
+without a recovery gap, not to either tool.
+
+**wired 24000 does not serve this q8_0 config at all.** At `-c
+98304`, q8_0 KV, wired 24000, the very first request failed outright
+with a Metal OOM (`kIOGPUCommandBufferCallbackErrorOutOfMemory`), not
+a slow degradation. This matches `choose-a-local-llm`'s own binary
+search: 98304 is the largest `-c` that loads and serves a completion
+at wired 25000 for this GGUF; wired 24000 falls under the floor this
+exact config needs.
+
+**f16 KV ceiling at wired 24000: `-c 33792`.** Found by the same
+binary-search method `choose-a-local-llm`'s run11 used for q8_0
+(`hardware/m1-max-32gb/benchmarks/bench11/results.md`, "Block 1/10").
+33792 loads and serves a real completion; 33920 fails the same Metal
+OOM way. For comparison, run11's f16 arm reached `-c 40960` at wired
+25000 — 1000 MB less wired limit costs about 7100 tokens of f16
+window on this model.
+
+**Tool validation: 4/4 clean runs, f16 KV, wired 24000, `-c 33792`,
+`-c` ladder to 32768, the loosened thresholds, `STEP_PAUSE_S=60`.**
+Sequence new, old, new, old
+(`f16-w24000-new-run1.tsv`, `f16-w24000-old-run1.tsv`,
+`f16-w24000-new-run2.tsv`, `f16-w24000-old-run2.tsv` — file names
+mark tool by their own label, not run order). Every run finished the
+ladder with `no ceiling found up to 32768` and `swap_delta_mb` at or
+below 0 on every row. Decode speed and page-churn both swing widely
+run to run (old tool alone: 40-54 tok/s on one run, 21-27 tok/s on the
+next, same unmodified code) with no consistent old-vs-new split. The
+variance sits between runs, not between tools — more support for an
+environmental read of the machine's compaction state, on top of the
+now-cleared refactor.
+
+**Revised verdict:** the refactor stays cleared — nothing above ties
+any failure to code that changed between the old and new tool. But
+"Case A, environmental noise, nothing to watch" undersold it. Two
+real, separate signals exist and are still open:
+1. The stop condition itself produces false positives from ordinary
+   speed decay at 16K-32K depth, now visible and tunable via the env
+   vars added in `02a63df`.
+2. Sustained sweeps at wired 25000 with no recovery gap between them
+   produce real swap growth with no precedent in this repository's
+   history. Wired 24000 avoids it in every test run so far, at the
+   cost of a smaller context window (f16: 33792 vs. 40960 at wired
+   25000; q8_0 does not serve at 24000 at all for `-c 98304`).
+
+Neither signal is fully explained yet. A same-machine, same-day
+side-by-side of wired 24000 vs. 25000 with matched recovery gaps
+between sweeps is the next test that would separate "wired level
+causes the swap growth" from "back-to-back sweeps with no recovery
+gap cause it regardless of wired level."
