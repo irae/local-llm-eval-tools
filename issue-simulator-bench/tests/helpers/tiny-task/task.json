@@ -1,3 +1,26 @@
 {
-  "instance_id": "tiny-task"
+  "instance_id": "tiny__repo-1",
+  "repo": "tiny/repo",
+  "base_commit": "base",
+  "problem_statement": "issue.md",
+  "version": "1",
+  "FAIL_TO_PASS": ["t_fix"],
+  "PASS_TO_PASS": ["t_keep"],
+  "test_cmd": "bash test.sh",
+  "unit": { "field": "files_done", "max": 2, "label": "files" },
+  "variants": {
+    "default": {
+      "prompt": "prompts/default.txt",
+      "version": "v1",
+      "branch_suffix": "-tiny",
+      "worktree_prefix": "tiny-bench-",
+      "results": "results-default.json"
+    }
+  },
+  "rubric": "rubric.md",
+  "battery": "bash battery.sh",
+  "done_check": { "tasks_file": "TASKS.md" },
+  "model_nudge": "Tiny task: continue.",
+  "agents_file": "agents.md",
+  "defaults": { "variant": "default", "mode": "clone" }
 }

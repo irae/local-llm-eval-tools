@@ -1,0 +1,3 @@
+- Quality of the fix: the change solves the stated problem, not just the visible test.
+- Minimality: the change touches only what the issue asks for.
+- Clarity: the commit history explains the fix.
