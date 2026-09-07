@@ -81,9 +81,9 @@ import time
 DEPTHS = [int(x) for x in
           os.environ.get("DEPTH_LIST", "").replace(" ", "").split(",") if x]
 N_CONTEXTS = int(os.environ.get("N_CONTEXTS", "1"))
-STEP_PAUSE_S = float(os.environ.get("STEP_PAUSE_S", "25"))
+STEP_PAUSE_S = float(os.environ.get("STEP_PAUSE_S", "60"))
 FLOOR_TOKS = float(os.environ.get("FLOOR_TOKS", "8"))
-COMPACT_PAGES = int(os.environ.get("COMPACT_PAGES", "200"))
+COMPACT_PAGES = int(os.environ.get("COMPACT_PAGES", "5000"))
 STALL_S = float(os.environ.get("STALL_S", "600"))
 PROBE_TIMEOUT_S = float(os.environ.get("PROBE_TIMEOUT_S", "300"))
 BASE = os.environ.get("SWEEP_BASE", "http://127.0.0.1:8081")
@@ -98,8 +98,8 @@ BLOCK = ("def parse_record_%06d(line):\n"
 # share a prefix, which would make the server's cache treat them as one.
 RANGE_SPAN = 200000
 
-RECOVERY_FRACTION = float(os.environ.get("RECOVERY_FRACTION", "0.85"))
-MAX_COMPACTING_STEPS = int(os.environ.get("MAX_COMPACTING_STEPS", "3"))
+RECOVERY_FRACTION = float(os.environ.get("RECOVERY_FRACTION", "0.75"))
+MAX_COMPACTING_STEPS = int(os.environ.get("MAX_COMPACTING_STEPS", "6"))
 
 # A probe queued behind a live step on a one-slot server fails exactly
 # like a probe to a dead one. So one failure is a suspicion and two are
