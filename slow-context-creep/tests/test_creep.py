@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -13,10 +14,15 @@ import urllib.request
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 SLOW_CONTEXT_CREEP_DIR = os.path.dirname(TESTS_DIR)
 HELPERS_DIR = os.path.join(TESTS_DIR, "helpers")
+FIXTURES_DIR = os.path.join(TESTS_DIR, "fixtures")
 CREEP_PY = os.path.join(SLOW_CONTEXT_CREEP_DIR, "creep.py")
 FAKE_SERVER_PY = os.path.join(HELPERS_DIR, "fake-server.py")
 FAKE_VM_STAT = os.path.join(HELPERS_DIR, "fake-vm_stat")
 FAKE_SYSCTL = os.path.join(HELPERS_DIR, "fake-sysctl")
+
+STOP_LINE_RE = re.compile(
+    r"^STOP: (below [0-9.]+ tok/s|request failed|silent halt|swap grew|"
+    r"[0-9]+ or more pages|generation thread died|server dead)")
 
 
 def free_port():
@@ -80,6 +86,29 @@ class CreepTestCase(unittest.TestCase):
         self.server_process.kill()
         self.server_process.wait()
         subprocess.run(["rm", "-rf", self.tmp])
+
+    def restart_server(self, scenario):
+        """Restart the fake server with a new scenario on the same port.
+
+        The fake server reads its scenario once at start, so a test that
+        needs different rates or a different `at` map must restart it
+        before calling run_creep.
+        """
+        self.server_process.kill()
+        self.server_process.wait()
+        with open(self.server_scenario_path, "w") as handle:
+            json.dump(scenario, handle)
+        server_env = dict(os.environ)
+        server_env["FAKE_SERVER_SCENARIO"] = self.server_scenario_path
+        server_env["FAKE_SERVER_PORT"] = str(self.port)
+        server_env["FAKE_SERVER_LOG"] = self.server_log_path
+        self.server_process = subprocess.Popen(
+            [sys.executable, FAKE_SERVER_PY], env=server_env)
+        wait_for_port(self.port)
+
+    def write_mem_scenario(self, snapshots):
+        with open(self.mem_scenario_path, "w") as handle:
+            json.dump({"snapshots": snapshots}, handle)
 
     def run_creep(self, backend, env=None, timeout=60):
         index_path = os.path.join(self.tmp, "mem_index")
@@ -256,6 +285,123 @@ class CreepTestCase(unittest.TestCase):
             index for index, line in enumerate(lines)
             if line.startswith("A\t"))
         self.assertLess(warning_index, first_row_index)
+
+    def test_rate_below_floor_stops_the_sweep_and_keeps_earlier_rows(self):
+        self.restart_server({"rates": [30, 5], "flavor": "llama", "probe": "ok"})
+
+        result = self.run_creep("llama")
+
+        self.assertEqual(result.returncode, 0)
+        lines = result.stdout.splitlines()
+        rows = [line for line in lines if line.startswith("A\t")]
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(rows[0].split("\t")[2].startswith("30"))
+        self.assertTrue(rows[1].split("\t")[2].startswith("5"))
+        stop_line = lines[-1]
+        self.assertRegex(stop_line, r"^STOP: below 8 tok/s at depth \d+$")
+        self.assertRegex(stop_line, STOP_LINE_RE)
+
+    def test_request_failure_stops_the_sweep_with_one_row_before_it(self):
+        self.restart_server({"rates": [30, 28, 26], "flavor": "llama",
+                             "probe": "ok", "at": {"1": "fail"}})
+
+        result = self.run_creep("llama")
+
+        self.assertEqual(result.returncode, 42)
+        lines = result.stdout.splitlines()
+        rows = [line for line in lines if line.startswith("A\t")]
+        self.assertEqual(len(rows), 1)
+        stop_line = lines[-1]
+        self.assertIn("STOP: request failed", stop_line)
+        self.assertRegex(stop_line, STOP_LINE_RE)
+
+    def test_empty_reply_stops_the_sweep_as_a_silent_halt(self):
+        self.restart_server({"rates": [30, 28, 26], "flavor": "llama",
+                             "probe": "ok", "at": {"1": "empty"}})
+
+        result = self.run_creep("llama")
+
+        self.assertEqual(result.returncode, 42)
+        stop_line = result.stdout.splitlines()[-1]
+        self.assertIn("STOP: silent halt", stop_line)
+        self.assertRegex(stop_line, STOP_LINE_RE)
+
+    def test_growing_swap_stops_the_sweep(self):
+        self.write_mem_scenario([
+            {"free": 1000000, "wired": 100000, "compressions": 500,
+             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 500,
+             "decompressions": 400, "swap_used_mb": 5},
+        ])
+
+        result = self.run_creep("llama")
+
+        self.assertEqual(result.returncode, 42)
+        stop_line = result.stdout.splitlines()[-1]
+        self.assertIn("STOP: swap grew", stop_line)
+        self.assertRegex(stop_line, STOP_LINE_RE)
+
+    def test_sustained_compaction_without_recovery_stops_the_sweep(self):
+        self.restart_server({"rates": [30, 25, 20, 15], "flavor": "llama",
+                             "probe": "ok"})
+        self.write_mem_scenario([
+            {"free": 1000000, "wired": 100000, "compressions": 500,
+             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 750,
+             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 1050,
+             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 1350,
+             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 1650,
+             "decompressions": 400, "swap_used_mb": 0},
+        ])
+
+        result = self.run_creep("llama", env={"DEPTH_LIST": "200,400,600,800"})
+
+        self.assertEqual(result.returncode, 42)
+        stop_line = result.stdout.splitlines()[-1]
+        self.assertRegex(
+            stop_line,
+            r"^STOP: 200 or more pages compressed or decompressed on 3 "
+            r"steps in a row, and speed did not come back, by depth \d+$")
+        self.assertRegex(stop_line, STOP_LINE_RE)
+
+    def test_sustained_compaction_with_recovery_does_not_stop_the_sweep(self):
+        self.restart_server({"rates": [30, 30, 30, 30], "flavor": "llama",
+                             "probe": "ok"})
+        self.write_mem_scenario([
+            {"free": 1000000, "wired": 100000, "compressions": 500,
+             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 750,
+             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 1050,
+             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 1350,
+             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 1650,
+             "decompressions": 400, "swap_used_mb": 0},
+        ])
+
+        result = self.run_creep("llama", env={"DEPTH_LIST": "200,400,600,800"})
+
+        self.assertEqual(result.returncode, 0)
+        lines = result.stdout.splitlines()
+        self.assertFalse(any(line.startswith("STOP:") for line in lines))
+        self.assertEqual(lines[-1], "no ceiling found up to 800")
+
+    def test_stop_lines_match_the_real_fixtures_stop_grammar(self):
+        fixture_names = [
+            "creep-qwen38-gguf-short-q8.tsv",
+            "creep-qwen36-gguf-full-q8.tsv",
+            "creep-gemma12-lmstudio-131k.tsv",
+        ]
+        for name in fixture_names:
+            with open(os.path.join(FIXTURES_DIR, name)) as handle:
+                stop_lines = [line for line in handle.read().splitlines()
+                             if line.startswith("STOP:")]
+            self.assertEqual(len(stop_lines), 1, name)
+            self.assertRegex(stop_lines[0], STOP_LINE_RE, name)
 
 
 if __name__ == "__main__":
