@@ -22,7 +22,7 @@
 - Scoring and rubric are two different things, kept apart. Scoring is objective and tool-owned: the battery, the telemetry and the `score_total` sum are computed the same way for every task, and documented once in the tool's own README, never per task. A rubric is judge-owned: it exists only to guide a judge's answer on the criteria a script cannot compute, it never affects the objective row, and a task may override or share it (see "Scoring and the rubric" below).
 - The Mendel report templates are not kept after the refactor; history keeps them. The tool ships one generic renderer.
 - House rules stay in force and go into the README: sibling worktree first, never nested; no bare stash; one run per plan provider at a time; credit exhaustion is a pause, never a teardown; a judge, when used, runs on a strong model; the task's `agents.md` is frozen, a new version is a new results epoch.
-- No home paths, machine names or credentials in the tree or in test output that gets committed.
+- No home paths, machine names or credentials in the tree or in test output that gets committed. No email address other than git authorship in anything the tool writes (a session log, an evidence pack, an artifact pack, a report) — a run can touch a real repository whose history, issue text or output carries a real person's address, and the tool must not amplify that into a new file.
 - Commit messages name the behavior, never a task number. Every commit ends with the two trailer lines the coordinator gives.
 - A local model server is the operator's, never the tool's. `isb run` never starts, stops or configures a server. It only copies the run's slice of a server log the operator already writes, when the operator names it. Every run works with no server log at all.
 
