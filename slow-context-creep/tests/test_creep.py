@@ -17,6 +17,9 @@ SLOW_CONTEXT_CREEP_DIR = os.path.dirname(TESTS_DIR)
 HELPERS_DIR = os.path.join(TESTS_DIR, "helpers")
 FIXTURES_DIR = os.path.join(TESTS_DIR, "fixtures")
 CREEP_PY = os.path.join(SLOW_CONTEXT_CREEP_DIR, "creep.py")
+
+sys.path.insert(0, SLOW_CONTEXT_CREEP_DIR)
+import creep as creep_module
 FAKE_SERVER_PY = os.path.join(HELPERS_DIR, "fake-server.py")
 FAKE_VM_STAT = os.path.join(HELPERS_DIR, "fake-vm_stat")
 FAKE_SYSCTL = os.path.join(HELPERS_DIR, "fake-sysctl")
@@ -110,6 +113,10 @@ class CreepTestCase(unittest.TestCase):
     def write_mem_scenario(self, snapshots):
         with open(self.mem_scenario_path, "w") as handle:
             json.dump({"snapshots": snapshots}, handle)
+
+    def read_request_log(self):
+        with open(self.server_log_path) as handle:
+            return [json.loads(line) for line in handle if line.strip()]
 
     def run_creep(self, backend, env=None, timeout=60):
         index_path = os.path.join(self.tmp, "mem_index")
@@ -500,6 +507,97 @@ class CreepTestCase(unittest.TestCase):
         self.assertIn("generation thread died in %s" % server_log_path,
                       stop_lines[0])
         self.assertRegex(stop_lines[0], STOP_LINE_RE)
+
+    def test_round_robin_grows_two_contexts_without_prefix_collision(self):
+        result = self.run_creep("llama", env={"N_CONTEXTS": "2"})
+
+        self.assertEqual(result.returncode, 0)
+        lines = result.stdout.splitlines()
+        labels = [line[0] for line in lines if line.startswith(("A\t", "B\t"))]
+        self.assertEqual(labels, ["A", "B", "A", "B", "A", "B"])
+
+        steps = [entry for entry in self.read_request_log()
+                if entry["kind"] == "step"]
+        self.assertEqual(len(steps), 6)
+        context_a = [steps[index]["prompt"] for index in (0, 2, 4)]
+        context_b = [steps[index]["prompt"] for index in (1, 3, 5)]
+        for prompts in (context_a, context_b):
+            for earlier, later in zip(prompts, prompts[1:]):
+                self.assertTrue(later.startswith(earlier))
+
+        block_re = re.compile(r"parse_record_(\d{6})")
+        a_blocks = [int(number) for prompt in context_a
+                   for number in block_re.findall(prompt)]
+        b_blocks = [int(number) for prompt in context_b
+                   for number in block_re.findall(prompt)]
+        self.assertTrue(a_blocks)
+        self.assertTrue(b_blocks)
+        self.assertLess(max(a_blocks), creep_module.RANGE_SPAN)
+        self.assertGreaterEqual(min(b_blocks), creep_module.RANGE_SPAN)
+
+    def test_llama_completion_backend_hits_completion_path_and_carries_the_rate(self):
+        result = self.run_creep("llama")
+
+        self.assertEqual(result.returncode, 0)
+        steps = [entry for entry in self.read_request_log()
+                if entry["kind"] == "step"]
+        self.assertTrue(steps)
+        self.assertTrue(all(entry["path"] == "/completion" for entry in steps))
+
+        first_row = next(line for line in result.stdout.splitlines()
+                         if line.startswith("A\t"))
+        self.assertEqual(float(first_row.split("\t")[2]), 30.0)
+
+    def test_llama_chat_backend_hits_chat_path_and_reads_rate_from_timings(self):
+        result = self.run_creep("llama", env={"ENDPOINT": "chat"})
+
+        self.assertEqual(result.returncode, 0)
+        steps = [entry for entry in self.read_request_log()
+                if entry["kind"] == "step"]
+        self.assertTrue(steps)
+        self.assertTrue(all(entry["path"] == "/v1/chat/completions"
+                            for entry in steps))
+
+        first_row = next(line for line in result.stdout.splitlines()
+                         if line.startswith("A\t"))
+        self.assertEqual(float(first_row.split("\t")[2]), 30.0)
+
+    def test_lmstudio_backend_hits_chat_path_and_paces_the_rate_from_chunk_gaps(self):
+        self.restart_server({"rates": [20, 20, 20], "flavor": "lmstudio",
+                             "probe": "ok"})
+
+        result = self.run_creep("lmstudio")
+
+        self.assertEqual(result.returncode, 0)
+        steps = [entry for entry in self.read_request_log()
+                if entry["kind"] == "step"]
+        self.assertTrue(steps)
+        self.assertTrue(all(entry["path"] == "/v1/chat/completions"
+                            for entry in steps))
+
+        first_row = next(line for line in result.stdout.splitlines()
+                         if line.startswith("A\t"))
+        measured = float(first_row.split("\t")[2])
+        self.assertLess(abs(measured - 20) / 20, 0.25)
+
+    def test_mlx_backend_hits_completions_path_and_warns_without_server_log(self):
+        self.restart_server({"rates": [20, 20, 20], "flavor": "mlx",
+                             "probe": "ok"})
+
+        result = self.run_creep("mlx", env={"SERVER_LOG": ""})
+
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("WARNING: SERVER_LOG unset.", result.stdout)
+        steps = [entry for entry in self.read_request_log()
+                if entry["kind"] == "step"]
+        self.assertTrue(steps)
+        self.assertTrue(all(entry["path"] == "/v1/completions"
+                            for entry in steps))
+
+        first_row = next(line for line in result.stdout.splitlines()
+                         if line.startswith("A\t"))
+        measured = float(first_row.split("\t")[2])
+        self.assertLess(abs(measured - 20) / 20, 0.25)
 
     def test_stop_lines_match_the_real_fixtures_stop_grammar(self):
         fixture_names = [
