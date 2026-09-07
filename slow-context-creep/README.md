@@ -18,7 +18,7 @@ has its own exit code.
 | A request fails | 42 |
 | A step returns no tokens (silent halt) | 42 |
 | Swap memory grows | 42 |
-| Sustained material compaction | 42 |
+| Sustained memory compression | 42 |
 | The server log shows the death signature | 42 |
 | Two liveness probes in a row fail | 42 |
 
@@ -45,9 +45,11 @@ python3 creep.py <llama|mlx|lmstudio>
 | --- | --- | --- |
 | `DEPTH_LIST` | none, required | Comma-separated target depths in tokens |
 | `N_CONTEXTS` | 1 | Round-robin contexts grown in turn |
-| `STEP_PAUSE_S` | 25 | Seconds between steps |
+| `STEP_PAUSE_S` | 60 | Seconds between steps |
 | `FLOOR_TOKS` | 8 | Decode speed floor, in tokens per second |
-| `COMPACT_PAGES` | 200 | Pages compressed or decompressed in one step that count as material compaction |
+| `COMPRESS_PAGES` | 5000 | Pages compressed or decompressed in one step that count as material memory compression (`COMPACT_PAGES` also works, for one release) |
+| `RECOVERY_FRACTION` | 0.75 | A step recovers when its rate is at least this fraction of the step before |
+| `MAX_COMPRESSING_STEPS` | 6 | Steps of material compression with no recovery before the sweep stops (`MAX_COMPACTING_STEPS` also works, for one release) |
 | `STALL_S` | 600 | Seconds of silence before one liveness probe |
 | `PROBE_TIMEOUT_S` | 300 | Seconds to wait for that probe |
 | `SWEEP_BASE` | `http://127.0.0.1:8081` | Server base URL |
@@ -138,7 +140,7 @@ server and fake memory tools instead of a real model and a real
 machine. A scenario file drives both fakes: it sets the decode rate of
 each step, marks which requests fail or hang, and lists the memory
 snapshot after each step. This lets each test set up one exact behavior,
-such as a stall, a dead server, or a compaction stop.
+such as a stall, a dead server, or a memory compression stop.
 
 The fixtures under `tests/fixtures/` are real output from real sweeps.
 They are never regenerated, reformatted or trimmed. See
@@ -169,10 +171,10 @@ reboot; write them under `~/.local/share/` or `~/.local/state/`, never
    can see the death signature.
 4. Read the ceiling from the file. On llama-server and mlx_lm.server,
    the ceiling is the deepest row before the stop: a rate under the
-   floor, a swap-growth stop, or a sustained-compaction stop. LM Studio
+   floor, a swap-growth stop, or a sustained memory-compression stop. LM Studio
    cannot pin its context window, so its window is only a loader
    estimate, not a measurement. For LM Studio, the ceiling is instead
-   the FIRST row that shows material compaction or any swap growth. The
+   the FIRST row that shows material memory compression or any swap growth. The
    engine keeps answering well past that row, but that row is still the
    ceiling.
 5. To continue a sweep past a raised context size, do not restart from
@@ -181,8 +183,8 @@ reboot; write them under `~/.local/share/` or `~/.local/state/`, never
    one jump, as a control point. Its reading must land within 5% of the
    value the earlier, slow run found there. Otherwise the two runs are
    not comparable.
-6. Keep `STEP_PAUSE_S` at its default, 25 seconds, unless a faster
+6. Keep `STEP_PAUSE_S` at its default, 60 seconds, unless a faster
    sweep is explicitly wanted. The pause gives macOS time to compress
    other memory, which raises the measured ceiling; a faster sweep
    understates it, and the tool prints a `WARNING:` line when it runs
-   below 25 seconds.
+   below 60 seconds.

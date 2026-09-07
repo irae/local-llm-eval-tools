@@ -27,7 +27,8 @@ FAKE_SYSCTL = os.path.join(HELPERS_DIR, "fake-sysctl")
 
 STOP_LINE_RE = re.compile(
     r"^STOP: (below [0-9.]+ tok/s|request failed|silent halt|swap grew|"
-    r"[0-9]+ or more pages|generation thread died|server dead)")
+    r"(memory compression, )?[0-9]+ or more pages|generation thread died|"
+    r"server dead)")
 
 
 def free_port():
@@ -356,33 +357,41 @@ class CreepTestCase(unittest.TestCase):
         self.assertIn("STOP: swap grew", stop_line)
         self.assertRegex(stop_line, STOP_LINE_RE)
 
-    def test_sustained_compaction_without_recovery_stops_the_sweep(self):
-        self.restart_server({"rates": [30, 25, 20, 15], "flavor": "llama",
-                             "probe": "ok"})
+    def test_sustained_compression_without_recovery_stops_the_sweep(self):
+        self.restart_server({"rates": [100, 70, 49, 34, 24, 17, 12],
+                             "flavor": "llama", "probe": "ok"})
         self.write_mem_scenario([
-            {"free": 1000000, "wired": 100000, "compressions": 500,
-             "decompressions": 400, "swap_used_mb": 0},
-            {"free": 1000000, "wired": 100000, "compressions": 750,
-             "decompressions": 400, "swap_used_mb": 0},
-            {"free": 1000000, "wired": 100000, "compressions": 1050,
-             "decompressions": 400, "swap_used_mb": 0},
-            {"free": 1000000, "wired": 100000, "compressions": 1350,
-             "decompressions": 400, "swap_used_mb": 0},
-            {"free": 1000000, "wired": 100000, "compressions": 1650,
-             "decompressions": 400, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 1000,
+             "decompressions": 500, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 1500,
+             "decompressions": 500, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 7500,
+             "decompressions": 500, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 13500,
+             "decompressions": 500, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 19500,
+             "decompressions": 500, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 25500,
+             "decompressions": 500, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 31500,
+             "decompressions": 500, "swap_used_mb": 0},
+            {"free": 1000000, "wired": 100000, "compressions": 37500,
+             "decompressions": 500, "swap_used_mb": 0},
         ])
 
-        result = self.run_creep("llama", env={"DEPTH_LIST": "200,400,600,800"})
+        result = self.run_creep(
+            "llama", env={"DEPTH_LIST": "200,400,600,800,1000,1200,1400"})
 
         self.assertEqual(result.returncode, 42)
         stop_line = result.stdout.splitlines()[-1]
         self.assertRegex(
             stop_line,
-            r"^STOP: 200 or more pages compressed or decompressed on 3 "
-            r"steps in a row, and speed did not come back, by depth \d+$")
+            r"^STOP: memory compression, 5000 or more pages compressed or "
+            r"decompressed on 6 steps in a row, and speed did not come "
+            r"back, by depth \d+$")
         self.assertRegex(stop_line, STOP_LINE_RE)
 
-    def test_sustained_compaction_with_recovery_does_not_stop_the_sweep(self):
+    def test_sustained_compression_with_recovery_does_not_stop_the_sweep(self):
         self.restart_server({"rates": [30, 30, 30, 30], "flavor": "llama",
                              "probe": "ok"})
         self.write_mem_scenario([
