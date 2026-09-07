@@ -10,7 +10,8 @@ The tool sends one growing, append-only prompt to a served model and
 reads back the decode speed and the macOS memory counters after every
 step. It writes one row per step to stdout. The run ends at the first
 stop condition, or at the last configured depth. Each stop condition
-has its own exit code.
+maps to one of two exit codes: 0 when the sweep found the usable
+floor, 42 when a stop invalidates every number after it.
 
 | Stop condition | Exit code |
 | --- | --- |
