@@ -1,0 +1,9 @@
+{
+  "instance_id": "tiny__repo-1",
+  "repo": "tiny/repo",
+  "base_commit": "base",
+  "problem_statement": "The keep function works but the fix function is broken.\nRepair the fix function without touching the keep function.",
+  "version": "1",
+  "FAIL_TO_PASS": ["t_fix"],
+  "PASS_TO_PASS": ["t_keep"]
+}

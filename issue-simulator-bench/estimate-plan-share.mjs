@@ -2,7 +2,8 @@
 // Fallback plan-share estimator, for a plan run whose before/after
 // probes are missing or unusable (probe failed, xai's no-endpoint
 // case, or run-worker recorded plan_provider=none). A measured probe
-// delta ALWAYS wins over this estimate — see PLAN.md "Plan accounting".
+// delta ALWAYS wins over this estimate — see the task's own plan-accounting
+// rules for the source policy.
 //
 // Method (owner-approved 2026-09-02): anchor on the same model's most
 // recent run that HAS a measured plan share. Scale that share three
@@ -13,29 +14,46 @@
 //
 // Usage:
 //   node estimate-plan-share.mjs <model> [results.json ...]
-// With no results files, reads results.json and results-guided.json.
-// Prints the three scalings and the recommended value (vendor-cost
-// scaling, the one that prices the long-context tier mix). The scorer
-// records it as cost.paid_usd with paid_basis "plan est.", copies the
-// anchor's plan block with marginal/wweek recomputed and
-// "w5h": "not measured", and writes a config_note naming the anchor.
+// With no results files, reads every .json file directly under
+// $ISB_DATA_DIR/results/ (one file per task variant). Prints the three
+// scalings and the recommended value (vendor-cost scaling, the one
+// that prices the long-context tier mix). The scorer records it as
+// cost.paid_usd with paid_basis "plan est.", copies the anchor's plan
+// block with marginal/wweek recomputed and "w5h": "not measured", and
+// writes a config_note naming the anchor.
 
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, existsSync, readdirSync } from 'fs';
+import { join, resolve } from 'path';
 
 const TOLERANCE_USD = 0.05;
 
-const dir = dirname(fileURLToPath(import.meta.url));
 const [model, ...files] = process.argv.slice(2);
 if (!model) {
     console.error('usage: estimate-plan-share.mjs <model> [results.json ...]');
     process.exit(2);
 }
-if (!files.length) files.push('results.json', 'results-guided.json');
 
-const runs = files.flatMap(
-    (f) => JSON.parse(readFileSync(join(dir, f), 'utf8')).runs
+let filePaths;
+if (files.length) {
+    filePaths = files.map((f) => resolve(process.cwd(), f));
+} else {
+    const dataDir = process.env.ISB_DATA_DIR || '';
+    const resultsDir = dataDir ? join(dataDir, 'results') : '$ISB_DATA_DIR/results';
+    const names =
+        existsSync(resultsDir)
+            ? readdirSync(resultsDir).filter((f) => f.endsWith('.json'))
+            : [];
+    if (!names.length) {
+        console.error(
+            `error: no results files found under ${resultsDir}; pass file paths explicitly`
+        );
+        process.exit(2);
+    }
+    filePaths = names.map((f) => join(resultsDir, f));
+}
+
+const runs = filePaths.flatMap(
+    (f) => JSON.parse(readFileSync(f, 'utf8')).runs
 );
 const anchors = runs.filter(
     (r) =>

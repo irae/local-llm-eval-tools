@@ -4,6 +4,7 @@
 //   node run-pi-rpc.mjs --model <id> --prompt <file> --out <prefix> [--cwd <dir>]
 //        [--thinking <level>] [--max-tooling 10] [--max-model 3]
 //        [--stall-min 10] [--wall-min 300] [--turn-min 25] [--allow-bad-config]
+//        [--task <dir>]
 //
 // Why: `pi -p` exits on the first `length`/`error` stop, which is a harness
 // limitation, not a model failure. A person in the TUI would type "continue".
@@ -14,9 +15,11 @@
 //     budget), a stall with no events, an aborted turn, a dead pi process.
 //     Message: TOOLING_MSG. Budget --max-tooling.
 //   model nudge (scored) — the model stopped on its own (`stop`, or `length`
-//     at its real output budget) while work is visibly unfinished: TASKS.md
-//     still has `- [ ]` items or the tree has uncommitted changes.
-//     Message: MODEL_MSG, always the same text. Budget --max-model.
+//     at its real output budget) while work is visibly unfinished: the done
+//     check's tasks file still has `- [ ]` items or the tree has uncommitted
+//     changes. Message: MODEL_MSG, unless --task <dir> names a task folder
+//     whose task.json sets model_nudge and done_check.tasks_file. Budget
+//     --max-model.
 //
 // Neither path reads or interprets the chat. Everything is recorded in
 // <out>-meta.json; the raw event stream goes to <out>-events.jsonl, the
@@ -31,7 +34,10 @@ import {
     appendFileSync,
 } from 'node:fs';
 import { homedir } from 'node:os';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const SELF_DIR = dirname(fileURLToPath(import.meta.url));
 
 const TOOLING_MSG = 'Continue from where you stopped.';
 const MODEL_MSG =
@@ -63,6 +69,26 @@ const turnMs = Number(args['turn-min'] ?? 25) * 60_000;
 const wallMs = Number(args['wall-min'] ?? 300) * 60_000;
 const prompt = readFileSync(promptFile, 'utf8');
 
+// ---- the task (optional) ---------------------------------------------------
+// Without --task, the done check and the model nudge keep today's fixed
+// values, so this runner behaves exactly as before.
+const task = args.task
+    ? JSON.parse(readFileSync(resolve(args.task, 'task.json'), 'utf8'))
+    : null;
+const tasksFileName = task?.done_check?.tasks_file || 'TASKS.md';
+const modelMsg = task?.model_nudge || MODEL_MSG;
+
+let toolVersion = 'unknown';
+try {
+    toolVersion = execFileSync(
+        'git',
+        ['-C', SELF_DIR, 'describe', '--tags', '--always'],
+        { encoding: 'utf8' }
+    ).trim();
+} catch {
+    // no .git, no git binary, or a shallow clone with no tags: unknown is fine
+}
+
 // ---- bookkeeping ----------------------------------------------------------
 const home = homedir();
 const redact = (s) => (s ? s.split(home).join('~') : s);
@@ -72,6 +98,8 @@ const meta = {
     thinking,
     cwd: redact(cwd),
     prompt_file: redact(resolve(promptFile)),
+    task: args.task ? redact(resolve(args.task)) : null,
+    tool_version: toolVersion,
     policy: {
         max_tooling: maxTooling,
         max_model: maxModel,
@@ -79,7 +107,7 @@ const meta = {
         wall_min: wallMs / 60_000,
         turn_min: turnMs / 60_000,
         tooling_msg: TOOLING_MSG,
-        model_msg: MODEL_MSG,
+        model_msg: modelMsg,
     },
     start: startedAt.toISOString(),
     end: null,
@@ -95,6 +123,11 @@ const meta = {
     compactions: [],
     retries: [],
     warnings: [],
+    harness_window: {
+        context_window: args['context-window'] ?? null,
+        reserve_tokens: args['reserve-tokens'] ?? null,
+        keep_recent_tokens: args['keep-recent-tokens'] ?? null,
+    },
     session_file: null,
     session_id: null,
     stats: null,
@@ -478,9 +511,9 @@ const porcelainPaths = (txt) =>
 
 function unfinishedWork() {
     const reasons = [];
-    const tasks = resolve(cwd, 'TASKS.md');
+    const tasks = resolve(cwd, tasksFileName);
     if (existsSync(tasks) && /- \[ \]/.test(readFileSync(tasks, 'utf8')))
-        reasons.push('TASKS.md has unchecked items');
+        reasons.push(`${tasksFileName} has unchecked items`);
     try {
         // untracked files count too: test-first creates files that must be committed
         const st = execFileSync('git', ['status', '--porcelain'], {
@@ -488,7 +521,7 @@ function unfinishedWork() {
             encoding: 'utf8',
         });
         const fresh = porcelainPaths(st).filter(
-            (p) => p !== 'TASKS.md' && !baselineDirty.has(p)
+            (p) => p !== tasksFileName && !baselineDirty.has(p)
         );
         if (fresh.length)
             reasons.push(
@@ -904,7 +937,7 @@ async function main() {
                 break;
             }
             meta.nudges.model.push(entry);
-            message = MODEL_MSG;
+            message = modelMsg;
         }
         saveMeta();
     }
