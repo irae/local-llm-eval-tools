@@ -157,15 +157,15 @@ ceiling of one server configuration.
 2. Warm the server up with one small request.
 3. Run the sweep and keep its whole output in a file:
 
-```
-DEPTH_LIST=4096,8192,16384,24576,32768,49152,65536 \
-MODEL=<the id the server answers to> \
-python3 creep.py llama > ~/.local/share/slow-context-creep/<config>-creep.tsv 2>&1
-```
+   ```
+   DEPTH_LIST=4096,8192,16384,24576,32768,49152,65536 \
+   MODEL=<the id the server answers to> \
+   python3 creep.py llama > ~/.local/share/slow-context-creep/<config>-creep.tsv 2>&1
+   ```
 
-A sweep run and a server log are both data worth keeping across a
-reboot; write them under `~/.local/share/` or `~/.local/state/`, never
-`/tmp` (see the root `AGENTS.md`).
+   A sweep run and a server log are both data worth keeping across a
+   reboot; write them under `~/.local/share/` or `~/.local/state/`, never
+   `/tmp` (see the root [`AGENTS.md`](../AGENTS.md)).
 
    On mlx_lm.server, add `SERVER_LOG=<the server log>` so the runner
    can see the death signature.

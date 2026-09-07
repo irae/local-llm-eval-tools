@@ -51,6 +51,9 @@ Three timers end a run outright, regardless of nudges: a stall timer
   Without both, `isb run` refuses to start; `--allow-bad-config` overrides
   the refusal and marks the run as not comparable to the others.
 
+Put `issue-simulator-bench/` on `PATH` to run `isb` as shown below, or call
+`./isb` from inside the folder instead.
+
 ## Run
 
 ### The task folder
@@ -325,6 +328,8 @@ Every field of a results row, and how it is computed:
   detects them automatically yet.
 - `branch`, `base_commit`, `thinking`, `plan_provider`: copied from the
   worker file.
+- `server_log`: copied from the worker file, unchanged — see "The server log
+  of a local model" above.
 - `prompt_version`: the matched variant's own `version`.
 - `partial`: `true` unless the meta's `end_reason` is `complete`.
 - `end_reason`, `tool_version`: copied from the meta and the worker file.
@@ -386,8 +391,9 @@ This runs `test-run-pi-rpc.sh`, the loop-check unit tests
 `tests/test-*.sh` script: `test-isb-run.sh`, `test-isb-wiring.sh`,
 `test-score.sh`, `test-report.sh`, `test-import.sh`. All of them drive the
 real commands against a fake `pi` on `PATH` and the real fixtures under
-`tests/fixtures/`, with `XDG_CONFIG_HOME` and `XDG_DATA_HOME` pointed at
-temporary directories, so no test run touches the user's home directory.
+[`tests/fixtures/`](tests/fixtures/README.md), with `XDG_CONFIG_HOME` and
+`XDG_DATA_HOME` pointed at temporary directories, so no test run touches the
+user's home directory.
 
 ## Example: Mendel issue 13
 

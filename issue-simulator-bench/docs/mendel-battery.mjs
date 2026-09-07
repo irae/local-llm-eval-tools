@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Scratch relocation of Mendel's own verification battery, moved out of
 // score.mjs so the generic scorer has no Mendel-specific logic left in it.
-// Not imported or run by anything in this repository. Task 10 rebuilds
-// Mendel's task folder from this file; until then it exists only so the
-// logic is not lost.
+// Not imported or run by anything in this repository. This is a snapshot,
+// kept only so the logic is not lost, for a future task that rebuilds
+// Mendel's own task folder from it.
 //
 //   node mendel-battery.mjs <worktree> <branch> <base-sha>
 

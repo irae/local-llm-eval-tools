@@ -295,7 +295,7 @@ Addendum, after review: the worker also captures the server log slice per "The s
 
 **Files:**
 - Create: `issue-simulator-bench/README.md` per the outline.
-- Modify: `/home/irae/code/local-llm-eval-tools/README.md`: one line for this tool.
+- Modify: `README.md`: one line for this tool.
 
 - [ ] Write the README. Run `bash tests/run.sh` once more. Verify the fixture checksums.
 - [ ] Commit: "The issue simulator README".
