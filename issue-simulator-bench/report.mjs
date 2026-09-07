@@ -94,19 +94,33 @@ function processRuns(runs, unit, errors) {
     return runs.map((row) => {
         const scores = row.scores || {};
         const sum = Object.values(scores).reduce((a, b) => a + (Number(b) || 0), 0);
-        const scoreTotal = row.score_total;
-        if (Math.abs(sum - scoreTotal) > 0.001) {
-            errors.push(`${row.model}: scores sum ${sum} != score_total ${scoreTotal}`);
+        // score.mjs writes score_raw (the fresh unpenalized sum) on every row
+        // it scores; only a legacy row (or the frozen two-row fixture) lacks
+        // it, and falls back to the pre-score_raw check against score_total.
+        const hasRaw = row.score_raw !== undefined && row.score_raw !== null;
+        const checkAgainst = hasRaw ? row.score_raw : row.score_total;
+        const checkField = hasRaw ? 'score_raw' : 'score_total';
+        if (Math.abs(sum - checkAgainst) > 0.001) {
+            errors.push(`${row.model}: scores sum ${sum} != ${checkField} ${checkAgainst}`);
         }
-        const raw = scoreTotal;
-        const capped = unit ? Math.min(scoreTotal, (100 * row[unit.field]) / unit.max) : scoreTotal;
-        const reruns = row.reruns ?? 0;
-        if (reruns) {
-            const expected = Math.max(0, Math.min(raw, capped) - 10 * reruns);
-            if (Math.abs(expected - scoreTotal) > 0.001) {
-                errors.push(
-                    `${row.model}: reruns ${reruns} needs score_total ${expected}, row says ${scoreTotal}`
-                );
+        let raw, capped;
+        if (hasRaw) {
+            // score.mjs already applied the cap and the retry penalty; trust
+            // score_total as-is, no re-derivation here.
+            raw = row.score_raw;
+            capped = row.score_total;
+        } else {
+            const scoreTotal = row.score_total;
+            raw = scoreTotal;
+            capped = unit ? Math.min(scoreTotal, (100 * row[unit.field]) / unit.max) : scoreTotal;
+            const reruns = row.reruns ?? 0;
+            if (reruns) {
+                const expected = Math.max(0, Math.min(raw, capped) - 10 * reruns);
+                if (Math.abs(expected - scoreTotal) > 0.001) {
+                    errors.push(
+                        `${row.model}: reruns ${reruns} needs score_total ${expected}, row says ${scoreTotal}`
+                    );
+                }
             }
         }
         const invalid = row.invalid ?? false;

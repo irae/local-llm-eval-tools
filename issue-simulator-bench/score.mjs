@@ -427,6 +427,16 @@ function deriveResolved(batteryResult) {
     return { resolved: computed, resolved_by: 'lists' };
 }
 
+// ---- score_total: raw sum, capped to the completion fraction, minus the
+// retry penalty. `score_raw` and `reruns` are the two inputs; this is their
+// one shared formula, so buildRow, a judge merge and a replace-by-branch
+// carry-forward all compute score_total the same way ------------------------
+function scoreTotalFromRaw(scoreRaw, reruns, row) {
+    const unitField = task.unit?.field || 'resolved';
+    const cap = task.unit ? (100 * row[unitField]) / task.unit.max : scoreRaw;
+    return Math.max(0, Math.min(scoreRaw, cap) - 10 * reruns);
+}
+
 // ---- the objective row --------------------------------------------------------------
 function buildRow() {
     const row = {
@@ -453,15 +463,17 @@ function buildRow() {
     if (battery.result) {
         const scores = battery.result.scores || {};
         row.scores = scores;
-        row.score_total = Object.values(scores).reduce(
+        row.score_raw = Object.values(scores).reduce(
             (a, b) => a + (Number(b) || 0),
             0
         );
+        row.reruns = 0;
         const { resolved, resolved_by } = deriveResolved(battery.result);
         row.resolved = resolved;
         row.resolved_by = resolved_by;
         const unitField = task.unit?.field || 'resolved';
         row[unitField] = task.unit ? battery.result[task.unit.field] ?? null : row.resolved;
+        row.score_total = scoreTotalFromRaw(row.score_raw, row.reruns, row);
     }
     return row;
 }
@@ -485,8 +497,19 @@ function saveRow(row) {
     const resultsPath = join(resultsDir, variant.results);
     const store = loadResults(resultsPath);
     const idx = store.runs.findIndex((r) => r.branch === row.branch);
-    if (idx >= 0) store.runs[idx] = row;
-    else store.runs.push(row);
+    if (idx >= 0) {
+        // A human sets reruns by hand on the row being replaced; it must
+        // survive a re-score, so carry it forward before the final
+        // score_total recompute (buildRow/the judge merge built the row
+        // with reruns: 0, since neither knows about the row it replaces).
+        if (row.score_raw !== undefined) {
+            row.reruns = store.runs[idx].reruns ?? 0;
+            row.score_total = scoreTotalFromRaw(row.score_raw, row.reruns, row);
+        }
+        store.runs[idx] = row;
+    } else {
+        store.runs.push(row);
+    }
     writeFileSync(resultsPath, JSON.stringify(store, null, 2) + '\n');
     writeFileSync(resultsPath.replace(/\.json$/, '.csv'), toCsv(store.runs));
     return resultsPath;
@@ -507,7 +530,15 @@ const FIXED_PRE = [
     'partial',
     'end_reason',
 ];
-const FIXED_POST = ['score_total', 'resolved', 'scored_by', 'cost_usd', 'cost_basis'];
+const FIXED_POST = [
+    'score_raw',
+    'score_total',
+    'reruns',
+    'resolved',
+    'scored_by',
+    'cost_usd',
+    'cost_basis',
+];
 
 function buildColumns(runs) {
     const unitKeys = new Set();
@@ -675,10 +706,11 @@ if (judgeFile) {
         process.exit(2);
     }
     row.scores = { ...existingScores, ...(verdict.scores || {}) };
-    row.score_total = Object.values(row.scores).reduce(
+    row.score_raw = Object.values(row.scores).reduce(
         (a, b) => a + (Number(b) || 0),
         0
     );
+    row.score_total = scoreTotalFromRaw(row.score_raw, row.reruns ?? 0, row);
     row.defects = verdict.defects || [];
     row.notes = verdict.notes || {};
     row.scored_by = `judge:${verdict.judge}`;

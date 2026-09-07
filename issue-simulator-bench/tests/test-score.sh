@@ -143,6 +143,8 @@ assert_eq "scored_by is battery" "$(row_field "$results" scored_by)" "battery"
 assert_eq "resolved is true" "$(row_field "$results" resolved)" "true"
 assert_eq "files_done is 2" "$(row_field "$results" files_done)" "2"
 assert_eq "score_total is 15 (10 + 5)" "$(row_field "$results" score_total)" "15"
+assert_eq "score_raw equals score_total on a fresh score" "$(row_field "$results" score_raw)" "15"
+assert_eq "reruns is 0 on a fresh row" "$(row_field "$results" reruns)" "0"
 assert_eq "resolved_by is lists (the task declares FAIL_TO_PASS/PASS_TO_PASS)" "$(row_field "$results" resolved_by)" "lists"
 tool_version="$(row_field "$results" tool_version)"
 [ -n "$tool_version" ] && ok "tool_version is present on the row" || bad "tool_version is present on the row"
@@ -304,6 +306,34 @@ case "$err" in
     *"no meta file"*"no-such-run-default"*) ok "stderr names the missing meta file" ;;
     *) bad "stderr names the missing meta file"; echo "        got: $err" ;;
 esac
+
+echo "test-score: a re-score carries forward a human-set reruns and applies the retry penalty"
+node -e '
+    const fs = require("fs");
+    const p = process.argv[1];
+    const r = JSON.parse(fs.readFileSync(p, "utf8"));
+    const row = r.runs.find((x) => x.branch === process.argv[2]);
+    row.reruns = 2;
+    fs.writeFileSync(p, JSON.stringify(r, null, 2));
+' "$results" "some-model-off-tiny"
+code=0
+"$ISB" --task "$task" --data-dir "$WORK/data" score "$fslug" > /dev/null 2>"$WORK/score-rerun.err" || code=$?
+assert_eq "rescore exits 0" "$code" "0"
+assert_eq "reruns 2 is carried forward onto the rescored row" "$(row_field "$results" reruns)" "2"
+assert_eq "score_raw is the fresh unpenalized sum (15)" "$(row_field "$results" score_raw)" "15"
+assert_eq "score_total is 0 (15 raw minus a 20-point penalty, floored at 0)" "$(row_field "$results" score_total)" "0"
+
+echo "test-score: a --judge merge on a reruns row keeps reruns and recomputes score_total from the new score_raw"
+verdict_rerun="$WORK/verdict-rerun.json"
+cat > "$verdict_rerun" <<'EOF'
+{"judge": "strong-model", "scores": {"quality": 10}, "defects": [], "notes": {"summary": "x", "what_decided_it": "x", "defects": "x", "anomalies": "x"}}
+EOF
+code=0
+"$ISB" --task "$task" --data-dir "$WORK/data" score "$fslug" --judge "$verdict_rerun" > /dev/null 2>"$WORK/judge-rerun.err" || code=$?
+assert_eq "judge merge on a reruns row exits 0" "$code" "0"
+assert_eq "reruns is still 2 after the judge merge" "$(row_field "$results" reruns)" "2"
+assert_eq "score_raw is 25 (15 battery + 10 judge)" "$(row_field "$results" score_raw)" "25"
+assert_eq "score_total is 5 (25 raw minus the same 20-point penalty)" "$(row_field "$results" score_total)" "5"
 
 echo "test-score: isb judge-pack writes the rubric and a valid JSON block"
 code=0

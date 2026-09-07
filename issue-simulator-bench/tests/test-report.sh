@@ -210,6 +210,44 @@ case "$err" in
 esac
 [ -f "$WORK/refuse2.json" ] && bad "no output file written" || ok "no output file written"
 
+echo "test-report: a row with score_raw that disagrees with the scores sum is refused, reruns/score_total are not re-checked"
+task_rawmismatch="$WORK/task-rawmismatch"
+mkdir -p "$task_rawmismatch"
+cat > "$task_rawmismatch/task.json" <<'EOF'
+{
+  "instance_id": "report-rawmismatch-1",
+  "unit": { "field": "libraries_done", "max": 8, "label": "libraries" },
+  "variants": {
+    "default": { "version": "v1", "results": "results-rawmismatch.json" }
+  },
+  "defaults": { "variant": "default" }
+}
+EOF
+mkdir -p "$WORK/data-rawmismatch/results"
+cat > "$WORK/data-rawmismatch/results/results-rawmismatch.json" <<'EOF'
+{
+  "runs": [
+    {
+      "model": "some-model",
+      "libraries_done": 8,
+      "score_raw": 50,
+      "score_total": 30,
+      "reruns": 2,
+      "scores": { "completion": 45 },
+      "telemetry": {}
+    }
+  ]
+}
+EOF
+code=0
+err="$("$ISB" --task "$task_rawmismatch" --data-dir "$WORK/data-rawmismatch" report --format json "$WORK/refuse3.json" 2>&1 1>/dev/null)" || code=$?
+assert_eq "exit code is nonzero" "$([ "$code" != "0" ] && echo nonzero || echo zero)" "nonzero"
+case "$err" in
+    *"scores sum"*"!="*"score_raw"*) ok "stderr names the score_raw mismatch" ;;
+    *) bad "stderr names the score_raw mismatch"; echo "        got: $err" ;;
+esac
+[ -f "$WORK/refuse3.json" ] && bad "no output file written" || ok "no output file written"
+
 # ---- --all on a task with two variants ----------------------------------------
 
 echo "test-report: --all on a two-variant task produces two cross-linked files"
