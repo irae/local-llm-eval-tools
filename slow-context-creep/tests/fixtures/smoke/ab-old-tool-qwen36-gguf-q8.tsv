@@ -1,0 +1,9 @@
+llama-server, endpoint=completion thinking=n/a (no template) contexts=1 pause=25s
+start: wired 25729 MB, free 266 MB, swap used 367 MB
+context	depth_tokens	decode_toks	wired_mb	free_mb	swap_delta_mb	compress_pages	decompress_pages	step_seconds
+A	4114	36.26	26138	59	0	5465	1276	7
+A	8222	43.64	26136	58	0	1298	1489	7
+A	16386	30.97	26135	57	0	4763	384	15
+A	24602	24.04	26128	60	0	3223	280	17
+A	32818	19.56	26126	59	0	7010	319	20
+STOP: 200 or more pages compressed or decompressed on 3 steps in a row, and speed did not come back, by depth 32818

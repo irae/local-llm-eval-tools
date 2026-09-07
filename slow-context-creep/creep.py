@@ -98,8 +98,8 @@ BLOCK = ("def parse_record_%06d(line):\n"
 # share a prefix, which would make the server's cache treat them as one.
 RANGE_SPAN = 200000
 
-RECOVERY_FRACTION = 0.85
-MAX_COMPACTING_STEPS = 3
+RECOVERY_FRACTION = float(os.environ.get("RECOVERY_FRACTION", "0.85"))
+MAX_COMPACTING_STEPS = int(os.environ.get("MAX_COMPACTING_STEPS", "3"))
 
 # A probe queued behind a live step on a one-slot server fails exactly
 # like a probe to a dead one. So one failure is a suspicion and two are
