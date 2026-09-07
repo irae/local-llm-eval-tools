@@ -26,6 +26,17 @@ one the unit tests use. One file per run.
 - Chip family: Apple M1 Max
 - Memory size: 32 GB
 
+## qwen36-gguf-q8-c98304-retry-clean.tsv
+
+Same model, same server command, same `creep.py` command as above.
+Re-run after the machine was confirmed clean (see below), to check
+whether the first run's early stop was machine noise.
+
+- Date: 2026-09-07 (same day, later, after the server was stopped and
+  restarted)
+- Chip family: Apple M1 Max
+- Memory size: 32 GB
+
 ## Comparison to the old tool
 
 The reference run is `choose-a-local-llm`'s
@@ -33,15 +44,39 @@ The reference run is `choose-a-local-llm`'s
 the accepted number for this exact model and server command (ceiling
 81958 tokens, `speed` verdict, full ladder to depth 98338).
 
-This run's decode speed matches the reference row for row at every
-depth both runs reached: 36.23 vs 36.53 tok/s at depth 4114, 43.56 vs
-44.15 at 8222, 31.05 vs 31.16 at 16386, 24.07 vs 24.14 at 24602, 19.60
-vs 19.64 at 32818. The tool reproduces the old one's numbers.
+**First run** (`qwen36-gguf-q8-c98304.tsv`): decode speed matches the
+reference row for row at every depth both runs reached (36.23 vs
+36.53 tok/s at depth 4114, down to 19.60 vs 19.64 at 32818). Stopped
+early on a `mem` verdict at depth 32818. Machine was dirty at start:
+`swap used` 4727 MB, against the reference run's 517 MB, after a full
+day of other benchmark activity.
 
-The stop point does not match: this run hit a `mem` verdict (material
-page compaction) at depth 32818, where the reference run continued to
-a `speed` verdict at depth 98338. The two runs did not start from the
-same machine state — this run's `start: swap used` reads 4727 MB,
-against the reference run's 517 MB. The machine had a full day of
-other benchmark activity behind it, not a clean baseline. The stop
-point is a reading of machine state, not a tool difference.
+**Retry** (`qwen36-gguf-q8-c98304-retry-clean.tsv`), after confirming
+a clean machine (`swap used` 439 MB at start, matching the reference
+run's 517 MB; `tools/preflight.sh` in `choose-a-local-llm` read `ok`
+on every check except a known stale machine-file value): **same
+result**. Decode speed still matches the reference row for row.
+Stopped at the same depth, 32818, same `mem` verdict.
+
+**This rules out machine noise as the explanation.** The real signal
+is in the compression/decompression page counts, which are the
+`mem` verdict's stop condition:
+
+| depth | reference `decompress_pages` | first run | retry |
+| --- | --- | --- | --- |
+| 4114 | 32 | 112615 | 84 |
+| 8222 | 459 | 19541 | 14162 |
+| 16386 | 48 | 3366 | 23883 |
+| 24602 | 244 | 3140 | 14263 |
+| 32818 | 1064 | 2279 | 22994 |
+
+The reference run barely touches the compressor through depth 32818.
+Both new-tool runs generate orders of magnitude more page
+compression/decompression at the same depths, on a clean machine,
+even though decode speed and wired memory track the reference run
+closely. This looks like a real difference in how the new tool grows
+the prompt between steps — possibly not reusing the server's prompt
+cache the way the old tool's append-only growth rule requires, which
+would force much more KV cache churn per step than the reference
+tool causes. Not confirmed; flagging for your own investigation
+rather than guessing further at the cause.
